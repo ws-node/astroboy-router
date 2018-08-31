@@ -3,6 +3,10 @@ import { BaseClass } from "astroboy";
 import { Router, Constructor, ControllerConstructor, METHOD, RouterDefine, Route, RouteFactory } from "./metadata";
 import { RouterMap } from './core';
 
+abstract class IController extends BaseClass {
+  [key: string]: any;
+}
+
 function tryGetRouter(target: RouterDefine) {
   const routerSaved = RouterMap.get(target);
   let router: Router;
@@ -19,7 +23,7 @@ function routeConnect(prefix: string, pathStr: string, isIndex: boolean) {
 }
 
 function RouterFactory(prefix: string) {
-  return function router<T extends Constructor<BaseClass>>(target: ControllerConstructor<InstanceType<T>>) {
+  return function router<T extends Constructor<IController>>(target: ControllerConstructor<InstanceType<T>>) {
     let router = <Router>RouterMap.get(target.prototype);
     router = router || {
       prefix,
@@ -36,12 +40,12 @@ function RouterFactory(prefix: string) {
     });
     RouterMap.set(target.prototype, router);
     target.prototype["@router"] = router;
-    return <T & { [key: string]: any }>(target);
+    return <T>(target);
   };
 }
 
 function ServiceFactory<T>(service: Constructor<T>) {
-  return function router_service<T extends Constructor<BaseClass>>(target: ControllerConstructor<InstanceType<T>>) {
+  return function router_service<T extends Constructor<IController>>(target: ControllerConstructor<InstanceType<T>>) {
     let router = <Router>RouterMap.get(target.prototype);
     router = router || {
       prefix: "",
@@ -50,7 +54,7 @@ function ServiceFactory<T>(service: Constructor<T>) {
     router.service = service;
     RouterMap.set(target.prototype, router);
     target.prototype["@router"] = router;
-    return <T & { [key: string]: any }>target;
+    return <T>target;
   };
 }
 
