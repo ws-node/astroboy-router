@@ -1,3 +1,5 @@
+/// <reference types="astroboy"/>
+import { BaseClass } from "astroboy";
 import { Router, Constructor, ControllerConstructor, METHOD, RouterDefine, Route, RouteFactory } from "./metadata";
 import { RouterMap } from './core';
 
@@ -17,7 +19,7 @@ function routeConnect(prefix: string, pathStr: string, isIndex: boolean) {
 }
 
 export function Router(prefix: string) {
-  return function router<T extends Constructor<any>>(target: ControllerConstructor<InstanceType<T>>) {
+  return function router<T extends Constructor<BaseClass>>(target: ControllerConstructor<InstanceType<T>>) {
     let router = <Router>RouterMap.get(target.prototype);
     router = router || {
       prefix,
@@ -34,12 +36,12 @@ export function Router(prefix: string) {
     });
     RouterMap.set(target.prototype, router);
     target.prototype["@router"] = router;
-    return <T>(target);
+    return <T & { [key: string]: any }>(target);
   };
 }
 
 export function Service<T>(service: Constructor<T>) {
-  return function router_service<T extends Constructor<any>>(target: ControllerConstructor<InstanceType<T>>) {
+  return function router_service<T extends Constructor<BaseClass>>(target: ControllerConstructor<InstanceType<T>>) {
     let router = <Router>RouterMap.get(target.prototype);
     router = router || {
       prefix: "",
@@ -48,7 +50,7 @@ export function Service<T>(service: Constructor<T>) {
     router.service = service;
     RouterMap.set(target.prototype, router);
     target.prototype["@router"] = router;
-    return <T>target;
+    return <T & { [key: string]: any }>target;
   };
 }
 

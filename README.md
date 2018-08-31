@@ -14,7 +14,7 @@ npm install astroboy-router --save
 // 导入astroboy框架，如果必要
 // 导入所需的业务逻辑
 // 导入astroboy-router
-import astroboy from "astroboy";
+import { Controller } from "astroboy";
 import BusinessService from "your/service/file";
 import { Router, Service, Index, API, Metadata, RouteMethod } from "astroboy-router";
 
@@ -23,7 +23,7 @@ import { Router, Service, Index, API, Metadata, RouteMethod } from "astroboy-rou
 // 3.继承astroboy基础控制器【必要】
 @Router("demo")
 @Service(BusinessService)
-class DemoController extends astroboy.BaseController {
+class DemoController extends Controller {
 
   // 如果需要在自己实现的路由方法中引用，声明business
   // business会自动初始化，无需手动初始化
