@@ -1,10 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-/// <reference types="astroboy"/>
-const astroboy_1 = require("astroboy");
 const core_1 = require("./core");
-class IController extends astroboy_1.BaseClass {
-}
 function tryGetRouter(target) {
     const routerSaved = core_1.RouterMap.get(target);
     let router;

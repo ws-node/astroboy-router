@@ -1,3 +1,4 @@
+import { BaseClass } from "astroboy";
 /**
  * 表示当前属性或变量的值必然不为undefined
  * * 如果当前字段类型不含null并且字段非可选，则无需进行空值检测
@@ -30,6 +31,9 @@ export interface RouterDefine {
 export declare type RouterPrototype<T = {}> = T & RouterDefine;
 export interface ControllerConstructor<T = any> {
     prototype: RouterPrototype<T>;
+}
+export declare abstract class IController extends BaseClass {
+    [key: string]: any;
 }
 export declare type RouteFactory = <T>(target: T, propertyKey: string, descriptor?: PropertyDescriptor) => any;
 export {};

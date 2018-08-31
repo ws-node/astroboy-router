@@ -1,10 +1,6 @@
-import { BaseClass } from "astroboy";
-import { Constructor, ControllerConstructor, METHOD, RouteFactory } from "./metadata";
-declare abstract class IController extends BaseClass {
-    [key: string]: any;
-}
-declare function RouterFactory(prefix: string): <T extends Constructor<IController>>(target: ControllerConstructor<InstanceType<T>>) => T;
-declare function ServiceFactory<T>(service: Constructor<T>): <T_1 extends Constructor<IController>>(target: ControllerConstructor<InstanceType<T_1>>) => T_1;
+import { Constructor, METHOD, RouteFactory, IController } from "./metadata";
+declare function RouterFactory(prefix: string): <T extends typeof IController>(target: T) => T;
+declare function ServiceFactory<S>(service: Constructor<S>): <T extends typeof IController>(target: T) => T;
 declare function RouteFactory(method: METHOD, path: string, inIndex?: boolean): RouteFactory;
 declare function RouteFactory(method: METHOD, path: string[], isIndex?: boolean): RouteFactory;
 declare function IndexFactory(path: string): RouteFactory;
