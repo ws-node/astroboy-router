@@ -1,4 +1,4 @@
-import { Router, Constructor, ControllerConstructor, METHOD, RouterDefine, Route } from "./metadata";
+import { RouterMetadata, Constructor, ControllerConstructor, METHOD, RouterDefine, Route } from "./metadata";
 
 function routeMethodImplements(prototype: any, method: string, route: Route) {
   if (!prototype[method]) {
@@ -30,7 +30,7 @@ function routerBusinessCreate(service: Constructor<any> | undefined, prototype: 
 
 export function createRouter(ctor: ControllerConstructor, name: string, root: string) {
   const prototype = <any>ctor.prototype;
-  const router = <Router>ctor.prototype["@router"];
+  const router = <RouterMetadata>ctor.prototype["@router"];
   if (!router) throw new Error("Create router failed : invalid router controller");
   const service = router.service;
   routerBusinessCreate(service, prototype);

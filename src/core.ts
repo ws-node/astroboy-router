@@ -1,3 +1,3 @@
-import { RouterPrototype, Router } from "./metadata";
+import { RouterPrototype, RouterMetadata } from "./metadata";
 
-export const RouterMap: Map<RouterPrototype<any>, Router> = new Map();
+export const RouterMap: Map<RouterPrototype<any>, RouterMetadata> = new Map();

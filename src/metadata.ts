@@ -21,14 +21,14 @@ export interface Route {
   index: boolean;
 }
 
-export interface Router<T = any> {
+export interface RouterMetadata<T = any> {
   prefix: string;
   service?: Constructor<T>;
   routes: { [key: string]: Route };
 }
 
 export interface RouterDefine {
-  "@router"?: Router;
+  "@router"?: RouterMetadata;
 }
 
 export type RouterPrototype<T = {}> = T & RouterDefine;

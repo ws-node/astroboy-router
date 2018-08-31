@@ -1,12 +1,12 @@
 /// <reference types="astroboy"/>
 import { BaseClass } from "astroboy";
-import { Router, Constructor, ControllerConstructor, METHOD, RouterDefine, Route, RouteFactory } from "./metadata";
+import { RouterMetadata, Constructor, ControllerConstructor, METHOD, RouterDefine, Route, RouteFactory } from "./metadata";
 import { RouterMap } from './core';
 
 function tryGetRouter(target: RouterDefine) {
   const routerSaved = RouterMap.get(target);
-  let router: Router;
-  router = <Router>routerSaved;
+  let router: RouterMetadata;
+  router = <RouterMetadata>routerSaved;
   if (!routerSaved) {
     router = { prefix: "", routes: {} };
     RouterMap.set(target, router);
@@ -20,7 +20,7 @@ function routeConnect(prefix: string, pathStr: string, isIndex: boolean) {
 
 export function Router(prefix: string) {
   return function router<T extends Constructor<BaseClass>>(target: ControllerConstructor<InstanceType<T>>) {
-    let router = <Router>RouterMap.get(target.prototype);
+    let router = <RouterMetadata>RouterMap.get(target.prototype);
     router = router || {
       prefix,
       routes: {}
@@ -42,7 +42,7 @@ export function Router(prefix: string) {
 
 export function Service<T>(service: Constructor<T>) {
   return function router_service<T extends Constructor<BaseClass>>(target: ControllerConstructor<InstanceType<T>>) {
-    let router = <Router>RouterMap.get(target.prototype);
+    let router = <RouterMetadata>RouterMap.get(target.prototype);
     router = router || {
       prefix: "",
       routes: {}
