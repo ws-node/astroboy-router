@@ -67,7 +67,7 @@ export =  createRouter(DEMO, "demo.DemoController", "/section01/section02");
 ```
 
 ## 4. 最终生成路由
-```json
+```
 [ 
   'GET',
   [
