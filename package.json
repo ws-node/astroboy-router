@@ -1,6 +1,6 @@
 {
   "name": "astroboy-router",
-  "version": "1.0.0-beta",
+  "version": "1.0.0-rc.1",
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
