@@ -73,7 +73,7 @@ function RouteFactory(...args) {
 exports.Route = RouteFactory;
 function IndexFactory(...args) {
     return function indexRoute(target, propertyKey, descriptor) {
-        RouteFactory("GET", args[1], true)(target, propertyKey, descriptor);
+        RouteFactory("GET", args[0], true)(target, propertyKey, descriptor);
     };
 }
 exports.Index = IndexFactory;

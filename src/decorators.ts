@@ -77,7 +77,7 @@ function IndexFactory(path: string): RouteFactory;
 function IndexFactory(path: string[]): RouteFactory;
 function IndexFactory(...args: any[]): RouteFactory {
   return function indexRoute(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
-    RouteFactory("GET", args[1], true)(target, propertyKey, descriptor);
+    RouteFactory("GET", args[0], true)(target, propertyKey, descriptor);
   };
 }
 
