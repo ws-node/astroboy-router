@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const metadata_1 = require("./metadata");
 const core_1 = require("./core");
 function tryGetRouter(target) {
     const routerSaved = core_1.RouterMap.get(target);
@@ -15,7 +14,7 @@ function tryGetRouter(target) {
 function routeConnect(prefix, pathStr, isIndex) {
     return `${!isIndex ? "api/" : ""}${prefix}${!!pathStr ? `/${pathStr}` : ""}`;
 }
-function Router(prefix) {
+function RouterFactory(prefix) {
     return function router(target) {
         let router = core_1.RouterMap.get(target.prototype);
         router = router || {
@@ -37,8 +36,8 @@ function Router(prefix) {
         return (target);
     };
 }
-exports.Router = Router;
-function Service(service) {
+exports.Router = RouterFactory;
+function ServiceFactory(service) {
     return function router_service(target) {
         let router = core_1.RouterMap.get(target.prototype);
         router = router || {
@@ -51,8 +50,8 @@ function Service(service) {
         return target;
     };
 }
-exports.Service = Service;
-function Route(...args) {
+exports.Service = ServiceFactory;
+function RouteFactory(...args) {
     return function route(target, propertyKey, descriptor) {
         const { prefix, routes } = tryGetRouter(target);
         const route = routes[propertyKey];
@@ -71,20 +70,20 @@ function Route(...args) {
         }
     };
 }
-exports.Route = Route;
-function Index(...args) {
+exports.Route = RouteFactory;
+function IndexFactory(...args) {
     return function indexRoute(target, propertyKey, descriptor) {
-        metadata_1.Route("GET", args[1], true)(target, propertyKey, descriptor);
+        RouteFactory("GET", args[1], true)(target, propertyKey, descriptor);
     };
 }
-exports.Index = Index;
-function API(...args) {
+exports.Index = IndexFactory;
+function APIFactory(...args) {
     return function apiRoute(target, propertyKey, descriptor) {
-        metadata_1.Route(args[0], args[1], false)(target, propertyKey, descriptor);
+        RouteFactory(args[0], args[1], false)(target, propertyKey, descriptor);
     };
 }
-exports.API = API;
-function Metadata(alias) {
+exports.API = APIFactory;
+function MetadataFactory(alias) {
     return function routeMetadata(target, propertyKey, descriptor) {
         const { prefix, routes } = tryGetRouter(target);
         const route = routes[propertyKey];
@@ -101,5 +100,5 @@ function Metadata(alias) {
         }
     };
 }
-exports.Metadata = Metadata;
+exports.Metadata = MetadataFactory;
 //# sourceMappingURL=decorators.js.map

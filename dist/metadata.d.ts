@@ -17,7 +17,7 @@ export interface Route {
     path: string | Array<string>;
     index: boolean;
 }
-export interface RouterMetadata<T = any> {
+export interface Router<T = any> {
     prefix: string;
     service?: Constructor<T>;
     routes: {
@@ -25,7 +25,7 @@ export interface RouterMetadata<T = any> {
     };
 }
 export interface RouterDefine {
-    "@router"?: RouterMetadata;
+    "@router"?: Router;
 }
 export declare type RouterPrototype<T = {}> = T & RouterDefine;
 export interface ControllerConstructor<T = any> {
