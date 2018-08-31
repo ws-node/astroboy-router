@@ -15,6 +15,7 @@ export interface Constructor<T> {
 
 export type METHOD = "GET" | "POST" | "PUT" | "DELETE";
 
+/** 未实现的路由方法 */
 export type RouteMethod = () => any;
 
 export interface Route {
