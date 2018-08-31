@@ -1,11 +1,11 @@
-# astroboy-router
+# assets-route-plugin
 > 配合astroboy框架使用，查看更多：[Astroboy](https://github.com/astroboy-lab/astroboy)
 
 ## 1. 安装
 ```zsh
-yarn add astroboy-router --save
+yarn add assets-route-plugin --save
 # or
-npm install astroboy-router --save
+npm install assets-route-plugin --save
 ```
 
 ## 2. 定义router
@@ -13,10 +13,10 @@ npm install astroboy-router --save
 ```typescript
 // 导入astroboy框架，如果必要
 // 导入所需的业务逻辑
-// 导入astroboy-router
+// 导入assets-route-plugin
 import { Controller } from "astroboy";
 import BusinessService from "your/service/file";
-import { Router, Service, Index, API, Metadata, RouteMethod } from "astroboy-router";
+import { Router, Service, Index, API, Metadata, RouteMethod } from "assets-route-plugin";
 
 // 1.设置router前缀【必要】
 // 2.设置router的业务服务(需要从astroboy基础服务继承)
@@ -61,7 +61,7 @@ class DemoController extends Controller {
 > router/demo.ts
 ```typescript
 import DEMO from "../controllers/demo/DemoController";
-import { createRouter } from "astroboy-router";
+import { createRouter } from "assets-route-plugin";
 
 export =  createRouter(DEMO, "demo.DemoController", "/section01/section02");
 ```
