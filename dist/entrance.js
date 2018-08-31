@@ -78,7 +78,6 @@ function createRouter(ctor, name, root) {
         routeArr.push(name);
         routeArr.push(method);
         routeMethodImplements(prototype, method, route);
-        console.log(routeArr);
         return routeArr;
     });
 }

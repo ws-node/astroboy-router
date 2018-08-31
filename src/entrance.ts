@@ -77,7 +77,6 @@ export function createRouter(ctor: ControllerConstructor, name: string, root: st
     routeArr.push(name);
     routeArr.push(method);
     routeMethodImplements(prototype, method, route);
-    console.log(routeArr);
     return routeArr;
   });
 }
