@@ -16,11 +16,7 @@ function routeConnect(prefix, pathStr, isIndex) {
 }
 function RouterFactory(prefix) {
     return function router(target) {
-        let router = core_1.RouterMap.get(target.prototype);
-        router = router || {
-            prefix,
-            routes: {}
-        };
+        const router = tryGetRouter(target.prototype);
         router.prefix = prefix;
         Object.keys(router.routes).forEach(key => {
             const route = router.routes[key];
@@ -31,7 +27,6 @@ function RouterFactory(prefix) {
                 route.path = routeConnect(prefix, route.path, route.index);
             }
         });
-        core_1.RouterMap.set(target.prototype, router);
         target.prototype["@router"] = router;
         return (target);
     };
@@ -39,13 +34,8 @@ function RouterFactory(prefix) {
 exports.Router = RouterFactory;
 function ServiceFactory(service) {
     return function router_service(target) {
-        let router = core_1.RouterMap.get(target.prototype);
-        router = router || {
-            prefix: "",
-            routes: {}
-        };
+        const router = tryGetRouter(target.prototype);
         router.service = service;
-        core_1.RouterMap.set(target.prototype, router);
         target.prototype["@router"] = router;
         return target;
     };

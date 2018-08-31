@@ -1,7 +1,7 @@
 import { Router, Constructor, METHOD, RouterDefine, Route, RouteFactory, IController } from "./metadata";
 import { RouterMap } from './core';
 
-function tryGetRouter(target: RouterDefine) {
+function tryGetRouter(target: RouterDefine | IController) {
   const routerSaved = RouterMap.get(target);
   let router: Router;
   router = <Router>routerSaved;
@@ -18,11 +18,7 @@ function routeConnect(prefix: string, pathStr: string, isIndex: boolean) {
 
 function RouterFactory(prefix: string) {
   return function router<T extends typeof IController>(target: T) {
-    let router = <Router>RouterMap.get(target.prototype);
-    router = router || {
-      prefix,
-      routes: {}
-    };
+    const router = tryGetRouter(target.prototype);
     router.prefix = prefix;
     Object.keys(router.routes).forEach(key => {
       const route = router.routes[key];
@@ -32,7 +28,6 @@ function RouterFactory(prefix: string) {
         route.path = routeConnect(prefix, route.path, route.index);
       }
     });
-    RouterMap.set(target.prototype, router);
     target.prototype["@router"] = router;
     return <T>(target);
   };
@@ -40,13 +35,8 @@ function RouterFactory(prefix: string) {
 
 function ServiceFactory<S>(service: Constructor<S>) {
   return function router_service<T extends typeof IController>(target: T) {
-    let router = <Router>RouterMap.get(target.prototype);
-    router = router || {
-      prefix: "",
-      routes: {}
-    };
+    const router = tryGetRouter(target.prototype);
     router.service = service;
-    RouterMap.set(target.prototype, router);
     target.prototype["@router"] = router;
     return <T>target;
   };
