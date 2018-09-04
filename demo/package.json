@@ -1,12 +1,8 @@
 {
-  "name": "astroboy-router",
-  "version": "1.0.0-rc.13",
-  "description": "A router plugin for astroboy.",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "ts:main": "./src/index.ts",
+  "name": "router-demo",
+  "version": "1.0.0",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "demo": "ENABLE_CDN=true ast dev --env qa --ts --inspect --tsconfig app/tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -19,6 +15,7 @@
     "@types/koa-router": "^7.0.31",
     "@types/node": "^10.9.4",
     "astroboy": "^0.0.30",
+    "lodash": "^4.17.10",
     "tslib": "^1.9.3",
     "typescript": "^2.9.2"
   }

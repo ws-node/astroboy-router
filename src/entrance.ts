@@ -1,4 +1,4 @@
-import { Router, Constructor, ControllerConstructor, METHOD, RouterDefine, Route } from "./metadata";
+import { Router, Constructor, ControllerConstructor, METHOD, RouterDefine, Route, BodyResolve } from "./metadata";
 
 /**
  * ## 实现未实现的路由方法
@@ -8,23 +8,32 @@ import { Router, Constructor, ControllerConstructor, METHOD, RouterDefine, Route
  * @param {*} prototype
  * @param {string} method
  * @param {Route} route
+ * @param {(Constructor<any> | undefined)} serviceCtor
+ * @param {BodyResolve} resolve
  */
-function routeMethodImplements(prototype: any, method: string, route: Route, serviceCtor?: Constructor<any>) {
+function routeMethodImplements(prototype: any, method: string, route: Route, serviceCtor: Constructor<any> | undefined, resolve: BodyResolve) {
   if (!prototype[method]) {
     const type = route.method;
     if (serviceCtor && !serviceCtor.prototype[method]) throw new Error(`Bind business method failed : no such method which name is "${method}" found in service [${serviceCtor.name}]`);
+    const hasQuery = !!resolve.queryKey;
+    const hasPost = !!resolve.postKey;
+    const hasToJson = !!resolve.toJsonKey;
     prototype[method] = async function () {
       let data = {};
       switch (type) {
         case "GET": // GET方法尝试获取query
-          data = this.ctx.getRequestData();
+          data = hasQuery ? this.ctx[<string>resolve.queryKey]() : resolve.getQuery.bind(this)();
           break;
         default: // 尝试获取body
-          data = this.ctx.getPostData();
+          data = hasPost ? this.ctx[<string>resolve.postKey]() : resolve.getPost.bind(this)();
           break;
       }
       // 调用business的同名函数，并用json格式要求返回结果
-      this.ctx.json(0, "success", await this.business[method](data || {}));
+      if (hasToJson) {
+        this.ctx[<string>resolve.toJsonKey](0, "success", await this.business[method](data || {}));
+      } else {
+        resolve.toJson.bind(this)(await this.business[method](data || {}));
+      }
     };
   }
 }
@@ -77,8 +86,46 @@ export function createRouter(ctor: ControllerConstructor, name: string, root: st
     }
     routeArr.push(name);
     routeArr.push(method);
-    routeMethodImplements(prototype, method, route, service);
+    routeMethodImplements(prototype, method, route, service || undefined, resolveDefaultBodyParser());
     return routeArr;
   });
+}
+
+function defaultGetQuery(): any {
+  // @ts-ignore
+  return this.ctx.query;
+};
+
+function defaultGetPost(): any {
+  // @ts-ignore
+  return this.ctx.request.body;
+};
+
+function defaultToJson(data: any): any {
+  // @ts-ignore
+  this.ctx.body = {
+    code: 0,
+    msg: "success",
+    data
+  };
+}
+
+function resolveDefaultBodyParser(): BodyResolve {
+  const pwd = process.env.PWD;
+  let config: any;
+  try {
+    config = require(`${pwd}/app/config/config.default.js`)["@ast-router"];
+  } catch (error) {
+    config = {};
+  }
+  const result: BodyResolve = {
+    getQuery: defaultGetQuery,
+    getPost: defaultGetPost,
+    toJson: defaultToJson
+  };
+  if (config.getQuery) result.queryKey = config.getQuery;
+  if (config.getPost) result.postKey = config.getPost;
+  if (config.toJson) result.toJsonKey = config.toJson;
+  return result;
 }
 

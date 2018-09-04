@@ -2,6 +2,10 @@
 > 配合astroboy框架使用，查看更多：[Astroboy](https://github.com/astroboy-lab/astroboy)
 
 ### CHANGE LOGS
+#### 1.0.0-rc.13
+* 修复astroboy没有默认路由实现的问题
+* 内置提供了默认的参数获取函数和body处理函数
+* 支持在astroboy的config里面配置参数修改router行为
 #### 1.0.0-rc.12 
 * 增加路由方法校验：检查business的方法实现，未实现的情况下服务启动过程会报错
 

@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "es2017", /* Specify ECMAScript target version: "ES3" (default), "ES5", "ES2015", "ES2016", "ES2017","ES2018" or "ESNEXT". */
+    "module": "commonjs", /* Specify module code generation: "none", "commonjs", "amd", "system", "umd", "es2015", or "ESNext". */
+    "lib": [
+      "es2015",
+      "es2016",
+      "es2017"
+    ],
+    "allowJs": false,
+    "checkJs": false,
+    "strict": true,
+    /* Generates corresponding ".map" file. */
+    "sourceMap": true,
+    /* Specify JSX code generation: "preserve", "react-native", or "react". */
+    "jsx": "react",
+    /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies "allowSyntheticDefaultImports". */
+    "esModuleInterop": true,
+    "noEmitHelpers": true,
+    "importHelpers": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "types": [
+      "koa",
+      "koa-router",
+      "astroboy",
+      "@youzan/youzan-framework",
+      "@youzan/wsc-pc-base",
+      "node"
+    ]
+  }
+}
