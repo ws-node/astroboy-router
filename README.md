@@ -1,6 +1,10 @@
 # assets-route-plugin
 > 配合astroboy框架使用，查看更多：[Astroboy](https://github.com/astroboy-lab/astroboy)
 
+### CHANGE LOGS
+#### 1.0.0-rc.12 
+* 增加路由方法校验：检查business的方法实现，未实现的情况下服务启动过程会报错
+
 ## 1. 安装
 ```zsh
 yarn add assets-route-plugin --save
