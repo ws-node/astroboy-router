@@ -9,9 +9,10 @@ import { Router, Constructor, ControllerConstructor, METHOD, RouterDefine, Route
  * @param {string} method
  * @param {Route} route
  */
-function routeMethodImplements(prototype: any, method: string, route: Route) {
+function routeMethodImplements(prototype: any, method: string, route: Route, businessPrototype?: any) {
   if (!prototype[method]) {
     const type = route.method;
+    if (businessPrototype && !businessPrototype[method]) throw new Error(`Bind business method failed : no such method which name is "${method}" found in service [${businessPrototype.name}]`);
     prototype[method] = async function () {
       let data = {};
       switch (type) {
@@ -76,7 +77,7 @@ export function createRouter(ctor: ControllerConstructor, name: string, root: st
     }
     routeArr.push(name);
     routeArr.push(method);
-    routeMethodImplements(prototype, method, route);
+    routeMethodImplements(prototype, method, route, prototype);
     return routeArr;
   });
 }

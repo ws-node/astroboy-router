@@ -27,6 +27,7 @@ class DemoController extends Controller {
 
   // 如果需要在自己实现的路由方法中引用，声明business
   // business会自动初始化，无需手动初始化
+  // !! business名字限定，不要重命名
   private business!: BusinessService;
 
   // index页面，支持多路由
@@ -71,9 +72,9 @@ export =  createRouter(DEMO, "demo.DemoController", "/section01/section02");
 [ 
   'GET',
   [
-    '/section01/section02/index',
-    '/section01/section02/another',
-    '/section01/section02/...'
+    '/section01/section02/demo/index',
+    '/section01/section02/demo/another',
+    '/section01/section02/demo/...'
   ],
   'demo.DemoController',
   'getIndexHtml' 
