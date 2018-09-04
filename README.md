@@ -36,7 +36,7 @@ class DemoController extends Controller {
 
   // index页面，支持多路由
   // index页面逻辑请自己实现
-  @Index(["index", "another", "..."])
+  @Index(["index", "", "..."])
   public async getIndexHtml(){
     this.ctx.render("index.html");
   }
@@ -77,7 +77,7 @@ export =  createRouter(DEMO, "demo.DemoController", "/section01/section02");
   'GET',
   [
     '/section01/section02/demo/index',
-    '/section01/section02/demo/another',
+    '/section01/section02/demo',
     '/section01/section02/demo/...'
   ],
   'demo.DemoController',
