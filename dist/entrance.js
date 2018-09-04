@@ -9,11 +9,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * @param {string} method
  * @param {Route} route
  */
-function routeMethodImplements(prototype, method, route, businessPrototype) {
+function routeMethodImplements(prototype, method, route, serviceCtor) {
     if (!prototype[method]) {
         const type = route.method;
-        if (businessPrototype && !businessPrototype[method])
-            throw new Error(`Bind business method failed : no such method which name is "${method}" found in service [${businessPrototype.name}]`);
+        if (serviceCtor && !serviceCtor.prototype[method])
+            throw new Error(`Bind business method failed : no such method which name is "${method}" found in service [${serviceCtor.name}]`);
         prototype[method] = async function () {
             let data = {};
             switch (type) {
@@ -79,7 +79,7 @@ function createRouter(ctor, name, root) {
         }
         routeArr.push(name);
         routeArr.push(method);
-        routeMethodImplements(prototype, method, route, prototype);
+        routeMethodImplements(prototype, method, route, service);
         return routeArr;
     });
 }
