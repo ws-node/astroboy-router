@@ -1,0 +1,17 @@
+[
+  [
+    "GET",
+    [
+      "/test/demo",
+      "/test/demo/*"
+    ],
+    "demo",
+    "getIndexHtml"
+  ],
+  [
+    "GET",
+    "/test/api/demo/testA",
+    "demo",
+    "testA"
+  ]
+]

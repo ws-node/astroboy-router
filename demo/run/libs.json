@@ -1,0 +1,7 @@
+{
+  "astroboy-view": [],
+  "astroboy-security": [
+    "randomString",
+    "token"
+  ]
+}

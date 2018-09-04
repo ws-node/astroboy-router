@@ -2,6 +2,10 @@
 > 配合astroboy框架使用，查看更多：[Astroboy](https://github.com/astroboy-lab/astroboy)
 
 ### CHANGE LOGS
+#### 1.0.0-rc.13
+* 修复astroboy没有默认路由实现的问题
+* 内置提供了默认的参数获取函数和body处理函数
+* 支持在astroboy的config里面配置参数修改router行为
 #### 1.0.0-rc.12 
 * 增加路由方法校验：检查business的方法实现，未实现的情况下服务启动过程会报错
 
@@ -36,7 +40,7 @@ class DemoController extends Controller {
 
   // index页面，支持多路由
   // index页面逻辑请自己实现
-  @Index(["index", "another", "..."])
+  @Index(["index", "", "*"])
   public async getIndexHtml(){
     this.ctx.render("index.html");
   }
@@ -77,8 +81,8 @@ export =  createRouter(DEMO, "demo.DemoController", "/section01/section02");
   'GET',
   [
     '/section01/section02/demo/index',
-    '/section01/section02/demo/another',
-    '/section01/section02/demo/...'
+    '/section01/section02/demo',
+    '/section01/section02/demo/*'
   ],
   'demo.DemoController',
   'getIndexHtml' 

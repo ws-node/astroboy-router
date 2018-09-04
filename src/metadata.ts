@@ -47,3 +47,11 @@ export abstract class IController extends BaseClass {
 
 export type RouteFactory = <T>(target: T, propertyKey: string, descriptor?: PropertyDescriptor) => any;
 
+export interface BodyResolve {
+  getQuery: Function;
+  getPost: Function;
+  toJson: Function;
+  queryKey?: string;
+  postKey?: string;
+  toJsonKey?: string;
+}

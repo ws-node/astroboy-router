@@ -1,0 +1,42 @@
+[
+  {
+    "baseDir": "/Users/bigmogician/Documents/github.com/ws-node/astroboy-router/demo/node_modules/astroboy/plugins/astroboy-view",
+    "type": "plugin",
+    "name": "astroboy-view"
+  },
+  {
+    "baseDir": "/Users/bigmogician/Documents/github.com/ws-node/astroboy-router/demo/node_modules/astroboy/plugins/astroboy-static",
+    "type": "plugin",
+    "name": "astroboy-static"
+  },
+  {
+    "baseDir": "/Users/bigmogician/Documents/github.com/ws-node/astroboy-router/demo/node_modules/astroboy/plugins/astroboy-security",
+    "type": "plugin",
+    "name": "astroboy-security"
+  },
+  {
+    "baseDir": "/Users/bigmogician/Documents/github.com/ws-node/astroboy-router/demo/node_modules/astroboy/plugins/astroboy-router",
+    "type": "plugin",
+    "name": "astroboy-router"
+  },
+  {
+    "baseDir": "/Users/bigmogician/Documents/github.com/ws-node/astroboy-router/demo/node_modules/astroboy/plugins/astroboy-meta",
+    "type": "plugin",
+    "name": "astroboy-meta"
+  },
+  {
+    "baseDir": "/Users/bigmogician/Documents/github.com/ws-node/astroboy-router/demo/node_modules/astroboy/plugins/astroboy-body",
+    "type": "plugin",
+    "name": "astroboy-body"
+  },
+  {
+    "baseDir": "/Users/bigmogician/Documents/github.com/ws-node/astroboy-router/demo/node_modules/astroboy",
+    "type": "framework",
+    "name": "astroboy"
+  },
+  {
+    "baseDir": "/Users/bigmogician/Documents/github.com/ws-node/astroboy-router/demo",
+    "type": "app",
+    "name": "demo"
+  }
+]
