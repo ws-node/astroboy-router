@@ -22,5 +22,8 @@
       "astroboy",
       "node"
     ]
-  }
+  },
+  "include": [
+    "./src"
+  ]
 }

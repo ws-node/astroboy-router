@@ -18,16 +18,20 @@ export type METHOD = "GET" | "POST" | "PUT" | "DELETE";
 /** 未实现的路由方法 */
 export type RouteMethod = () => any;
 
+export type AuthGuard = () => Promise<boolean> | boolean;
+
 export interface Route {
   name: Unsure<string>;
   method: METHOD;
   path: string | Array<string>;
   index: boolean;
+  auths: AuthGuard[];
 }
 
 export interface Router<T = any> {
   prefix: string;
   service?: Constructor<T>;
+  auths: AuthGuard[];
   routes: { [key: string]: Route };
 }
 
@@ -46,6 +50,7 @@ export abstract class IController extends BaseClass {
 }
 
 export type RouteFactory = <T>(target: T, propertyKey: string, descriptor?: PropertyDescriptor) => any;
+export type RouterFactory = <T>(target: T) => any;
 
 export interface BodyResolve {
   getQuery: Function;

@@ -14,7 +14,7 @@ function tryGetRouter(target) {
     let router;
     router = routerSaved;
     if (!routerSaved) {
-        router = { prefix: "", routes: {} };
+        router = { prefix: "", routes: {}, auths: [] };
         core_1.RouterMap.set(target, router);
     }
     return router;
@@ -92,7 +92,8 @@ function RouteFactory(...args) {
                 name: undefined,
                 method: args[0],
                 path: args[1],
-                index: !!args[2]
+                index: !!args[2],
+                auths: []
             };
         }
     };
@@ -119,7 +120,7 @@ exports.API = APIFactory;
  */
 function MetadataFactory(alias) {
     return function routeMetadata(target, propertyKey, descriptor) {
-        const { prefix, routes } = tryGetRouter(target);
+        const { routes } = tryGetRouter(target);
         const route = routes[propertyKey];
         if (route) {
             route.name = alias;
@@ -129,10 +130,35 @@ function MetadataFactory(alias) {
                 name: alias,
                 method: "GET",
                 path: "",
-                index: false
+                index: false,
+                auths: []
             };
         }
     };
 }
 exports.Metadata = MetadataFactory;
+function AuthFactory(arr) {
+    return function routeAuth(target, propertyKey, descriptor) {
+        if (propertyKey) {
+            const { routes } = tryGetRouter(target);
+            const route = routes[propertyKey];
+            if (route) {
+                route.auths = arr;
+            }
+            else {
+                routes[propertyKey] = {
+                    name: "",
+                    method: "GET",
+                    path: "",
+                    index: false,
+                    auths: arr
+                };
+            }
+        }
+        else {
+            const router = tryGetRouter(target.prototype);
+            router.auths = arr;
+        }
+    };
+}
 //# sourceMappingURL=decorators.js.map

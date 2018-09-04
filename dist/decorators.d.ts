@@ -1,4 +1,4 @@
-import { Constructor, METHOD, RouteFactory, IController } from "./metadata";
+import { Constructor, METHOD, RouteFactory, IController, RouterFactory } from "./metadata";
 /**
  * ## 定义控制器Router
  * * 支持配置router的前缀
@@ -69,4 +69,4 @@ declare function APIFactory(method: METHOD, path: string): RouteFactory;
  * @returns {RouteFactory}
  */
 declare function MetadataFactory(alias: string): RouteFactory;
-export { RouterFactory as Router, ServiceFactory as Service, IndexFactory as Index, APIFactory as API, MetadataFactory as Metadata };
+export { RouterFactory as Router, ServiceFactory as Service, IndexFactory as Index, APIFactory as API, MetadataFactory as Metadata, };

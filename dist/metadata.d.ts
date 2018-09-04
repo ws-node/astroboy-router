@@ -13,15 +13,18 @@ export interface Constructor<T> {
 export declare type METHOD = "GET" | "POST" | "PUT" | "DELETE";
 /** 未实现的路由方法 */
 export declare type RouteMethod = () => any;
+export declare type AuthGuard = () => Promise<boolean> | boolean;
 export interface Route {
     name: Unsure<string>;
     method: METHOD;
     path: string | Array<string>;
     index: boolean;
+    auths: AuthGuard[];
 }
 export interface Router<T = any> {
     prefix: string;
     service?: Constructor<T>;
+    auths: AuthGuard[];
     routes: {
         [key: string]: Route;
     };
@@ -37,4 +40,13 @@ export declare abstract class IController extends BaseClass {
     [key: string]: any;
 }
 export declare type RouteFactory = <T>(target: T, propertyKey: string, descriptor?: PropertyDescriptor) => any;
+export declare type RouterFactory = <T>(target: T) => any;
+export interface BodyResolve {
+    getQuery: Function;
+    getPost: Function;
+    toJson: Function;
+    queryKey?: string;
+    postKey?: string;
+    toJsonKey?: string;
+}
 export {};

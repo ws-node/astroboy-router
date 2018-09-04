@@ -1,4 +1,4 @@
-import { Router, Constructor, METHOD, RouterDefine, Route, RouteFactory, IController } from "./metadata";
+import { Router, Constructor, METHOD, RouterDefine, Route, RouteFactory, IController, RouterFactory } from "./metadata";
 import { RouterMap } from './core';
 
 /**
@@ -14,7 +14,7 @@ function tryGetRouter(target: RouterDefine | IController) {
   let router: Router;
   router = <Router>routerSaved;
   if (!routerSaved) {
-    router = { prefix: "", routes: {} };
+    router = { prefix: "", routes: {}, auths: [] };
     RouterMap.set(target, router);
   }
   return router;
@@ -107,7 +107,8 @@ function RouteFactory(...args: any[]): RouteFactory {
         name: undefined,
         method: args[0],
         path: args[1],
-        index: !!args[2]
+        index: !!args[2],
+        auths: []
       };
     }
   };
@@ -161,7 +162,7 @@ function APIFactory(...args: any[]): RouteFactory {
  */
 function MetadataFactory(alias: string): RouteFactory {
   return function routeMetadata(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
-    const { prefix, routes } = tryGetRouter(target);
+    const { routes } = tryGetRouter(target);
     const route = routes[propertyKey];
     if (route) {
       route.name = alias;
@@ -170,8 +171,34 @@ function MetadataFactory(alias: string): RouteFactory {
         name: alias,
         method: "GET",
         path: "",
-        index: false
+        index: false,
+        auths: []
       };
+    }
+  };
+}
+
+function AuthFactory(arr: any[]): RouteFactory;
+function AuthFactory(arr: any[]): RouterFactory;
+function AuthFactory(arr: any[]) {
+  return function routeAuth(target: RouterDefine | typeof IController, propertyKey?: string, descriptor?: PropertyDescriptor) {
+    if (propertyKey) {
+      const { routes } = tryGetRouter(<RouterDefine>target);
+      const route = routes[propertyKey];
+      if (route) {
+        route.auths = arr;
+      } else {
+        routes[propertyKey] = {
+          name: "",
+          method: "GET",
+          path: "",
+          index: false,
+          auths: arr
+        };
+      }
+    } else {
+      const router = tryGetRouter((<typeof IController>target).prototype);
+      router.auths = arr;
     }
   };
 }
@@ -182,5 +209,6 @@ export {
   ServiceFactory as Service,
   IndexFactory as Index,
   APIFactory as API,
-  MetadataFactory as Metadata
+  MetadataFactory as Metadata,
+  // AuthFactory as Auth //未完成
 };
