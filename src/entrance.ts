@@ -94,7 +94,8 @@ function resolveDefaultBodyParser(): BodyResolve {
   const pwd = process.env.PWD;
   let config: any;
   try {
-    config = require(`${pwd}/app/config/config.default.js`)["@ast-router"];
+    const defaultConfig = require(`${pwd}/app/config/config.default.js`);
+    config = (defaultConfig && defaultConfig["@ast-router"]) || {};
   } catch (error) {
     config = {};
   }
