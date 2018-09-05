@@ -123,7 +123,7 @@ import { createRouter } from "astroboy-router";
 export =  createRouter(DEMO, "demo.DemoController", "/section01/section02");
 ```
 
-## 4. 最终生成路由
+## 5. 最终生成路由
 ```
 [ 
   'GET',
@@ -162,7 +162,9 @@ export =  createRouter(DEMO, "demo.DemoController", "/section01/section02");
 ]
 ```
 
-## 5. 路由集成鉴权
+## 6. 路由集成鉴权
+> npm:^1.0.0-rc.16
+
 支持路由（Router/Route）级别集成权限处理
 1) 编写鉴权服务（如有必要）
 > services/demo/auth.ts
