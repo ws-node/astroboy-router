@@ -14,10 +14,36 @@ function tryGetRouter(target) {
     let router;
     router = routerSaved;
     if (!routerSaved) {
-        router = { prefix: "", routes: {}, auths: [] };
+        router = { prefix: "", routes: {}, auth: { rules: [], errorMsg: "Auth failed." } };
         core_1.RouterMap.set(target, router);
     }
     return router;
+}
+/**
+ * ## 获取route配置参数
+ * * 如果是第一次配置当前路由项，先做初始化
+ * @description
+ * @author Big Mogician
+ * @param {{ [key: string]: Route }} routes
+ * @param {string} key
+ * @returns
+ */
+function tryGetRoute(routes, key) {
+    let route = routes[key];
+    if (!route) {
+        route = routes[key] = {
+            name: undefined,
+            method: "GET",
+            path: "",
+            index: false,
+            auth: {
+                rules: [],
+                extend: true,
+                errorMsg: "Auth failed."
+            }
+        };
+    }
+    return route;
 }
 /**
  * ## 连接路由
@@ -80,22 +106,11 @@ function ServiceFactory(service) {
 exports.Service = ServiceFactory;
 function RouteFactory(...args) {
     return function route(target, propertyKey, descriptor) {
-        const { prefix, routes } = tryGetRouter(target);
-        const route = routes[propertyKey];
-        if (route) {
-            route.method = args[0];
-            route.path = args[1];
-            route.index = !!args[2];
-        }
-        else {
-            routes[propertyKey] = {
-                name: undefined,
-                method: args[0],
-                path: args[1],
-                index: !!args[2],
-                auths: []
-            };
-        }
+        const { routes } = tryGetRouter(target);
+        const route = tryGetRoute(routes, propertyKey);
+        route.method = args[0];
+        route.path = args[1];
+        route.index = !!args[2];
     };
 }
 function IndexFactory(...args) {
@@ -121,44 +136,33 @@ exports.API = APIFactory;
 function MetadataFactory(alias) {
     return function routeMetadata(target, propertyKey, descriptor) {
         const { routes } = tryGetRouter(target);
-        const route = routes[propertyKey];
-        if (route) {
-            route.name = alias;
+        const route = tryGetRoute(routes, propertyKey);
+        route.name = alias;
+    };
+}
+exports.Metadata = MetadataFactory;
+function AuthFactory(arr, metadata) {
+    return function routeAuth(target, propertyKey, descriptor) {
+        const { extend, errorMsg, error } = metadata || { extend: true, errorMsg: undefined, error: undefined };
+        if (propertyKey) {
+            const { routes } = tryGetRouter(target);
+            const route = tryGetRoute(routes, propertyKey);
+            route.auth = {
+                rules: arr,
+                extend: extend === undefined ? true : !!extend,
+                errorMsg: errorMsg || "Auth failed.",
+                error
+            };
         }
         else {
-            routes[propertyKey] = {
-                name: alias,
-                method: "GET",
-                path: "",
-                index: false,
-                auths: []
+            const router = tryGetRouter(target.prototype);
+            router.auth = {
+                rules: arr,
+                errorMsg: errorMsg || "Auth failed.",
+                error
             };
         }
     };
 }
-exports.Metadata = MetadataFactory;
-function AuthFactory(arr) {
-    return function routeAuth(target, propertyKey, descriptor) {
-        if (propertyKey) {
-            const { routes } = tryGetRouter(target);
-            const route = routes[propertyKey];
-            if (route) {
-                route.auths = arr;
-            }
-            else {
-                routes[propertyKey] = {
-                    name: "",
-                    method: "GET",
-                    path: "",
-                    index: false,
-                    auths: arr
-                };
-            }
-        }
-        else {
-            const router = tryGetRouter(target.prototype);
-            router.auths = arr;
-        }
-    };
-}
+exports.Auth = AuthFactory;
 //# sourceMappingURL=decorators.js.map

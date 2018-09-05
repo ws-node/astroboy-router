@@ -1,4 +1,4 @@
-import { Constructor, METHOD, RouteFactory, IController, RouterFactory } from "./metadata";
+import { Constructor, METHOD, RouteFactory, IController, RouterFactory, AuthGuard, RouteAuthMetadata, MixinFactory } from "./metadata";
 /**
  * ## 定义控制器Router
  * * 支持配置router的前缀
@@ -69,4 +69,6 @@ declare function APIFactory(method: METHOD, path: string): RouteFactory;
  * @returns {RouteFactory}
  */
 declare function MetadataFactory(alias: string): RouteFactory;
-export { RouterFactory as Router, ServiceFactory as Service, IndexFactory as Index, APIFactory as API, MetadataFactory as Metadata, };
+declare function AuthFactory(arr: AuthGuard[], metadata: RouteAuthMetadata): MixinFactory;
+declare function AuthFactory(arr: AuthGuard[]): MixinFactory;
+export { RouterFactory as Router, ServiceFactory as Service, IndexFactory as Index, APIFactory as API, MetadataFactory as Metadata, AuthFactory as Auth };
