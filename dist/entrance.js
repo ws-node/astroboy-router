@@ -5,13 +5,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * * 使用astroboy的推荐写法完成默认路由实现
  * @description
  * @author Big Mogician
- * @param {*} prototype
- * @param {string} method
- * @param {Route} route
- * @param {(Constructor<any> | undefined)} serviceCtor
- * @param {BodyResolve} resolve
  */
-function routeMethodImplements(prototype, method, route, serviceCtor, resolve) {
+function routeMethodImplements(metadata) {
+    const { prototype, method, route, auth, serviceCtor, resolve } = metadata;
     if (!prototype[method]) {
         const type = route.method;
         if (serviceCtor && !serviceCtor.prototype[method])
@@ -34,6 +30,21 @@ function routeMethodImplements(prototype, method, route, serviceCtor, resolve) {
             jsonInvoke(0, "success", await this.business[method](...data));
         };
     }
+    if (auth.rules.length > 0) {
+        const { rules, errorMsg, error } = auth;
+        const authPreloads = async (ctx, afterMethod) => {
+            for (const guard of rules) {
+                const valid = await guard(ctx);
+                if (!valid)
+                    throw error || new Error(errorMsg);
+            }
+            afterMethod();
+        };
+        const oldProtoMethod = prototype[method];
+        prototype[method] = async function () {
+            await authPreloads(this.ctx, oldProtoMethod.bind(this));
+        };
+    }
 }
 /**
  * ## 初始化业务服务
@@ -53,43 +64,6 @@ function routerBusinessCreate(service, prototype) {
         };
     }
 }
-/**
- * ## 生成astroboy路由配置
- * @description
- * @author Big Mogician
- * @export
- * @param {ControllerConstructor} ctor
- * @param {string} name
- * @param {string} root
- * @returns
- */
-function createRouter(ctor, name, root) {
-    const prototype = ctor.prototype;
-    const router = ctor.prototype["@router"];
-    // 未经装饰，不符合Router的要求，终止应用程序
-    if (!router)
-        throw new Error("Create router failed : invalid router controller");
-    const service = router.service;
-    routerBusinessCreate(service, prototype);
-    return Object.keys(router.routes).map(method => {
-        const route = router.routes[method];
-        const routeArr = [];
-        if (!!route.name)
-            routeArr.push(route.name);
-        routeArr.push(route.method);
-        if (route.path instanceof Array) {
-            routeArr.push(route.path.map(path => `${root}/${path}`));
-        }
-        else {
-            routeArr.push(`${root}/${route.path}`);
-        }
-        routeArr.push(name);
-        routeArr.push(method);
-        routeMethodImplements(prototype, method, route, service || undefined, resolveDefaultBodyParser());
-        return routeArr;
-    });
-}
-exports.createRouter = createRouter;
 function defaultGetQueryFac(instance) {
     return () => instance.ctx.query;
 }
@@ -143,4 +117,53 @@ function resolveDefaultBodyParser() {
     }
     return result;
 }
+/**
+ * ## 生成astroboy路由配置
+ * @description
+ * @author Big Mogician
+ * @export
+ * @param {ControllerConstructor} ctor
+ * @param {string} name
+ * @param {string} root
+ * @returns
+ */
+function createRouter(ctor, name, root) {
+    const prototype = ctor.prototype;
+    const router = ctor.prototype["@router"];
+    // 未经装饰，不符合Router的要求，终止应用程序
+    if (!router)
+        throw new Error("Create router failed : invalid router controller");
+    const service = router.service;
+    routerBusinessCreate(service, prototype);
+    return Object.keys(router.routes).map(method => {
+        const route = router.routes[method];
+        const routeArr = [];
+        if (!!route.name)
+            routeArr.push(route.name);
+        routeArr.push(route.method);
+        if (route.path instanceof Array) {
+            routeArr.push(route.path.map(path => `${root}/${path}`));
+        }
+        else {
+            routeArr.push(`${root}/${route.path}`);
+        }
+        routeArr.push(name);
+        routeArr.push(method);
+        const { extend, rules, errorMsg, error } = route.auth;
+        routeMethodImplements({
+            prototype,
+            method,
+            route,
+            auth: {
+                rules: extend ? [...router.auth.rules, ...rules] : rules,
+                errorMsg: extend ? errorMsg : router.auth.errorMsg,
+                error: extend ? error : router.auth.error
+            },
+            serviceCtor: service || undefined,
+            resolve: resolveDefaultBodyParser()
+        });
+        return routeArr;
+    });
+}
+exports.createRouter = createRouter;
 //# sourceMappingURL=entrance.js.map
