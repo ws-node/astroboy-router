@@ -16,26 +16,22 @@ function routeMethodImplements(prototype, method, route, serviceCtor, resolve) {
         const type = route.method;
         if (serviceCtor && !serviceCtor.prototype[method])
             throw new Error(`Bind business method failed : no such method which name is "${method}" found in service [${serviceCtor.name}]`);
-        const hasQuery = !!resolve.queryKey;
-        const hasPost = !!resolve.postKey;
-        const hasToJson = !!resolve.toJsonKey;
         prototype[method] = async function () {
-            let data = {};
+            let data = [];
+            const queryInvoke = resolve.getQuery(this);
+            const postInvoke = resolve.getPost(this);
+            const jsonInvoke = resolve.toJson(this);
             switch (type) {
                 case "GET": // GET方法尝试获取query
-                    data = hasQuery ? this.ctx[resolve.queryKey]() : resolve.getQuery.bind(this)();
+                    data.push(queryInvoke());
                     break;
-                default: // 尝试获取body
-                    data = hasPost ? this.ctx[resolve.postKey]() : resolve.getPost.bind(this)();
+                default: // 尝试获取body和query
+                    data.push(postInvoke());
+                    data.push(queryInvoke());
                     break;
             }
             // 调用business的同名函数，并用json格式要求返回结果
-            if (hasToJson) {
-                this.ctx[resolve.toJsonKey](0, "success", await this.business[method](data || {}));
-            }
-            else {
-                resolve.toJson.bind(this)(await this.business[method](data || {}));
-            }
+            jsonInvoke(0, "success", await this.business[method](...data));
         };
     }
 }
@@ -94,21 +90,19 @@ function createRouter(ctor, name, root) {
     });
 }
 exports.createRouter = createRouter;
-function defaultGetQuery() {
-    // @ts-ignore
-    return this.ctx.query;
+function defaultGetQueryFac(instance) {
+    return () => instance.ctx.query;
 }
 ;
-function defaultGetPost() {
-    // @ts-ignore
-    return this.ctx.request.body;
+function defaultGetPostFac(instance) {
+    return () => instance.ctx.request.body;
 }
 ;
-function defaultToJson(data) {
+function defaultToJsonFac(instance) {
     // @ts-ignore
-    this.ctx.body = {
-        code: 0,
-        msg: "success",
+    return (code, msg, data) => instance.ctx.body = {
+        code,
+        msg,
         data
     };
 }
@@ -122,16 +116,31 @@ function resolveDefaultBodyParser() {
         config = {};
     }
     const result = {
-        getQuery: defaultGetQuery,
-        getPost: defaultGetPost,
-        toJson: defaultToJson
+        getQuery: defaultGetQueryFac,
+        getPost: defaultGetPostFac,
+        toJson: defaultToJsonFac
     };
-    if (config.getQuery)
-        result.queryKey = config.getQuery;
-    if (config.getPost)
-        result.postKey = config.getPost;
-    if (config.toJson)
-        result.toJsonKey = config.toJson;
+    if (config.getQuery) {
+        const queryKey = config.getQuery;
+        result.getQuery = (instance) => {
+            // @ts-ignore
+            return () => instance.ctx[queryKey]();
+        };
+    }
+    if (config.getPost) {
+        const postKey = config.getPost;
+        result.getPost = (instance) => {
+            // @ts-ignore
+            return () => instance.ctx[postKey]();
+        };
+    }
+    if (config.toJson) {
+        const toJsonKey = config.toJson;
+        result.toJson = (instance) => {
+            // @ts-ignore
+            return (code, msg, data) => instance.ctx[toJsonKey](code, msg, data);
+        };
+    }
     return result;
 }
 //# sourceMappingURL=entrance.js.map

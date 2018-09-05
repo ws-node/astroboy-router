@@ -16,6 +16,9 @@ class DemoController extends BaseClass {
   @API("GET", "testA")
   public testA!: RouteMethod;
 
+  @API("POST", "testB")
+  public testB!: RouteMethod;
+
 }
 
 export = DemoController;
