@@ -2,7 +2,10 @@
 > 配合astroboy框架使用，查看更多：[Astroboy](https://github.com/astroboy-lab/astroboy)
 
 ### CHANGE LOGS
-#### 1.0.0-rc.13
+#### 1.0.0-rc.15
+* 增加PUT/POST/DELETE方法query参数的获取，在服务的第二个参数位置接收
+* 优化了默认参数提取的工厂方法和config配置支持
+#### 1.0.0-rc.14
 * 修复astroboy没有默认路由实现的问题
 * 内置提供了默认的参数获取函数和body处理函数
 * 支持在astroboy的config里面配置参数修改router行为
@@ -16,7 +19,46 @@ yarn add assets-route-plugin --save
 npm install assets-route-plugin --save
 ```
 
-## 2. 定义router
+## 2. 构建Business层
+> services/demo/BusinessService.ts
+```typescript
+import { BaseClass } from "astroboy";
+
+class BusinessService extends BaseClass {
+
+  queryParams(query: any){
+    return { ...query };
+  }
+
+  queryParams2(query: any){
+    return { ...query };
+  }
+
+  changeData(postData: any) {
+    return { ...postData };
+  }
+
+  changeData2(postData: any, query: any) {
+    return { 
+      postData,
+      query
+    };
+  }
+
+  testB(post: any, query: any) {
+    return {
+      post,
+      query
+    };
+  }
+
+}
+
+export = BusinessService;
+
+```
+
+## 3. 定义router
 > controllers/demo/DemoController.ts
 ```typescript
 // 导入astroboy框架，如果必要
@@ -58,15 +100,19 @@ class DemoController extends Controller {
   // 或者你可以自己实现路由方法
   @API("POST", "change")
   public async changeData(){
-    const postData = this.ctx.getPostData();
+    const postData = this.ctx.body;
     const result = await this.business.changeData(postData);
     this.ctx.json(0, "success", result);
   }
 
+  // 支持获取body和query @1.0.0-rc.15
+  @API("POST", "change2")
+  public changeData2!: RouteMethod;
+
 }
 ```
 
-## 3. 生成router规则
+## 4. 生成router规则
 > router/demo.ts
 ```typescript
 import DEMO from "../controllers/demo/DemoController";
@@ -105,5 +151,11 @@ export =  createRouter(DEMO, "demo.DemoController", "/section01/section02");
   '/section01/section02/api/demo/change',
   'demo.DemoController',
   'changeData' 
+],
+[ 
+  'POST',
+  '/section01/section02/api/demo/change2',
+  'demo.DemoController',
+  'changeData2' 
 ]
 ```

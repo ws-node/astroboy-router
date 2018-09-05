@@ -3,10 +3,13 @@ import { BaseClass } from "astroboy";
 class DemoService extends BaseClass {
 
   testA({ id }: any) {
+    return { id }
+  }
+
+  testB(post: any, query: any) {
     return {
-      code: 0,
-      msg: "success",
-      data: { id }
+      post,
+      query
     }
   }
 
