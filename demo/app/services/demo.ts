@@ -13,6 +13,12 @@ class DemoService extends BaseClass {
     }
   }
 
+  testC(query: any) {
+    return {
+      ...query
+    }
+  }
+
 }
 
 export = DemoService;

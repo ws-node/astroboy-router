@@ -1,4 +1,4 @@
-import { Router, Constructor, METHOD, RouterDefine, Route, RouteFactory, IController, RouterFactory } from "./metadata";
+import { Router, Constructor, METHOD, RouterDefine, Route, RouteFactory, IController, RouterFactory, AuthGuard, RouterAuthMetadata, RouteAuthMetadata, MixinFactory } from "./metadata";
 import { RouterMap } from './core';
 
 /**
@@ -14,11 +14,39 @@ function tryGetRouter(target: RouterDefine | IController) {
   let router: Router;
   router = <Router>routerSaved;
   if (!routerSaved) {
-    router = { prefix: "", routes: {}, auths: [] };
+    router = { prefix: "", routes: {}, auth: { rules: [], errorMsg: "Auth failed." } };
     RouterMap.set(target, router);
   }
   return router;
 }
+
+/**
+ * ## 获取route配置参数
+ * * 如果是第一次配置当前路由项，先做初始化
+ * @description
+ * @author Big Mogician
+ * @param {{ [key: string]: Route }} routes
+ * @param {string} key
+ * @returns 
+ */
+function tryGetRoute(routes: { [key: string]: Route }, key: string) {
+  let route = routes[key];
+  if (!route) {
+    route = routes[key] = {
+      name: undefined,
+      method: "GET",
+      path: "",
+      index: false,
+      auth: {
+        rules: [],
+        extend: true,
+        errorMsg: "Auth failed."
+      }
+    };
+  }
+  return route;
+}
+
 
 /**
  * ## 连接路由
@@ -96,21 +124,11 @@ function RouteFactory(method: METHOD, path: string, inIndex?: boolean): RouteFac
 function RouteFactory(method: METHOD, path: string[], isIndex?: boolean): RouteFactory;
 function RouteFactory(...args: any[]): RouteFactory {
   return function route(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
-    const { prefix, routes } = tryGetRouter(target);
-    const route = routes[propertyKey];
-    if (route) {
-      route.method = args[0];
-      route.path = args[1];
-      route.index = !!args[2];
-    } else {
-      routes[propertyKey] = {
-        name: undefined,
-        method: args[0],
-        path: args[1],
-        index: !!args[2],
-        auths: []
-      };
-    }
+    const { routes } = tryGetRouter(target);
+    const route = tryGetRoute(routes, propertyKey);
+    route.method = args[0];
+    route.path = args[1];
+    route.index = !!args[2];
   };
 }
 
@@ -163,42 +181,32 @@ function APIFactory(...args: any[]): RouteFactory {
 function MetadataFactory(alias: string): RouteFactory {
   return function routeMetadata(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     const { routes } = tryGetRouter(target);
-    const route = routes[propertyKey];
-    if (route) {
-      route.name = alias;
-    } else {
-      routes[propertyKey] = {
-        name: alias,
-        method: "GET",
-        path: "",
-        index: false,
-        auths: []
-      };
-    }
+    const route = tryGetRoute(routes, propertyKey);
+    route.name = alias;
   };
 }
 
-function AuthFactory(arr: any[]): RouteFactory;
-function AuthFactory(arr: any[]): RouterFactory;
-function AuthFactory(arr: any[]) {
+function AuthFactory(arr: AuthGuard[], metadata: RouteAuthMetadata): MixinFactory;
+function AuthFactory(arr: AuthGuard[]): MixinFactory;
+function AuthFactory(arr: AuthGuard[], metadata?: RouteAuthMetadata) {
   return function routeAuth(target: RouterDefine | typeof IController, propertyKey?: string, descriptor?: PropertyDescriptor) {
+    const { extend, errorMsg, error } = metadata || { extend: true, errorMsg: undefined, error: undefined };
     if (propertyKey) {
       const { routes } = tryGetRouter(<RouterDefine>target);
-      const route = routes[propertyKey];
-      if (route) {
-        route.auths = arr;
-      } else {
-        routes[propertyKey] = {
-          name: "",
-          method: "GET",
-          path: "",
-          index: false,
-          auths: arr
-        };
-      }
+      const route = tryGetRoute(routes, propertyKey);
+      route.auth = {
+        rules: arr,
+        extend: extend === undefined ? true : !!extend,
+        errorMsg: errorMsg || "Auth failed.",
+        error
+      };
     } else {
       const router = tryGetRouter((<typeof IController>target).prototype);
-      router.auths = arr;
+      router.auth = {
+        rules: arr,
+        errorMsg: errorMsg || "Auth failed.",
+        error
+      };
     }
   };
 }
@@ -210,5 +218,5 @@ export {
   IndexFactory as Index,
   APIFactory as API,
   MetadataFactory as Metadata,
-  // AuthFactory as Auth //未完成
+  AuthFactory as Auth //未完成
 };

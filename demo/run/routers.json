@@ -19,5 +19,11 @@
     "/test/api/demo/testB",
     "demo",
     "testB"
+  ],
+  [
+    "GET",
+    "/test/api/demo/testC",
+    "demo",
+    "testC"
   ]
 ]

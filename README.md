@@ -2,6 +2,8 @@
 > 配合astroboy框架使用，查看更多：[Astroboy](https://github.com/astroboy-lab/astroboy)
 
 ### CHANGE LOGS
+#### 1.0.0-rc.16
+* 增加Router/Route集成鉴权处理
 #### 1.0.0-rc.15
 * 增加PUT/POST/DELETE方法query参数的获取，在服务的第二个参数位置接收
 * 优化了默认参数提取的工厂方法和config配置支持
@@ -65,7 +67,7 @@ export = BusinessService;
 // 导入所需的业务逻辑
 // 导入assets-route-plugin
 import { Controller } from "astroboy";
-import BusinessService from "your/service/file";
+import BusinessService from "../services/demo/BusinessService";
 import { Router, Service, Index, API, Metadata, RouteMethod } from "assets-route-plugin";
 
 // 1.设置router前缀【必要】
@@ -121,7 +123,7 @@ import { createRouter } from "assets-route-plugin";
 export =  createRouter(DEMO, "demo.DemoController", "/section01/section02");
 ```
 
-## 4. 最终生成路由
+## 5. 最终生成路由
 ```
 [ 
   'GET',
@@ -158,4 +160,100 @@ export =  createRouter(DEMO, "demo.DemoController", "/section01/section02");
   'demo.DemoController',
   'changeData2' 
 ]
+```changeData2' 
+]
+```
+
+## 6. 路由集成鉴权
+> npm:^1.0.0-rc.16
+
+支持路由（Router/Route）级别集成权限处理
+1) 编写鉴权服务（如有必要）
+> services/demo/auth.ts
+```typescript
+import { BaseClass } from "astroboy";
+
+class AuthService extends BaseClass {
+
+  sleep(time = 500) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+  }
+
+  async checkIsLogin() {
+    await this.sleep(10);
+    return true;
+  }
+
+  async checkIsAdmin() {
+    await this.sleep(10);
+    if (this.ctx.header["auth"] === "admin") return true;
+    return false
+  }
+
+  async checkIsSuperAdmin() {
+    await this.sleep(10);
+    if (this.ctx.header["auth"] === "s_a") return true;
+    return false
+  }
+
+}
+
+export = AuthService;
+```
+2) 编写鉴权工厂函数（如有必要）,构建鉴权组件
+```typescript
+import { AuthGuard } from 'assets-route-plugin';
+
+const authFac: (auth?: "admin" | "s_a") => AuthGuard = (auth) => {
+  return async (ctx: AstroboyContext) => {
+    if (auth === "admin")
+      return await new AuthService(ctx).checkIsAdmin();
+    else if (auth === "s_a")
+      return await new AuthService(ctx).checkIsSuperAdmin();
+    else
+      return await new AuthService(ctx).checkIsLogin();
+  }
+};
+
+const admin = [authFac("admin")];
+const s_a = [authFac("s_a")];
+const ad_sa = [...admin, ...s_a];
+const meta = { error: new Error("鉴权失败") };
+const scope_meta = { error: new Error("鉴权失败"), extend: false };
+```
+
+3) 在路由上使用
+```typescript
+@Router("demo")
+@Service(DemoService)
+@Auth(ad_sa, meta)
+// 支持Router级别挂载(可选)，默认会作用到所有子路由逻辑之前触发
+// 可以在单条路有上关闭，实现独立逻辑
+// 鉴权失败会抛出异常，请使用全局异常处理
+class DemoController extends BaseClass {
+
+  private business!: DemoService;
+
+  @Index(["", "*"])
+  public async getIndexHtml() {
+    this.ctx.render("demo/index.html")
+  }
+
+  @API("GET", "testA")
+  @Auth([], meta)
+  // 继承Router级别鉴权，并不新增额外的鉴权
+  public testA!: RouteMethod;
+
+  @API("POST", "testB")
+  @Auth(admin, scope_meta)
+  // 不继承Router鉴权逻辑，独立定义当前Route的权限处理
+  public testB!: RouteMethod;
+
+  @API("GET", "testC")
+  @Auth([], { extend: false })
+  // 单独Route清空鉴权逻辑
+  // 如果没有定义Router级别鉴权，就不需要这样处理
+  public testC!: RouteMethod;
+
+}
 ```
