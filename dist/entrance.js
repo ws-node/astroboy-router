@@ -43,8 +43,11 @@ function routeMethodImplements(metadata) {
         const authPreloads = async (ctx, afterMethod) => {
             for (const guard of rules) {
                 const valid = await guard(ctx);
-                if (!valid)
+                if (valid === true)
+                    continue;
+                if (valid === false)
                     throw error || new Error(errorMsg);
+                throw valid;
             }
             afterMethod();
         };

@@ -18,7 +18,7 @@ export type METHOD = "GET" | "POST" | "PUT" | "DELETE";
 /** 未实现的路由方法 */
 export type RouteMethod = () => any;
 
-export type AuthGuard = (context: AstroboyContext) => Promise<boolean> | boolean;
+export type AuthGuard = (context: AstroboyContext) => Promise<boolean | Error> | boolean | Error;
 
 export interface Route<T = any> {
   name: Unsure<string>;

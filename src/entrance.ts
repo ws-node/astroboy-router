@@ -52,7 +52,9 @@ function routeMethodImplements(metadata: {
     const authPreloads = async (ctx: AstroboyContext, afterMethod: () => any) => {
       for (const guard of rules) {
         const valid = await guard(ctx);
-        if (!valid) throw error || new Error(errorMsg);
+        if (valid === true) continue;
+        if (valid === false) throw error || new Error(errorMsg);
+        throw valid;
       }
       afterMethod();
     }
