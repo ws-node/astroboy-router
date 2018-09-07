@@ -49,18 +49,21 @@ function routeMethodImplements(metadata: {
   }
   if (auth.rules.length > 0) {
     const { rules, errorMsg, error } = auth;
-    const authPreloads = async (ctx: AstroboyContext, afterMethod: () => any) => {
-      for (const guard of rules) {
-        const valid = await guard(ctx);
-        if (valid === true) continue;
-        if (valid === false) throw error || new Error(errorMsg);
-        throw valid;
-      }
-      afterMethod();
-    }
     const oldProtoMethod = prototype[method];
     prototype[method] = async function () {
-      await authPreloads(this.ctx, oldProtoMethod.bind(this));
+      for (const guard of rules) {
+        const valid = await guard(this.ctx);
+        if (valid === true)
+          continue;
+        if (valid === false)
+          throw error || new Error(errorMsg);
+        throw valid;
+      }
+      try {
+        await oldProtoMethod.bind(this)();
+      } catch (error) {
+        throw error;
+      }
     };
   }
 }

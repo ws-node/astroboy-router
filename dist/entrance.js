@@ -40,20 +40,22 @@ function routeMethodImplements(metadata) {
     }
     if (auth.rules.length > 0) {
         const { rules, errorMsg, error } = auth;
-        const authPreloads = async (ctx, afterMethod) => {
+        const oldProtoMethod = prototype[method];
+        prototype[method] = async function () {
             for (const guard of rules) {
-                const valid = await guard(ctx);
+                const valid = await guard(this.ctx);
                 if (valid === true)
                     continue;
                 if (valid === false)
                     throw error || new Error(errorMsg);
                 throw valid;
             }
-            afterMethod();
-        };
-        const oldProtoMethod = prototype[method];
-        prototype[method] = async function () {
-            await authPreloads(this.ctx, oldProtoMethod.bind(this));
+            try {
+                await oldProtoMethod.bind(this)();
+            }
+            catch (error) {
+                throw error;
+            }
         };
     }
 }
