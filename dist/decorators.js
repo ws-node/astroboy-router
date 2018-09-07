@@ -172,6 +172,7 @@ function AuthFactory(arr, metadata) {
     };
 }
 exports.Auth = AuthFactory;
+exports.Authorize = AuthFactory;
 function InjectFactory() {
     return function injectProperty(target, propertyKey, descriptor) {
         const router = tryGetRouter(target);

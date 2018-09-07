@@ -244,5 +244,6 @@ export {
   APIFactory as API,
   MetadataFactory as Metadata,
   AuthFactory as Auth,
+  AuthFactory as Authorize,
   InjectFactory as Inject
 };

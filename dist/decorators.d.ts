@@ -73,4 +73,4 @@ declare function MetadataFactory(alias: string): RouteFactory;
 declare function AuthFactory(arr: AuthGuard[], metadata: RouteAuthMetadata): MixinFactory;
 declare function AuthFactory(arr: AuthGuard[]): MixinFactory;
 declare function InjectFactory<T = any>(): RouteFactory;
-export { RouterFactory as Router, ServiceFactory as Service, IndexFactory as Index, APIFactory as API, MetadataFactory as Metadata, AuthFactory as Auth, InjectFactory as Inject };
+export { RouterFactory as Router, ServiceFactory as Service, IndexFactory as Index, APIFactory as API, MetadataFactory as Metadata, AuthFactory as Auth, AuthFactory as Authorize, InjectFactory as Inject };
