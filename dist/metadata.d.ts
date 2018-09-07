@@ -13,7 +13,7 @@ export interface Constructor<T> {
 export declare type METHOD = "GET" | "POST" | "PUT" | "DELETE";
 /** 未实现的路由方法 */
 export declare type RouteMethod = () => any;
-export declare type AuthGuard = (context: AstroboyContext) => Promise<boolean> | boolean;
+export declare type AuthGuard = (context: AstroboyContext) => Promise<boolean | Error> | boolean | Error;
 export interface Route<T = any> {
     name: Unsure<string>;
     method: METHOD;
