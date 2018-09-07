@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { Constructor, METHOD, RouteFactory, IController, RouterFactory, AuthGuard, RouteAuthMetadata, MixinFactory } from "./metadata";
 /**
  * ## 定义控制器Router
@@ -9,7 +10,7 @@ import { Constructor, METHOD, RouteFactory, IController, RouterFactory, AuthGuar
  */
 declare function RouterFactory(prefix: string): <T extends typeof IController>(target: T) => T;
 /**
- * ## 为当前Router绑定业务逻辑服务
+ * ## 为当前Router/Route绑定业务逻辑服务
  * * 业务逻辑服务名限定为`business`
  * * 服务在router初始化(`init`)后自动创建
  * @description
@@ -18,7 +19,7 @@ declare function RouterFactory(prefix: string): <T extends typeof IController>(t
  * @param {Constructor<S>} service
  * @returns
  */
-declare function ServiceFactory<S>(service: Constructor<S>): <T extends typeof IController>(target: T) => T;
+declare function ServiceFactory<S>(service: Constructor<S>): MixinFactory;
 /**
  * ## 定义路由方法
  * * 支持多路径
@@ -71,4 +72,5 @@ declare function APIFactory(method: METHOD, path: string): RouteFactory;
 declare function MetadataFactory(alias: string): RouteFactory;
 declare function AuthFactory(arr: AuthGuard[], metadata: RouteAuthMetadata): MixinFactory;
 declare function AuthFactory(arr: AuthGuard[]): MixinFactory;
-export { RouterFactory as Router, ServiceFactory as Service, IndexFactory as Index, APIFactory as API, MetadataFactory as Metadata, AuthFactory as Auth };
+declare function InjectFactory<T = any>(): RouteFactory;
+export { RouterFactory as Router, ServiceFactory as Service, IndexFactory as Index, APIFactory as API, MetadataFactory as Metadata, AuthFactory as Auth, InjectFactory as Inject };

@@ -20,11 +20,12 @@ export type RouteMethod = () => any;
 
 export type AuthGuard = (context: AstroboyContext) => Promise<boolean> | boolean;
 
-export interface Route {
+export interface Route<T = any> {
   name: Unsure<string>;
   method: METHOD;
   path: string | Array<string>;
   index: boolean;
+  service?: Constructor<T>;
   auth: {
     rules: AuthGuard[];
     extend: boolean;
@@ -36,6 +37,7 @@ export interface Route {
 export interface Router<T = any> {
   prefix: string;
   service?: Constructor<T>;
+  dependency: Map<Constructor<any>, string>;
   auth: {
     rules: AuthGuard[];
     errorMsg: string;

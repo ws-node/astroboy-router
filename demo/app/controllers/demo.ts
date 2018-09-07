@@ -1,6 +1,7 @@
 import { BaseClass } from "astroboy";
-import { Router, Service, Index, API, RouteMethod, Auth } from '../../../src';
+import { Router, Service, Index, API, RouteMethod, Auth, Inject } from '../../../src';
 import DemoService from "../services/demo";
+import Demo2Service from "../services/demo2";
 import AuthService from "../services/auth";
 import { AuthGuard } from '../../../src/metadata';
 
@@ -26,7 +27,10 @@ const scope_meta = { error: new Error("鉴权失败"), extend: false };
 @Auth(ad_sa, meta)
 class DemoController extends BaseClass {
 
-  private business!: DemoService;
+  private readonly business!: DemoService;
+
+  @Inject()
+  private readonly demo2!: Demo2Service;
 
   @Index(["", "*"])
   public async getIndexHtml() {
@@ -34,6 +38,7 @@ class DemoController extends BaseClass {
   }
 
   @API("GET", "testA")
+  @Service(Demo2Service)
   @Auth([], meta)
   public testA!: RouteMethod;
 
@@ -43,7 +48,12 @@ class DemoController extends BaseClass {
 
   @API("GET", "testC")
   @Auth([], { extend: false })
-  public testC!: RouteMethod;
+  public testC() {
+    console.log(this.demo2);
+    const result = this.demo2.testC(this.ctx.query);
+    console.log(result);
+    this.ctx.body = this;
+  }
 
 }
 
