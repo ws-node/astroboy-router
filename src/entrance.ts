@@ -76,26 +76,26 @@ function routeMethodImplements(metadata: {
  * @param {Map<Constructor<any>, string>} depedency
  */
 function routerBusinessCreate(service: Constructor<any> | undefined, prototype: any, depedency: Map<Constructor<any>, string>) {
+  const funcName = prototype.constructor.name;
+  Array.from(depedency.entries()).forEach(([service, key]) => {
+    if (key === "business") throw new Error(`Inject service failed: you can not define business service manually on router [${funcName}].`);
+    const metaKey = routeMeta(key);
+    try {
+      Object.defineProperty(prototype, key, {
+        get: function () { return this[metaKey] || (this[metaKey] = new service(this.ctx)); },
+        configurable: false,
+        enumerable: false
+      });
+    } catch (error) {
+      throw new Error(`Inject service failed: duplicate service property [${key}] name on router [${funcName}]`);
+    }
+  });
   if (service) {
     const oldInit = prototype.init || (() => { });
     prototype.init = async function () {
       await oldInit.bind(this)();
       this.business = new service(this.ctx);
     };
-    const funcName = prototype.constructor.name;
-    Array.from(depedency.entries()).forEach(([service, key]) => {
-      if (key === "business") throw new Error(`Inject service failed: you can not define business service manually on router [${funcName}].`);
-      const metaKey = routeMeta(key);
-      try {
-        Object.defineProperty(prototype, key, {
-          get: function () { return this[metaKey] || (this[metaKey] = new service(this.ctx)); },
-          configurable: false,
-          enumerable: false
-        });
-      } catch (error) {
-        throw new Error(`Inject service failed: duplicate service property [${key}] name on router [${funcName}]`);
-      }
-    });
   }
 }
 
