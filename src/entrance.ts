@@ -2,6 +2,10 @@
 import { Router, Constructor, ControllerConstructor, METHOD, RouterDefine, Route, BodyResolve, AuthGuard } from "./metadata";
 import { BaseClass } from 'astroboy';
 
+function routeMeta(key: string): string {
+  return `@metadata::${key}`;
+}
+
 /**
  * ## 实现未实现的路由方法
  * * 使用astroboy的推荐写法完成默认路由实现
@@ -14,12 +18,14 @@ function routeMethodImplements(metadata: {
   route: Route,
   auth: { rules: AuthGuard[], errorMsg: string, error?: any },
   serviceCtor: Constructor<any> | undefined,
+  scopeService: boolean,
   resolve: BodyResolve
 }) {
-  const { prototype, method, route, auth, serviceCtor, resolve } = metadata;
+  const { prototype, method, route, auth, serviceCtor, resolve, scopeService: isScope } = metadata;
   if (!prototype[method]) {
     const type = route.method;
-    if (serviceCtor && !serviceCtor.prototype[method]) throw new Error(`Bind business method failed : no such method which name is "${method}" found in service [${serviceCtor.name}]`);
+    if (!serviceCtor) throw new Error("Create route method failed: init an abstract route method without a service is not allowed.");
+    if (!serviceCtor.prototype[method]) throw new Error(`Bind service method failed : no such method which name is "${method}" found in service [${serviceCtor.name}]`);
     prototype[method] = async function () {
       let data = [];
       const queryInvoke = resolve.getQuery(this);
@@ -33,6 +39,9 @@ function routeMethodImplements(metadata: {
           data.push(postInvoke());
           data.push(queryInvoke());
           break;
+      }
+      if (!this.business || isScope) {
+        this.business = this[routeMeta("business")] = new serviceCtor(this.ctx);
       }
       // 调用business的同名函数，并用json格式要求返回结果
       jsonInvoke(0, "success", await this.business[method](...data));
@@ -61,15 +70,30 @@ function routeMethodImplements(metadata: {
  * @description
  * @author Big Mogician
  * @param {(Constructor<any> | undefined)} service
- * @param {*} prototype
+ * @param {any} prototype
+ * @param {Map<Constructor<any>, string>} depedency
  */
-function routerBusinessCreate(service: Constructor<any> | undefined, prototype: any) {
+function routerBusinessCreate(service: Constructor<any> | undefined, prototype: any, depedency: Map<Constructor<any>, string>) {
   if (service) {
     const oldInit = prototype.init || (() => { });
     prototype.init = async function () {
       await oldInit.bind(this)();
       this.business = new service(this.ctx);
     };
+    const funcName = prototype.constructor.name;
+    Array.from(depedency.entries()).forEach(([service, key]) => {
+      if (key === "business") throw new Error(`Inject service failed: you can not define business service manually on router [${funcName}].`);
+      const metaKey = routeMeta(key);
+      try {
+        Object.defineProperty(prototype, key, {
+          get: function () { return this[metaKey] || (this[metaKey] = new service(this.ctx)); },
+          configurable: false,
+          enumerable: false
+        });
+      } catch (error) {
+        throw new Error(`Inject service failed: duplicate service property [${key}] name on router [${funcName}]`);
+      }
+    });
   }
 }
 
@@ -95,7 +119,7 @@ function resolveDefaultBodyParser(): BodyResolve {
   let config: any;
   try {
     const defaultConfig = require(`${pwd}/app/config/config.default.js`);
-    config = (defaultConfig && defaultConfig["@ast-router"]) || {};
+    config = (defaultConfig && defaultConfig["@router-metadata"]) || {};
   } catch (error) {
     config = {};
   }
@@ -142,9 +166,9 @@ export function createRouter(ctor: ControllerConstructor, name: string, root: st
   const prototype = <any>ctor.prototype;
   const router = <Router>ctor.prototype["@router"];
   // 未经装饰，不符合Router的要求，终止应用程序
-  if (!router) throw new Error("Create router failed : invalid router controller");
+  if (!router) throw new Error(`Create router failed : invalid router controller [${ctor && (<any>ctor).name}]`);
   const service = router.service;
-  routerBusinessCreate(service, prototype);
+  routerBusinessCreate(service, prototype, router.dependency);
   return Object.keys(router.routes).map(method => {
     const route = router.routes[method];
     const routeArr: (string | string[])[] = [];
@@ -167,7 +191,8 @@ export function createRouter(ctor: ControllerConstructor, name: string, root: st
         errorMsg: extend ? errorMsg : router.auth.errorMsg,
         error: extend ? error : router.auth.error
       },
-      serviceCtor: service || undefined,
+      serviceCtor: route.service || service || undefined,
+      scopeService: route.service !== undefined,
       resolve: resolveDefaultBodyParser()
     });
     return routeArr;

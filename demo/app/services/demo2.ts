@@ -1,10 +1,10 @@
 import { BaseClass } from "astroboy";
 
-class DemoService extends BaseClass {
+class Demo2Service extends BaseClass {
 
   testA({ id }: any) {
-    console.log("test method 1");
-    return { id, origin: "demo1" }
+    console.log("test method 2");
+    return { id, origin: "demo2" }
   }
 
   testB(post: any, query: any) {
@@ -22,4 +22,4 @@ class DemoService extends BaseClass {
 
 }
 
-export = DemoService;
+export = Demo2Service;

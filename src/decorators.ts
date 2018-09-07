@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { Router, Constructor, METHOD, RouterDefine, Route, RouteFactory, IController, RouterFactory, AuthGuard, RouterAuthMetadata, RouteAuthMetadata, MixinFactory } from "./metadata";
 import { RouterMap } from './core';
 
@@ -14,9 +15,18 @@ function tryGetRouter(target: RouterDefine | IController) {
   let router: Router;
   router = <Router>routerSaved;
   if (!routerSaved) {
-    router = { prefix: "", routes: {}, auth: { rules: [], errorMsg: "Auth failed." } };
+    router = {
+      prefix: "",
+      routes: {},
+      dependency: new Map(),
+      auth: {
+        rules: [],
+        errorMsg: "Auth failed."
+      }
+    };
     RouterMap.set(target, router);
   }
+  target["@router"] = router;
   return router;
 }
 
@@ -83,13 +93,12 @@ function RouterFactory(prefix: string) {
         route.path = routeConnect(prefix, route.path, route.index);
       }
     });
-    target.prototype["@router"] = router;
     return <T>(target);
   };
 }
 
 /**
- * ## 为当前Router绑定业务逻辑服务
+ * ## 为当前Router/Route绑定业务逻辑服务
  * * 业务逻辑服务名限定为`business`
  * * 服务在router初始化(`init`)后自动创建
  * @description
@@ -98,12 +107,20 @@ function RouterFactory(prefix: string) {
  * @param {Constructor<S>} service
  * @returns 
  */
+function ServiceFactory<S>(service: Constructor<S>): MixinFactory;
 function ServiceFactory<S>(service: Constructor<S>) {
-  return function router_service<T extends typeof IController>(target: T) {
-    const router = tryGetRouter(target.prototype);
-    router.service = service;
-    target.prototype["@router"] = router;
-    return <T>target;
+  return function router_service<T extends (RouterDefine | typeof IController)>(target: T, propertyKey?: string, descriptor?: PropertyDescriptor) {
+    if (propertyKey) {
+      const prototype = <RouterDefine>target;
+      const { routes } = tryGetRouter(prototype);
+      const route = tryGetRoute(routes, propertyKey);
+      route.service = service;
+    } else {
+      const { prototype } = <typeof IController>target
+      const router = tryGetRouter(prototype);
+      router.service = service;
+      return <T>target;
+    }
   };
 }
 
@@ -211,6 +228,14 @@ function AuthFactory(arr: AuthGuard[], metadata?: RouteAuthMetadata) {
   };
 }
 
+function InjectFactory<T = any>(): RouteFactory {
+  return function injectProperty(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
+    const router = tryGetRouter(target);
+    const type = Reflect.getOwnMetadata("design:type", target, propertyKey);
+    router.dependency.set(type, propertyKey);
+  };
+}
+
 export {
   RouterFactory as Router,
   // RouteFactory as Route, // 不公开
@@ -218,5 +243,6 @@ export {
   IndexFactory as Index,
   APIFactory as API,
   MetadataFactory as Metadata,
-  AuthFactory as Auth //未完成
+  AuthFactory as Auth,
+  InjectFactory as Inject
 };

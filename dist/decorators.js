@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+require("reflect-metadata");
 const core_1 = require("./core");
 /**
  * ## 获取router配置参数
@@ -14,9 +15,18 @@ function tryGetRouter(target) {
     let router;
     router = routerSaved;
     if (!routerSaved) {
-        router = { prefix: "", routes: {}, auth: { rules: [], errorMsg: "Auth failed." } };
+        router = {
+            prefix: "",
+            routes: {},
+            dependency: new Map(),
+            auth: {
+                rules: [],
+                errorMsg: "Auth failed."
+            }
+        };
         core_1.RouterMap.set(target, router);
     }
+    target["@router"] = router;
     return router;
 }
 /**
@@ -80,27 +90,24 @@ function RouterFactory(prefix) {
                 route.path = routeConnect(prefix, route.path, route.index);
             }
         });
-        target.prototype["@router"] = router;
         return (target);
     };
 }
 exports.Router = RouterFactory;
-/**
- * ## 为当前Router绑定业务逻辑服务
- * * 业务逻辑服务名限定为`business`
- * * 服务在router初始化(`init`)后自动创建
- * @description
- * @author Big Mogician
- * @template S
- * @param {Constructor<S>} service
- * @returns
- */
 function ServiceFactory(service) {
-    return function router_service(target) {
-        const router = tryGetRouter(target.prototype);
-        router.service = service;
-        target.prototype["@router"] = router;
-        return target;
+    return function router_service(target, propertyKey, descriptor) {
+        if (propertyKey) {
+            const prototype = target;
+            const { routes } = tryGetRouter(prototype);
+            const route = tryGetRoute(routes, propertyKey);
+            route.service = service;
+        }
+        else {
+            const { prototype } = target;
+            const router = tryGetRouter(prototype);
+            router.service = service;
+            return target;
+        }
     };
 }
 exports.Service = ServiceFactory;
@@ -165,4 +172,12 @@ function AuthFactory(arr, metadata) {
     };
 }
 exports.Auth = AuthFactory;
+function InjectFactory() {
+    return function injectProperty(target, propertyKey, descriptor) {
+        const router = tryGetRouter(target);
+        const type = Reflect.getOwnMetadata("design:type", target, propertyKey);
+        router.dependency.set(type, propertyKey);
+    };
+}
+exports.Inject = InjectFactory;
 //# sourceMappingURL=decorators.js.map

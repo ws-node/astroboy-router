@@ -2,6 +2,9 @@
 > 配合astroboy框架使用，查看更多：[Astroboy](https://github.com/astroboy-lab/astroboy)
 
 ### CHANGE LOGS
+#### 1.0.0-rc.17
+* 支持单路由重定义business服务
+* 支持多服务依赖注入能力
 #### 1.0.0-rc.16
 * 增加Router/Route集成鉴权处理
 #### 1.0.0-rc.15
@@ -68,7 +71,9 @@ export = BusinessService;
 // 导入astroboy-router
 import { Controller } from "astroboy";
 import BusinessService from "../services/demo/BusinessService.ts";
-import { Router, Service, Index, API, Metadata, RouteMethod } from "astroboy-router";
+import AnotherService from "...xxxx";
+import ThirdService from "....xxxxxxxx";
+import { Router, Service, Index, API, Metadata, RouteMethod, Inject } from "astroboy-router";
 
 // 1.设置router前缀【必要】
 // 2.设置router的业务服务(需要从astroboy基础服务继承)
@@ -80,7 +85,13 @@ class DemoController extends Controller {
   // 如果需要在自己实现的路由方法中引用，声明business
   // business会自动初始化，无需手动初始化
   // !! business名字限定，不要重命名
-  private business!: BusinessService;
+  private readonly business!: BusinessService;
+
+  // 服务级别DI @1.0.0-rc.17
+  // 服务需要继承astroboy基础类，并会在第一次访问是动态初始化
+  // 务必仅在typescript环境下使用， 确保emitDecoratorMetadata选项被打开
+  @Inject()
+  private readonly service03!: ThirdService;
 
   // index页面，支持多路由
   // index页面逻辑请自己实现
@@ -110,6 +121,12 @@ class DemoController extends Controller {
   // 支持获取body和query @1.0.0-rc.15
   @API("POST", "change2")
   public changeData2!: RouteMethod;
+
+  // 重定义当前路由端使用的business服务类型 @1.0.0-rc.17
+  // 覆盖行为在本路由方法scope中生效
+  @API("POST", "change2")
+  @Service(AnotherService)
+  public changeData3!: RouteMethod;
 
 }
 ```
