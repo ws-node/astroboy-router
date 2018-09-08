@@ -14,6 +14,15 @@ export declare type METHOD = "GET" | "POST" | "PUT" | "DELETE";
 /** 未实现的路由方法 */
 export declare type RouteMethod = () => any;
 export declare type AuthGuard = (context: AstroboyContext) => Promise<boolean | Error> | boolean | Error;
+export interface IRouterMetaConfig<T = any> {
+    prefix: string;
+    apiPrefix?: string;
+    business?: Constructor<T>;
+    auth?: {
+        rules: AuthGuard[];
+        metadata?: RouterAuthMetadata;
+    };
+}
 export interface Route<T = any> {
     name: Unsure<string>;
     method: METHOD;
@@ -29,6 +38,7 @@ export interface Route<T = any> {
 }
 export interface Router<T = any> {
     prefix: string;
+    apiPrefix: string;
     service?: Constructor<T>;
     dependency: Map<Constructor<any>, string>;
     auth: {
@@ -57,9 +67,9 @@ export interface ControllerConstructor<T = any> {
 export declare abstract class IController extends BaseClass {
     [key: string]: any;
 }
-export declare type RouteFactory = <T>(target: T, propertyKey: string, descriptor?: PropertyDescriptor) => any;
-export declare type RouterFactory = <T>(target: T) => any;
-export declare type MixinFactory = <T>(target: T, propertyKey?: string) => any;
+export declare type IRouteFactory = <T>(target: T, propertyKey: string, descriptor?: PropertyDescriptor) => any;
+export declare type IRouterFactory = <T>(target: T) => any;
+export declare type IMixinFactory = <T>(target: T, propertyKey?: string) => any;
 declare type RequestParamsInvokeFactory = (instance: BaseClass) => (() => any);
 declare type ResponseBodyInvokeFactory = (instance: BaseClass) => (<T>(code: any, msg: any, data: T) => any);
 export interface BodyResolve {

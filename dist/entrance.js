@@ -42,15 +42,15 @@ function routeMethodImplements(metadata) {
         const { rules, errorMsg, error } = auth;
         const oldProtoMethod = prototype[method];
         prototype[method] = async function () {
-            for (const guard of rules) {
-                const valid = await guard(this.ctx);
-                if (valid === true)
-                    continue;
-                if (valid === false)
-                    throw error || new Error(errorMsg);
-                throw valid;
-            }
             try {
+                for (const guard of rules) {
+                    const valid = await guard(this.ctx);
+                    if (valid === true)
+                        continue;
+                    if (valid === false)
+                        throw error || new Error(errorMsg);
+                    throw valid;
+                }
                 await oldProtoMethod.bind(this)();
             }
             catch (error) {
