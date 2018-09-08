@@ -1,5 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+function routeMeta(key) {
+    return `@metadata::${key}`;
+}
 /**
  * ## 实现未实现的路由方法
  * * 使用astroboy的推荐写法完成默认路由实现
@@ -7,11 +10,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * @author Big Mogician
  */
 function routeMethodImplements(metadata) {
-    const { prototype, method, route, auth, serviceCtor, resolve } = metadata;
+    const { prototype, method, route, auth, serviceCtor, resolve, scopeService: isScope } = metadata;
     if (!prototype[method]) {
         const type = route.method;
-        if (serviceCtor && !serviceCtor.prototype[method])
-            throw new Error(`Bind business method failed : no such method which name is "${method}" found in service [${serviceCtor.name}]`);
+        if (!serviceCtor)
+            throw new Error("Create route method failed: init an abstract route method without a service is not allowed.");
+        if (!serviceCtor.prototype[method])
+            throw new Error(`Bind service method failed : no such method which name is "${method}" found in service [${serviceCtor.name}]`);
         prototype[method] = async function () {
             let data = [];
             const queryInvoke = resolve.getQuery(this);
@@ -26,23 +31,31 @@ function routeMethodImplements(metadata) {
                     data.push(queryInvoke());
                     break;
             }
+            if (!this.business || isScope) {
+                this.business = this[routeMeta("business")] = new serviceCtor(this.ctx);
+            }
             // 调用business的同名函数，并用json格式要求返回结果
             jsonInvoke(0, "success", await this.business[method](...data));
         };
     }
     if (auth.rules.length > 0) {
         const { rules, errorMsg, error } = auth;
-        const authPreloads = async (ctx, afterMethod) => {
-            for (const guard of rules) {
-                const valid = await guard(ctx);
-                if (!valid)
-                    throw error || new Error(errorMsg);
-            }
-            afterMethod();
-        };
         const oldProtoMethod = prototype[method];
         prototype[method] = async function () {
-            await authPreloads(this.ctx, oldProtoMethod.bind(this));
+            try {
+                for (const guard of rules) {
+                    const valid = await guard(this.ctx);
+                    if (valid === true)
+                        continue;
+                    if (valid === false)
+                        throw error || new Error(errorMsg);
+                    throw valid;
+                }
+                await oldProtoMethod.bind(this)();
+            }
+            catch (error) {
+                throw error;
+            }
         };
     }
 }
@@ -53,9 +66,26 @@ function routeMethodImplements(metadata) {
  * @description
  * @author Big Mogician
  * @param {(Constructor<any> | undefined)} service
- * @param {*} prototype
+ * @param {any} prototype
+ * @param {Map<Constructor<any>, string>} depedency
  */
-function routerBusinessCreate(service, prototype) {
+function routerBusinessCreate(service, prototype, depedency) {
+    const funcName = prototype.constructor.name;
+    Array.from(depedency.entries()).forEach(([service, key]) => {
+        if (key === "business")
+            throw new Error(`Inject service failed: you can not define business service manually on router [${funcName}].`);
+        const metaKey = routeMeta(key);
+        try {
+            Object.defineProperty(prototype, key, {
+                get: function () { return this[metaKey] || (this[metaKey] = new service(this.ctx)); },
+                configurable: false,
+                enumerable: false
+            });
+        }
+        catch (error) {
+            throw new Error(`Inject service failed: duplicate service property [${key}] name on router [${funcName}]`);
+        }
+    });
     if (service) {
         const oldInit = prototype.init || (() => { });
         prototype.init = async function () {
@@ -84,7 +114,8 @@ function resolveDefaultBodyParser() {
     const pwd = process.env.PWD;
     let config;
     try {
-        config = require(`${pwd}/app/config/config.default.js`)["@ast-router"];
+        const defaultConfig = require(`${pwd}/app/config/config.default.js`);
+        config = (defaultConfig && defaultConfig["@router-metadata"]) || {};
     }
     catch (error) {
         config = {};
@@ -132,9 +163,9 @@ function createRouter(ctor, name, root) {
     const router = ctor.prototype["@router"];
     // 未经装饰，不符合Router的要求，终止应用程序
     if (!router)
-        throw new Error("Create router failed : invalid router controller");
+        throw new Error(`Create router failed : invalid router controller [${ctor && ctor.name}]`);
     const service = router.service;
-    routerBusinessCreate(service, prototype);
+    routerBusinessCreate(service, prototype, router.dependency);
     return Object.keys(router.routes).map(method => {
         const route = router.routes[method];
         const routeArr = [];
@@ -159,7 +190,8 @@ function createRouter(ctor, name, root) {
                 errorMsg: extend ? errorMsg : router.auth.errorMsg,
                 error: extend ? error : router.auth.error
             },
-            serviceCtor: service || undefined,
+            serviceCtor: route.service || service || undefined,
+            scopeService: route.service !== undefined,
             resolve: resolveDefaultBodyParser()
         });
         return routeArr;

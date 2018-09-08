@@ -1,5 +1,5 @@
 module.exports = {
-  "@ast-router": {
+  "@router-metadata": {
     getQuery: "",
     getPost: "",
     toJson: ""
