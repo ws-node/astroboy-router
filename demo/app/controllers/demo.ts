@@ -1,5 +1,5 @@
 import { BaseClass } from "astroboy";
-import { Router, Service, Index, API, RouteMethod, Auth, Inject } from '../../../src';
+import { Router, Service, Index, API, RouteMethod, Authorize, Inject, NoAuthorize } from '../../../src';
 import DemoService from "../services/demo";
 import Demo2Service from "../services/demo2";
 import AuthService from "../services/auth";
@@ -7,12 +7,16 @@ import { AuthGuard } from '../../../src/metadata';
 
 const authFac: (auth?: "admin" | "s_a") => AuthGuard = (auth) => {
   return async (ctx: AstroboyContext) => {
+    let hasAccess = false;
     if (auth === "admin")
-      return await new AuthService(ctx).checkIsAdmin();
+      hasAccess = await new AuthService(ctx).checkIsAdmin();
     else if (auth === "s_a")
-      return await new AuthService(ctx).checkIsSuperAdmin();
+      hasAccess = await new AuthService(ctx).checkIsSuperAdmin();
     else
-      return await new AuthService(ctx).checkIsLogin();
+      hasAccess = await new AuthService(ctx).checkIsLogin();
+    if (!hasAccess)
+      return new Error("鉴权失败");
+    return true;
   }
 };
 
@@ -22,9 +26,17 @@ const ad_sa = [...admin, ...s_a];
 const meta = { error: new Error("鉴权失败") };
 const scope_meta = { error: new Error("鉴权失败"), extend: false };
 
-@Router("demo")
-@Service(DemoService)
-@Auth(ad_sa, meta)
+// @Router("demo")
+// @Service(DemoService)
+// @Authorize(ad_sa, meta)
+@Router({
+  prefix: "demo",
+  business: DemoService,
+  auth: {
+    rules: ad_sa,
+    metadata: meta
+  }
+})
 class DemoController extends BaseClass {
 
   private readonly business!: DemoService;
@@ -39,15 +51,15 @@ class DemoController extends BaseClass {
 
   @API("GET", "testA")
   @Service(Demo2Service)
-  @Auth([], meta)
+  // @Authorize([], meta)
   public testA!: RouteMethod;
 
   @API("POST", "testB")
-  @Auth(admin, scope_meta)
+  @Authorize(admin, scope_meta)
   public testB!: RouteMethod;
 
   @API("GET", "testC")
-  @Auth([], { extend: false })
+  @NoAuthorize()
   public testC() {
     console.log(this.demo2);
     const result = this.demo2.testC(this.ctx.query);

@@ -1,6 +1,6 @@
 {
   "name": "assets-route-plugin",
-  "version": "1.0.0-rc.21",
+  "version": "1.0.0-rc.22",
   "description": "A router plugin for astroboy.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

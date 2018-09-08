@@ -2,11 +2,15 @@
 > 配合astroboy框架使用，查看更多：[Astroboy](https://github.com/astroboy-lab/astroboy)
 
 ### CHANGE LOGS
+#### 1.0.0-rc.22
+* 新增装饰器@NoAuthorize，用于关闭单条Route的鉴权
+* 拓宽了@Router的参数，简化配置
+* 支持使用@Router修改api前缀
 #### 1.0.0-rc.17
 * 支持单路由重定义business服务
 * 支持多服务依赖注入能力
 #### 1.0.0-rc.16
-* 增加Router/Route集成鉴权处理
+* 增加Router/Route集成鉴权处理@Authorize
 #### 1.0.0-rc.15
 * 增加PUT/POST/DELETE方法query参数的获取，在服务的第二个参数位置接收
 * 优化了默认参数提取的工厂方法和config配置支持
@@ -78,11 +82,20 @@ import { Router, Service, Index, API, Metadata, RouteMethod, Inject } from "asse
 // 1.设置router前缀【必要】
 // 2.设置router的业务服务(需要从astroboy基础服务继承)
 // 3.继承astroboy基础控制器【必要】
+// 4.支持使用Router装饰器做更多的事 1.0.0-rc.22
+// @Router({
+//   prefix: "demo",
+//   business: BusinessService,
+//   auth: {
+//     rules: xxxx,
+//     metadata: xxxxx
+//   }
+// })
 @Router("demo")
 @Service(BusinessService)
 class DemoController extends Controller {
 
-  // 如果需要在自己实现的路由方法中引用，声明business
+  // 【如果需要】在自己实现的路由方法中引用，声明business
   // business会自动初始化，无需手动初始化
   // !! business名字限定，不要重命名
   private readonly business!: BusinessService;
@@ -90,6 +103,7 @@ class DemoController extends Controller {
   // 服务级别DI @1.0.0-rc.17
   // 服务需要继承astroboy基础类，并会在第一次访问是动态初始化
   // 务必仅在typescript环境下使用， 确保emitDecoratorMetadata选项被打开
+  // ！！注意字段不要使用business名称
   @Inject()
   private readonly service03!: ThirdService;
 
@@ -236,14 +250,13 @@ const admin = [authFac("admin")];
 const s_a = [authFac("s_a")];
 const ad_sa = [...admin, ...s_a];
 const meta = { error: new Error("鉴权失败") };
-const scope_meta = { error: new Error("鉴权失败"), extend: false };
 ```
 
 3) 在路由上使用
 ```typescript
 @Router("demo")
 @Service(DemoService)
-@Auth(ad_sa, meta)
+@Authorize(ad_sa, meta)
 // 支持Router级别挂载(可选)，默认会作用到所有子路由逻辑之前触发
 // 可以在单条路有上关闭，实现独立逻辑
 // 鉴权失败会抛出异常，请使用全局异常处理
@@ -257,17 +270,16 @@ class DemoController extends BaseClass {
   }
 
   @API("GET", "testA")
-  @Auth([], meta)
   // 继承Router级别鉴权，并不新增额外的鉴权
   public testA!: RouteMethod;
 
   @API("POST", "testB")
-  @Auth(admin, scope_meta)
+  @Authorize(admin, scope_meta)
   // 不继承Router鉴权逻辑，独立定义当前Route的权限处理
   public testB!: RouteMethod;
 
   @API("GET", "testC")
-  @Auth([], { extend: false })
+  @NoAuthorize()
   // 单独Route清空鉴权逻辑
   // 如果没有定义Router级别鉴权，就不需要这样处理
   public testC!: RouteMethod;

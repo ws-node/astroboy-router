@@ -20,6 +20,16 @@ export type RouteMethod = () => any;
 
 export type AuthGuard = (context: AstroboyContext) => Promise<boolean | Error> | boolean | Error;
 
+export interface IRouterMetaConfig<T = any> {
+  prefix: string;
+  apiPrefix?: string;
+  business?: Constructor<T>;
+  auth?: {
+    rules: AuthGuard[];
+    metadata?: RouterAuthMetadata;
+  }
+}
+
 export interface Route<T = any> {
   name: Unsure<string>;
   method: METHOD;
@@ -36,6 +46,7 @@ export interface Route<T = any> {
 
 export interface Router<T = any> {
   prefix: string;
+  apiPrefix: string;
   service?: Constructor<T>;
   dependency: Map<Constructor<any>, string>;
   auth: {
@@ -69,9 +80,9 @@ export abstract class IController extends BaseClass {
   [key: string]: any;
 }
 
-export type RouteFactory = <T>(target: T, propertyKey: string, descriptor?: PropertyDescriptor) => any;
-export type RouterFactory = <T>(target: T) => any;
-export type MixinFactory = <T>(target: T, propertyKey?: string) => any;
+export type IRouteFactory = <T>(target: T, propertyKey: string, descriptor?: PropertyDescriptor) => any;
+export type IRouterFactory = <T>(target: T) => any;
+export type IMixinFactory = <T>(target: T, propertyKey?: string) => any;
 
 type RequestParamsInvokeFactory = (instance: BaseClass) => (() => any);
 type ResponseBodyInvokeFactory = (instance: BaseClass) => (<T>(code: any, msg: any, data: T) => any);
