@@ -69,7 +69,14 @@ function tryGetRoute(routes, key) {
  * @returns
  */
 function routeConnect(prefix, apiPrefix, pathStr, isIndex) {
-    return `${!isIndex ? `${apiPrefix}/` : ""}${prefix}${!!pathStr ? `/${pathStr}` : ""}`;
+    const splits = [];
+    if (!isIndex)
+        splits.push(apiPrefix);
+    if (prefix !== '')
+        splits.push(prefix);
+    if (!!pathStr)
+        splits.push(pathStr);
+    return splits.join("/");
 }
 function RouterFactory(...args) {
     const meta = args[0];

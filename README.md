@@ -2,6 +2,8 @@
 > 配合astroboy框架使用，查看更多：[Astroboy](https://github.com/astroboy-lab/astroboy)
 
 ### CHANGE LOGS
+#### 1.0.0-rc.23
+* 支持无前缀的Router控制器（提供空字符串即可）
 #### 1.0.0-rc.22
 * 新增装饰器@NoAuthorize，用于关闭单条Route的鉴权
 * 拓宽了@Router的参数，简化配置

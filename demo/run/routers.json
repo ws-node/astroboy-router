@@ -25,5 +25,20 @@
     "/test/api/demo/testC",
     "demo",
     "testC"
+  ],
+  [
+    "GET",
+    [
+      "/test2/",
+      "/test2/*"
+    ],
+    "test2",
+    "getIndexHtml"
+  ],
+  [
+    "GET",
+    "/test2/api/testC",
+    "test2",
+    "testC"
   ]
 ]
