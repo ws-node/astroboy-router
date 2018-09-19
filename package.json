@@ -1,6 +1,6 @@
 {
   "name": "astroboy-router",
-  "version": "1.0.0-rc.16",
+  "version": "1.0.0-rc.23",
   "description": "A router plugin for astroboy.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -18,7 +18,10 @@
     "@types/koa": "^2.0.46",
     "@types/koa-router": "^7.0.31",
     "@types/node": "^10.9.4",
-    "astroboy": "^0.0.30",
+    "reflect-metadata": "^0.1.12"
+  },
+  "devDependencies": {
+    "astroboy": ">=0.0.30",
     "tslib": "^1.9.3",
     "typescript": "^2.9.2"
   }

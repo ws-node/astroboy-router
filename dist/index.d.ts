@@ -1,5 +1,5 @@
 export * from "./entrance";
 export * from "./decorators";
 export * from "./utils";
-import { RouteMethod } from "./metadata";
-export { RouteMethod };
+import { RouteMethod, AuthGuard } from "./metadata";
+export { RouteMethod, AuthGuard };

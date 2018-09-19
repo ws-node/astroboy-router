@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+require("reflect-metadata");
 const core_1 = require("./core");
 /**
  * ## 获取router配置参数
@@ -14,9 +15,19 @@ function tryGetRouter(target) {
     let router;
     router = routerSaved;
     if (!routerSaved) {
-        router = { prefix: "", routes: {}, auth: { rules: [], errorMsg: "Auth failed." } };
+        router = {
+            prefix: "",
+            apiPrefix: "api",
+            routes: {},
+            dependency: new Map(),
+            auth: {
+                rules: [],
+                errorMsg: "Auth failed."
+            }
+        };
         core_1.RouterMap.set(target, router);
     }
+    target["@router"] = router;
     return router;
 }
 /**
@@ -52,55 +63,71 @@ function tryGetRoute(routes, key) {
  * @description
  * @author Big Mogician
  * @param {string} prefix
+ * @param {string} apiPrefix
  * @param {string} pathStr
  * @param {boolean} isIndex
  * @returns
  */
-function routeConnect(prefix, pathStr, isIndex) {
-    return `${!isIndex ? "api/" : ""}${prefix}${!!pathStr ? `/${pathStr}` : ""}`;
+function routeConnect(prefix, apiPrefix, pathStr, isIndex) {
+    const splits = [];
+    if (!isIndex)
+        splits.push(apiPrefix);
+    if (prefix !== '')
+        splits.push(prefix);
+    if (!!pathStr)
+        splits.push(pathStr);
+    return splits.join("/");
 }
-/**
- * ## 定义控制器Router
- * * 支持配置router的前缀
- * @description
- * @author Big Mogician
- * @param {string} prefix
- * @returns
- */
-function RouterFactory(prefix) {
+function RouterFactory(...args) {
+    const meta = args[0];
+    const hasMetadata = typeof meta !== "string";
+    let prefix = hasMetadata ? meta.prefix : meta;
+    let apiPrefix = (hasMetadata ? meta.apiPrefix : undefined) || "api";
     return function router(target) {
         const router = tryGetRouter(target.prototype);
         router.prefix = prefix;
+        router.apiPrefix = apiPrefix;
         Object.keys(router.routes).forEach(key => {
             const route = router.routes[key];
             if (route.path instanceof Array) {
-                route.path = route.path.map(path => routeConnect(prefix, path, route.index));
+                route.path = route.path.map(path => routeConnect(prefix, apiPrefix, path, route.index));
             }
             else {
-                route.path = routeConnect(prefix, route.path, route.index);
+                route.path = routeConnect(prefix, apiPrefix, route.path, route.index);
             }
         });
-        target.prototype["@router"] = router;
+        if (hasMetadata) {
+            const metadata = meta;
+            if (!!metadata.business)
+                ServiceFactory(metadata.business)(target);
+            if (!!metadata.auth) {
+                const { rules, metadata: m } = metadata.auth;
+                if (!m) {
+                    AuthFactory(rules)(target);
+                }
+                else {
+                    AuthFactory(rules, m)(target);
+                }
+            }
+        }
         return (target);
     };
 }
 exports.Router = RouterFactory;
-/**
- * ## 为当前Router绑定业务逻辑服务
- * * 业务逻辑服务名限定为`business`
- * * 服务在router初始化(`init`)后自动创建
- * @description
- * @author Big Mogician
- * @template S
- * @param {Constructor<S>} service
- * @returns
- */
 function ServiceFactory(service) {
-    return function router_service(target) {
-        const router = tryGetRouter(target.prototype);
-        router.service = service;
-        target.prototype["@router"] = router;
-        return target;
+    return function router_service(target, propertyKey, descriptor) {
+        if (propertyKey) {
+            const prototype = target;
+            const { routes } = tryGetRouter(prototype);
+            const route = tryGetRoute(routes, propertyKey);
+            route.service = service;
+        }
+        else {
+            const { prototype } = target;
+            const router = tryGetRouter(prototype);
+            router.service = service;
+            return target;
+        }
     };
 }
 exports.Service = ServiceFactory;
@@ -165,4 +192,30 @@ function AuthFactory(arr, metadata) {
     };
 }
 exports.Auth = AuthFactory;
+exports.Authorize = AuthFactory;
+function NoAuthFactory() {
+    return function routeNoAuth(target, propertyKey) {
+        AuthFactory([], { extend: false })(target, propertyKey);
+    };
+}
+exports.NoAuthorize = NoAuthFactory;
+/**
+ * ## 为Router注入服务
+ * * 延迟初始化：注入的服务会在第一次访问时初始化
+ * * 同路由中多次访问同一服务，服务保持单例状态
+ * * ⚠️ 确保仅在Typescript环境使用此装饰器
+ * * ⚠️ 确保开启`tsconfig.json`中的`emitDecoratorMetadata`选项
+ * @description
+ * @author Big Mogician
+ * @template T
+ * @returns {IRouteFactory}
+ */
+function InjectFactory() {
+    return function injectProperty(target, propertyKey, descriptor) {
+        const router = tryGetRouter(target);
+        const type = Reflect.getOwnMetadata("design:type", target, propertyKey);
+        router.dependency.set(type, propertyKey);
+    };
+}
+exports.Inject = InjectFactory;
 //# sourceMappingURL=decorators.js.map
