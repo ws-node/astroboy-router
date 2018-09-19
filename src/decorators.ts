@@ -85,7 +85,11 @@ function tryGetRoute(routes: { [key: string]: Route }, key: string) {
  * @returns 
  */
 function routeConnect(prefix: string, apiPrefix: string, pathStr: string, isIndex: boolean) {
-  return `${!isIndex ? `${apiPrefix}/` : ""}${prefix}${!!pathStr ? `/${pathStr}` : ""}`;
+  const splits: string[] = [];
+  if (!isIndex) splits.push(apiPrefix);
+  if (prefix !== '') splits.push(prefix);
+  if (!!pathStr) splits.push(pathStr);
+  return splits.join("/");
 }
 
 /**
