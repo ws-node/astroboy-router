@@ -31,8 +31,8 @@ export function RouterFactory<S>(metadata: IRouterMetaConfig<S>): IRouterFactory
 export function RouterFactory(...args: any[]) {
   const meta = args[0];
   const hasMetadata = typeof meta !== "string";
-  let prefix = hasMetadata ? (<IRouterMetaConfig>meta).prefix : <string>meta;
-  let apiPrefix = (hasMetadata ? (<IRouterMetaConfig>meta).apiPrefix : undefined) || "api";
+  const prefix = hasMetadata ? (<IRouterMetaConfig>meta).prefix : <string>meta;
+  const apiPrefix = (hasMetadata ? (<IRouterMetaConfig>meta).apiPrefix : undefined) || "api";
   return function router<T extends typeof IController>(target: T) {
     const router = tryGetRouter(target.prototype);
     router.prefix = prefix;

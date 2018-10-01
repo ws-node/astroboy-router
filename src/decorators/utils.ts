@@ -4,7 +4,7 @@ import {
   Router,
   Route
 } from "../metadata";
-import { RouterMap } from '../core';
+import { RouterMap } from "../core";
 
 /**
  * ## 获取router配置参数
@@ -12,7 +12,7 @@ import { RouterMap } from '../core';
  * @description
  * @author Big Mogician
  * @param {(RouterDefine | IController)} target 控制器原型
- * @returns 
+ * @returns
  * @exports
  */
 export function tryGetRouter(target: RouterDefine | IController) {
@@ -43,7 +43,7 @@ export function tryGetRouter(target: RouterDefine | IController) {
  * @author Big Mogician
  * @param {{ [key: string]: Route }} routes
  * @param {string} key
- * @returns 
+ * @returns
  * @exports
  */
 export function tryGetRoute(routes: { [key: string]: Route }, key: string) {
@@ -75,13 +75,13 @@ export function tryGetRoute(routes: { [key: string]: Route }, key: string) {
  * @param {string} apiPrefix
  * @param {string} pathStr
  * @param {boolean} isIndex
- * @returns 
+ * @returns
  * @exports
  */
 export function routeConnect(prefix: string, apiPrefix: string, pathStr: string, isIndex: boolean) {
   const splits: string[] = [];
   if (!isIndex) splits.push(apiPrefix);
-  if (prefix !== '') splits.push(prefix);
+  if (prefix !== "") splits.push(prefix);
   if (!!pathStr) splits.push(pathStr);
   return splits.join("/");
 }

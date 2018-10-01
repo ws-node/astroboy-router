@@ -20,7 +20,7 @@ export function routerBusinessCreate(service: Constructor<any> | undefined, prot
     const metaKey = routeMeta(key);
     try {
       Object.defineProperty(prototype, key, {
-        get: function () { return this[metaKey] || (this[metaKey] = new service(this.ctx)); },
+        get() { return this[metaKey] || (this[metaKey] = new service(this.ctx)); },
         configurable: false,
         enumerable: false
       });

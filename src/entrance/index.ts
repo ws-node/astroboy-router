@@ -2,7 +2,7 @@
 import { Router, ControllerConstructor } from "../metadata";
 import { routerBusinessCreate } from "./service-init";
 import { routeMethodImplements } from "./route-implements";
-import { resolveDefaultBodyParser } from './utils';
+import { resolveDefaultBodyParser } from "./utils";
 
 /**
  * ## 生成astroboy路由配置
@@ -12,7 +12,7 @@ import { resolveDefaultBodyParser } from './utils';
  * @param {ControllerConstructor} ctor
  * @param {string} name
  * @param {string} root
- * @returns 
+ * @returns
  * @exports
  */
 export function createRouter(ctor: ControllerConstructor, name: string, root: string) {

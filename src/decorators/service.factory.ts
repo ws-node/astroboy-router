@@ -21,7 +21,7 @@ export function ServiceFactory<S>(service: Constructor<S>) {
       const route = tryGetRoute(routes, propertyKey);
       route.service = service;
     } else {
-      const { prototype } = <typeof IController>target
+      const { prototype } = <typeof IController>target;
       const router = tryGetRouter(prototype);
       router.service = service;
       return <T>target;

@@ -33,7 +33,7 @@ export function routeMethodImplements(metadata: {
     if (!serviceCtor) throw new Error("Create route method failed: init an abstract route method without a service is not allowed.");
     if (!serviceCtor.prototype[method]) throw new Error(`Bind service method failed : no such method which name is "${method}" found in service [${serviceCtor.name}]`);
     prototype[method] = async function () {
-      let data = [];
+      const data: any[] = [];
       const queryInvoke = resolve.getQuery(this);
       const postInvoke = resolve.getPost(this);
       const jsonInvoke = resolve.toJson(this);
@@ -60,10 +60,8 @@ export function routeMethodImplements(metadata: {
       try {
         for (const guard of rules) {
           const valid = await guard(this.ctx);
-          if (valid === true)
-            continue;
-          if (valid === false)
-            throw error || new Error(errorMsg);
+          if (valid === true) continue;
+          if (valid === false) throw error || new Error(errorMsg);
           throw valid;
         }
         await oldProtoMethod.bind(this)();

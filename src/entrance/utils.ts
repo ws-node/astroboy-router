@@ -24,32 +24,32 @@ export function resolveDefaultBodyParser(): BodyResolve {
     result.getQuery = (instance: BaseClass) => {
       // @ts-ignore
       return () => instance.ctx[queryKey]();
-    }
+    };
   }
   if (config.getPost) {
     const postKey = config.getPost;
     result.getPost = (instance: BaseClass) => {
       // @ts-ignore
       return () => instance.ctx[postKey]();
-    }
+    };
   }
   if (config.toJson) {
     const toJsonKey = config.toJson;
     result.toJson = (instance: BaseClass) => {
       // @ts-ignore
       return (code, msg, data) => instance.ctx[toJsonKey](code, msg, data);
-    }
+    };
   }
   return result;
 }
 
 function defaultGetQueryFac(instance: BaseClass) {
   return () => instance.ctx.query;
-};
+}
 
 function defaultGetPostFac(instance: BaseClass) {
   return () => (<any>instance.ctx.request).body;
-};
+}
 
 function defaultToJsonFac<T>(instance: BaseClass) {
   // @ts-ignore
