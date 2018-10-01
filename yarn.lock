@@ -143,9 +143,9 @@ assign-symbols@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/assign-symbols/-/assign-symbols-1.0.0.tgz#59667f41fadd4f20ccbc2bb96b8d4f7f78ec0367"
 
-astroboy@^0.0.30:
-  version "0.0.30"
-  resolved "https://registry.yarnpkg.com/astroboy/-/astroboy-0.0.30.tgz#d741eea0941dbb3cd089c540b02ddcbe6c7d36a3"
+astroboy@>=0.0.30:
+  version "0.0.32"
+  resolved "https://registry.yarnpkg.com/astroboy/-/astroboy-0.0.32.tgz#403944eea08d1625e48a8fb1d9ec8f64ae5e7db1"
   dependencies:
     chalk "2.4.0"
     complete-assign "0.0.2"
