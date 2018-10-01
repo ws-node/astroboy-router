@@ -1,12 +1,13 @@
 import { RouterFactory } from "./router.factory";
-import { ServiceFactory } from './service.factory';
-import { IndexFactory, APIFactory, MetadataFactory } from "./route.factory";
-import { AuthFactory, NoAuthFactory } from './auth.factory';
+import { ServiceFactory } from "./service.factory";
+import { IndexFactory, APIFactory, MetadataFactory, CustomRouteFactory } from "./route.factory";
+import { AuthFactory, NoAuthFactory } from "./auth.factory";
 import { InjectFactory } from "./inject.factory";
 
 export {
   RouterFactory as Router,
   // RouteFactory as Route, // 不公开
+  CustomRouteFactory as CustomRoute,
   ServiceFactory as Service,
   IndexFactory as Index,
   APIFactory as API,

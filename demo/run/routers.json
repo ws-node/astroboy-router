@@ -2,8 +2,8 @@
   [
     "GET",
     [
-      "/test/demo",
-      "/test/demo/*"
+      "/test/demo/fk/",
+      "/test/demo/fk/*"
     ],
     "demo",
     "getIndexHtml"
@@ -11,7 +11,8 @@
   [
     "GET",
     [
-      "/test/api/demo/testA"
+      "/test/xxxxxx/demo/testA",
+      "/test/m/xxxxxx/demo/testA"
     ],
     "demo",
     "testA"
@@ -19,7 +20,7 @@
   [
     "POST",
     [
-      "/test/api/demo/testB"
+      "/test/demo/fk/xxxxxx/testB"
     ],
     "demo",
     "testB"
@@ -27,7 +28,7 @@
   [
     "GET",
     [
-      "/test/api/demo/testC"
+      "/test/demo/fk/xxxxxx/testC"
     ],
     "demo",
     "testC"

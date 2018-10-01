@@ -21,7 +21,7 @@ describe("src/decorators/utils.ts", () => {
   it("test tryGetRoute", () => {
     const result = tryGetRoute({}, "test");
     expect(result.index).to.equal(false);
-    expect(result.method).to.equal("GET");
+    expect(Object.keys(result.method).length).to.equal(0);
     expect(result.name).to.equal(undefined);
     expect(Object.keys(result.path).length).to.equal(0);
     expect(result.service).to.equal(undefined);

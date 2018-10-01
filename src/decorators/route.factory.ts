@@ -1,15 +1,26 @@
-import { METHOD, IRouteFactory, RouterDefine } from "../metadata";
+import { METHOD, IRouteFactory, RouterDefine, RoutePathConfig } from "../metadata";
 import { tryGetRouter, tryGetRoute } from "./utils";
 
 interface RouteOptions {
-  url: string;
+  /** 路由命名，实现@Metadata相同能力 */
   name: string;
+  /** 重置当前路由模板 */
+  tpl: string;
+  /** 提供当前路由模板的参数 */
+  sections?: { [key: string]: string; };
+}
+
+interface CustonRouteOptions {
+  method: METHOD;
+  tpls: string[];
+  name?: string;
+  isIndex?: boolean;
 }
 
 interface RouteBaseConfig {
   name?: string;
   method: METHOD;
-  path: string | string[];
+  path: RoutePathConfig[];
   isIndex: boolean;
   tpl?: string;
 }
@@ -30,8 +41,10 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
     const { routes } = tryGetRouter(target);
     const route = tryGetRoute(routes, propertyKey);
     const { method, path, isIndex, tpl } = options;
-    route.method = method;
-    route.path.push(...(path instanceof Array ? path : [path]));
+    // 封锁多method的能力，暂时没有用单一路由处理多method的需求，
+    // 根据情况未来可能考虑做开放
+    route.method = [method];
+    route.pathConfig.push(...path);
     route.index = !!isIndex;
     route.urlTpl = tpl;
   };
@@ -62,11 +75,12 @@ export function IndexFactory(...args: any[]): IRouteFactory {
   const options: Partial<RouteOptions> = args[1] || {};
   return function indexRoute(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     if (options.name) MetadataFactory(options.name)(target, propertyKey, descriptor);
+    const paths: string[] = args[0] instanceof Array ? args[0] : [args[0]];
     RouteFactory({
       method: "GET",
-      path: args[0],
+      path: paths.map(path => ({ path, sections: options.sections || {} })),
       isIndex: true,
-      tpl: options.url
+      tpl: options.tpl
     })(target, propertyKey, descriptor);
   };
 }
@@ -77,6 +91,7 @@ export function IndexFactory(...args: any[]): IRouteFactory {
  * @author Big Mogician
  * @param {METHOD} method
  * @param {string} path
+ * @param {Partial<RouteOptions>} [options=undefined]
  * @returns {IRouteFactory}
  * @exports
  */
@@ -87,16 +102,43 @@ export function APIFactory(...args: any[]): IRouteFactory {
     if (options.name) MetadataFactory(options.name)(target, propertyKey, descriptor);
     RouteFactory({
       method: args[0],
-      path: [args[1]],
+      path: [{ path: args[1], sections: options.sections || {} }],
       isIndex: false,
-      tpl: options.url
+      tpl: options.tpl
     })(target, propertyKey, descriptor);
   };
 }
 
 /**
+ * ## 自定义的路由
+ * @description
+ * @author Big Mogician
+ * @export
+ * @param {CustonRouteOptions} options
+ * @returns {IRouteFactory}
+ * @exports
+ */
+export function CustomRouteFactory(options: CustonRouteOptions): IRouteFactory {
+  const method = options.method;
+  const isIndex = !!options.isIndex;
+  return function customApiRoute(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
+    if (options.name) MetadataFactory(options.name)(target, propertyKey, descriptor);
+    options.tpls.forEach(item => {
+      RouteFactory({
+        method,
+        path: [{ path: "", sections: {}, urlTpl: item }],
+        isIndex,
+        tpl: item
+      })(target, propertyKey, descriptor);
+    });
+  };
+}
+
+/**
+ * #### deprecated : 使用@Index或者@API的最后一个options参数代替
  * ## 路由元数据
  * * 目前支持为路由命名
+ * @deprecated
  * @description
  * @author Big Mogician
  * @param {string} alias

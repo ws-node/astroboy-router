@@ -53,8 +53,9 @@ export function tryGetRoute(routes: { [key: string]: Route }, key: string) {
   if (!route) {
     route = routes[key] = {
       name: undefined,
-      method: "GET",
+      method: [],
       path: [],
+      pathConfig: [],
       index: false,
       urlTpl: undefined,
       auth: {
@@ -79,17 +80,36 @@ export function tryGetRoute(routes: { [key: string]: Route }, key: string) {
  * @param {string} pathStr
  * @param {boolean} isIndex
  * @param {UrlTplTuple} tpl
+ * @param {{ [key: string]: string }} tplSections
  * @returns
  * @exports
  */
-export function routeConnect(prefix: string, apiPrefix: string, pathStr: string, isIndex: boolean, tpl: UrlTplTuple) {
+export function routeConnect(
+  prefix: string,
+  apiPrefix: string,
+  pathStr: string,
+  isIndex: boolean,
+  tpl: UrlTplTuple,
+  tplSections: { [key: string]: string }
+) {
   const splits: string[] = [];
   const [indexTpl, apiTpl] = tpl || [undefined, undefined];
-  if (indexTpl && isIndex) {
-    return indexTpl.replace("{{$prefix}}", prefix).replace("{{$path}}", pathStr);
-  } else if (apiTpl && !isIndex) {
-    return apiTpl.replace("{{$api}}", apiPrefix).replace("{{$prefix}}", prefix).replace("{{$path}}", pathStr);
+  // 没有重置模版，不要进入逻辑分支
+  if (!!indexTpl || !!apiTpl) {
+    const sections: any = {
+      prefix,
+      path: pathStr,
+      ...tplSections
+    };
+    if (!isIndex) sections.api = apiPrefix;
+    let urlToExport = (!!isIndex ? indexTpl : apiTpl) || "";
+    Object.keys(sections).forEach(key => {
+      urlToExport = urlToExport.replace("{{@" + key + "}}", sections[key]);
+    });
+    return urlToExport;
   }
+  // 默认的url拼装逻辑
+  // 事实上等效："{{@prefix}}/{{@path}}" 和 "api/{{@prefix}}/{{@path}}"
   if (!isIndex) splits.push(apiPrefix);
   if (prefix !== "") splits.push(prefix);
   if (!!pathStr) splits.push(pathStr);

@@ -36,10 +36,18 @@ export interface IRouterMetaConfig<T = any> {
   };
 }
 
+export interface RoutePathConfig {
+  isPlainUrl?: boolean;
+  path: string;
+  urlTpl?: string;
+  sections: { [key: string]: string };
+}
+
 export interface Route<T = any> {
   name: Unsure<string>;
-  method: METHOD;
+  method: METHOD[];
   path: Array<string>;
+  pathConfig: Array<RoutePathConfig>;
   index: boolean;
   service?: Constructor<T>;
   urlTpl?: string;
