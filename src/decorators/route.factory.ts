@@ -1,6 +1,19 @@
 import { METHOD, IRouteFactory, RouterDefine } from "../metadata";
 import { tryGetRouter, tryGetRoute } from "./utils";
 
+interface RouteOptions {
+  url: string;
+  name: string;
+}
+
+interface RouteBaseConfig {
+  name?: string;
+  method: METHOD;
+  path: string | string[];
+  isIndex: boolean;
+  tpl?: string;
+}
+
 /**
  * ## 定义路由方法
  * * 支持多路径
@@ -9,20 +22,18 @@ import { tryGetRouter, tryGetRoute } from "./utils";
  * * Route不公开，做后续扩展支持
  * @description
  * @author Big Mogician
- * @param {METHOD} method
- * @param {string} path
- * @param {boolean} [inIndex]
+ * @param {RouteBaseConfig} options
  * @returns {IRouteFactory}
  */
-function RouteFactory(method: METHOD, path: string, inIndex?: boolean): IRouteFactory;
-function RouteFactory(method: METHOD, path: string[], isIndex?: boolean): IRouteFactory;
-function RouteFactory(...args: any[]): IRouteFactory {
+function RouteFactory(options: RouteBaseConfig): IRouteFactory {
   return function route(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     const { routes } = tryGetRouter(target);
     const route = tryGetRoute(routes, propertyKey);
-    route.method = args[0];
-    route.path = args[1];
-    route.index = !!args[2];
+    const { method, path, isIndex, tpl } = options;
+    route.method = method;
+    route.path.push(...(path instanceof Array ? path : [path]));
+    route.index = !!isIndex;
+    route.urlTpl = tpl;
   };
 }
 
@@ -31,29 +42,37 @@ function RouteFactory(...args: any[]): IRouteFactory {
  * @description
  * @author Big Mogician
  * @param {string} path
+ * @param {Partial<RouteOptions>} [options=undefined]
  * @returns {IRouteFactory}
  * @exports
  */
-export function IndexFactory(path: string): IRouteFactory;
+export function IndexFactory(path: string, options?: Partial<RouteOptions>): IRouteFactory;
 /**
  * ## 定义Index页面
  * * 多路由支持
  * @description
  * @author Big Mogician
  * @param {string[]} path
+ * @param {Partial<RouteOptions>} [options=undefined]
  * @returns {IRouteFactory}
  * @exports
  */
-export function IndexFactory(path: string[]): IRouteFactory;
+export function IndexFactory(path: string[], options?: Partial<RouteOptions>): IRouteFactory;
 export function IndexFactory(...args: any[]): IRouteFactory {
+  const options: Partial<RouteOptions> = args[1] || {};
   return function indexRoute(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
-    RouteFactory("GET", args[0], true)(target, propertyKey, descriptor);
+    if (options.name) MetadataFactory(options.name)(target, propertyKey, descriptor);
+    RouteFactory({
+      method: "GET",
+      path: args[0],
+      isIndex: true,
+      tpl: options.url
+    })(target, propertyKey, descriptor);
   };
 }
 
 /**
  * ## 定义api
- * * api不支持多路由映射
  * @description
  * @author Big Mogician
  * @param {METHOD} method
@@ -61,10 +80,17 @@ export function IndexFactory(...args: any[]): IRouteFactory {
  * @returns {IRouteFactory}
  * @exports
  */
-export function APIFactory(method: METHOD, path: string): IRouteFactory;
+export function APIFactory(method: METHOD, path: string, options?: Partial<RouteOptions>): IRouteFactory;
 export function APIFactory(...args: any[]): IRouteFactory {
+  const options: Partial<RouteOptions> = args[2] || {};
   return function apiRoute(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
-    RouteFactory(args[0], args[1], false)(target, propertyKey, descriptor);
+    if (options.name) MetadataFactory(options.name)(target, propertyKey, descriptor);
+    RouteFactory({
+      method: args[0],
+      path: [args[1]],
+      isIndex: false,
+      tpl: options.url
+    })(target, propertyKey, descriptor);
   };
 }
 

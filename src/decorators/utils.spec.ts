@@ -23,16 +23,20 @@ describe("src/decorators/utils.ts", () => {
     expect(result.index).to.equal(false);
     expect(result.method).to.equal("GET");
     expect(result.name).to.equal(undefined);
-    expect(result.path).to.equal("");
+    expect(Object.keys(result.path).length).to.equal(0);
     expect(result.service).to.equal(undefined);
     expect(Object.keys(result.auth).length).to.equal(3);
   });
 
   it("test routeConnect", () => {
-    const apiResult = routeConnect("testPrifix", "testApiPrefix", "testPath", false);
+    const apiResult = routeConnect("testPrifix", "testApiPrefix", "testPath", false, [undefined, undefined]);
     expect(apiResult).to.equal("testApiPrefix/testPrifix/testPath");
-    const indexResult = routeConnect("testPrifix", "testApiPrefix", "testPath", true);
+    const apiResult2 = routeConnect("testPrifix", "testApiPrefix", "testPath", false, [undefined, "custom/{{$api}}/xxx/{{$path}}"]);
+    expect(apiResult2).to.equal("custom/testApiPrefix/xxx/testPath");
+    const indexResult = routeConnect("testPrifix", "testApiPrefix", "testPath", true, [undefined, undefined]);
     expect(indexResult).to.equal("testPrifix/testPath");
+    const indexResult2 = routeConnect("testPrifix", "testApiPrefix", "testPath", true, ["custom/{{$prefix}}/xxx/{{$path}}", undefined]);
+    expect(indexResult2).to.equal("custom/testPrifix/xxx/testPath");
   });
 
 });

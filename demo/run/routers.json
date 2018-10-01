@@ -10,19 +10,25 @@
   ],
   [
     "GET",
-    "/test/api/demo/testA",
+    [
+      "/test/api/demo/testA"
+    ],
     "demo",
     "testA"
   ],
   [
     "POST",
-    "/test/api/demo/testB",
+    [
+      "/test/api/demo/testB"
+    ],
     "demo",
     "testB"
   ],
   [
     "GET",
-    "/test/api/demo/testC",
+    [
+      "/test/api/demo/testC"
+    ],
     "demo",
     "testC"
   ],
@@ -37,7 +43,9 @@
   ],
   [
     "GET",
-    "/test2/api/testC",
+    [
+      "/test2/api/testC"
+    ],
     "test2",
     "testC"
   ]

@@ -2,7 +2,8 @@ import {
   RouterDefine,
   IController,
   Router,
-  Route
+  Route,
+  UrlTplTuple
 } from "../metadata";
 import { RouterMap } from "../core";
 
@@ -25,6 +26,7 @@ export function tryGetRouter(target: RouterDefine | IController) {
       apiPrefix: "api",
       routes: {},
       dependency: new Map(),
+      urlTpl: [undefined, undefined],
       auth: {
         rules: [],
         errorMsg: "Auth failed."
@@ -52,8 +54,9 @@ export function tryGetRoute(routes: { [key: string]: Route }, key: string) {
     route = routes[key] = {
       name: undefined,
       method: "GET",
-      path: "",
+      path: [],
       index: false,
+      urlTpl: undefined,
       auth: {
         rules: [],
         extend: true,
@@ -75,11 +78,18 @@ export function tryGetRoute(routes: { [key: string]: Route }, key: string) {
  * @param {string} apiPrefix
  * @param {string} pathStr
  * @param {boolean} isIndex
+ * @param {UrlTplTuple} tpl
  * @returns
  * @exports
  */
-export function routeConnect(prefix: string, apiPrefix: string, pathStr: string, isIndex: boolean) {
+export function routeConnect(prefix: string, apiPrefix: string, pathStr: string, isIndex: boolean, tpl: UrlTplTuple) {
   const splits: string[] = [];
+  const [indexTpl, apiTpl] = tpl || [undefined, undefined];
+  if (indexTpl && isIndex) {
+    return indexTpl.replace("{{$prefix}}", prefix).replace("{{$path}}", pathStr);
+  } else if (apiTpl && !isIndex) {
+    return apiTpl.replace("{{$api}}", apiPrefix).replace("{{$prefix}}", prefix).replace("{{$path}}", pathStr);
+  }
   if (!isIndex) splits.push(apiPrefix);
   if (prefix !== "") splits.push(prefix);
   if (!!pathStr) splits.push(pathStr);
