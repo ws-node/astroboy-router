@@ -1,4 +1,4 @@
-import { ControllerConstructor } from "./metadata";
+import { ControllerConstructor } from "../metadata";
 /**
  * ## 生成astroboy路由配置
  * @description
@@ -8,5 +8,6 @@ import { ControllerConstructor } from "./metadata";
  * @param {string} name
  * @param {string} root
  * @returns
+ * @exports
  */
 export declare function createRouter(ctor: ControllerConstructor, name: string, root: string): (string | string[])[][];
