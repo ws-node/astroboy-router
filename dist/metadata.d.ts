@@ -14,21 +14,36 @@ export declare type METHOD = "GET" | "POST" | "PUT" | "DELETE";
 /** 未实现的路由方法 */
 export declare type RouteMethod = () => any;
 export declare type AuthGuard = (context: AstroboyContext) => Promise<boolean | Error> | boolean | Error;
+export declare type UrlTplTuple = [string | undefined, string | undefined];
 export interface IRouterMetaConfig<T = any> {
     prefix: string;
     apiPrefix?: string;
     business?: Constructor<T>;
+    urlTpl?: {
+        index?: string;
+        api?: string;
+    };
     auth?: {
         rules: AuthGuard[];
         metadata?: RouterAuthMetadata;
     };
 }
+export interface RoutePathConfig {
+    isPlainUrl?: boolean;
+    path: string;
+    urlTpl?: string;
+    sections: {
+        [key: string]: string;
+    };
+}
 export interface Route<T = any> {
     name: Unsure<string>;
-    method: METHOD;
-    path: string | Array<string>;
+    method: METHOD[];
+    path: Array<string>;
+    pathConfig: Array<RoutePathConfig>;
     index: boolean;
     service?: Constructor<T>;
+    urlTpl?: string;
     auth: {
         rules: AuthGuard[];
         extend: boolean;
@@ -41,6 +56,7 @@ export interface Router<T = any> {
     apiPrefix: string;
     service?: Constructor<T>;
     dependency: Map<Constructor<any>, string>;
+    urlTpl: UrlTplTuple;
     auth: {
         rules: AuthGuard[];
         errorMsg: string;
