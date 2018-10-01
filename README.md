@@ -5,6 +5,12 @@
 [![package version](https://badge.fury.io/js/astroboy-router.svg)](https://badge.fury.io/js/astroboy-router.svg)
 
 ### CHANGE LOGS
+#### 1.0.0-rc.24
+* 新增@CustomRoute，代替@Index和@API提供高可定制的路由能力
+* @Index和@API新增一个可选参数，提供部分可定制能力
+* 拓宽@Router的能力，支持定制url模板
+* 拓宽createRouter，提供一个新的重载，支持开启调试模式
+* 兼容以前的版本
 #### 1.0.0-rc.23
 * 支持无前缀的Router控制器（提供空字符串即可）
 #### 1.0.0-rc.22
