@@ -21,7 +21,7 @@ function routerBusinessCreate(service, prototype, depedency) {
         const metaKey = utils_1.routeMeta(key);
         try {
             Object.defineProperty(prototype, key, {
-                get: function () { return this[metaKey] || (this[metaKey] = new service(this.ctx)); },
+                get() { return this[metaKey] || (this[metaKey] = new service(this.ctx)); },
                 configurable: false,
                 enumerable: false
             });

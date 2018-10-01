@@ -6,8 +6,8 @@ const auth_factory_1 = require("./auth.factory");
 function RouterFactory(...args) {
     const meta = args[0];
     const hasMetadata = typeof meta !== "string";
-    let prefix = hasMetadata ? meta.prefix : meta;
-    let apiPrefix = (hasMetadata ? meta.apiPrefix : undefined) || "api";
+    const prefix = hasMetadata ? meta.prefix : meta;
+    const apiPrefix = (hasMetadata ? meta.apiPrefix : undefined) || "api";
     return function router(target) {
         const router = utils_1.tryGetRouter(target.prototype);
         router.prefix = prefix;

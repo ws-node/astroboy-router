@@ -27,7 +27,7 @@ function routeMethodImplements(metadata) {
         if (!serviceCtor.prototype[method])
             throw new Error(`Bind service method failed : no such method which name is "${method}" found in service [${serviceCtor.name}]`);
         prototype[method] = async function () {
-            let data = [];
+            const data = [];
             const queryInvoke = resolve.getQuery(this);
             const postInvoke = resolve.getPost(this);
             const jsonInvoke = resolve.toJson(this);

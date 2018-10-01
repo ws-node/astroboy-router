@@ -46,11 +46,9 @@ exports.resolveDefaultBodyParser = resolveDefaultBodyParser;
 function defaultGetQueryFac(instance) {
     return () => instance.ctx.query;
 }
-;
 function defaultGetPostFac(instance) {
     return () => instance.ctx.request.body;
 }
-;
 function defaultToJsonFac(instance) {
     // @ts-ignore
     return (code, msg, data) => instance.ctx.body = {

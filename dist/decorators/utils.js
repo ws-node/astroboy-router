@@ -76,7 +76,7 @@ function routeConnect(prefix, apiPrefix, pathStr, isIndex) {
     const splits = [];
     if (!isIndex)
         splits.push(apiPrefix);
-    if (prefix !== '')
+    if (prefix !== "")
         splits.push(prefix);
     if (!!pathStr)
         splits.push(pathStr);
