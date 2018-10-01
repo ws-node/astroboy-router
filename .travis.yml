@@ -4,6 +4,7 @@ node_js:
 branches:
   only:
     - master
+    - plugin
 before_script:
   - npm install
   - npm install typescript@3.0.3 -g
