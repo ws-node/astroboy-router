@@ -8,6 +8,7 @@ const route_factory_1 = require("./route.factory");
 exports.Index = route_factory_1.IndexFactory;
 exports.API = route_factory_1.APIFactory;
 exports.Metadata = route_factory_1.MetadataFactory;
+exports.CustomRoute = route_factory_1.CustomRouteFactory;
 const auth_factory_1 = require("./auth.factory");
 exports.Auth = auth_factory_1.AuthFactory;
 exports.Authorize = auth_factory_1.AuthFactory;

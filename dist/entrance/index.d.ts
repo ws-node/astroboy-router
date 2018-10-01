@@ -1,4 +1,10 @@
 import { ControllerConstructor } from "../metadata";
+interface RouterOptions {
+    router: ControllerConstructor;
+    name: string;
+    root: string;
+    debug?: boolean;
+}
 /**
  * ## 生成astroboy路由配置
  * @description
@@ -11,3 +17,5 @@ import { ControllerConstructor } from "../metadata";
  * @exports
  */
 export declare function createRouter(ctor: ControllerConstructor, name: string, root: string): (string | string[])[][];
+export declare function createRouter(options: RouterOptions): (string | string[])[][];
+export {};

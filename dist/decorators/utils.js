@@ -20,6 +20,7 @@ function tryGetRouter(target) {
             apiPrefix: "api",
             routes: {},
             dependency: new Map(),
+            urlTpl: [undefined, undefined],
             auth: {
                 rules: [],
                 errorMsg: "Auth failed."
@@ -46,9 +47,11 @@ function tryGetRoute(routes, key) {
     if (!route) {
         route = routes[key] = {
             name: undefined,
-            method: "GET",
-            path: "",
+            method: [],
+            path: [],
+            pathConfig: [],
             index: false,
+            urlTpl: undefined,
             auth: {
                 rules: [],
                 extend: true,
@@ -69,11 +72,27 @@ exports.tryGetRoute = tryGetRoute;
  * @param {string} apiPrefix
  * @param {string} pathStr
  * @param {boolean} isIndex
+ * @param {UrlTplTuple} tpl
+ * @param {{ [key: string]: string }} tplSections
  * @returns
  * @exports
  */
-function routeConnect(prefix, apiPrefix, pathStr, isIndex) {
+function routeConnect(prefix, apiPrefix, pathStr, isIndex, tpl, tplSections) {
     const splits = [];
+    const [indexTpl, apiTpl] = tpl || [undefined, undefined];
+    // 没有重置模版，不要进入逻辑分支
+    if (!!indexTpl || !!apiTpl) {
+        const sections = Object.assign({ prefix, path: pathStr }, tplSections);
+        if (!isIndex)
+            sections.api = apiPrefix;
+        let urlToExport = (!!isIndex ? indexTpl : apiTpl) || "";
+        Object.keys(sections).forEach(key => {
+            urlToExport = urlToExport.replace("{{@" + key + "}}", sections[key]);
+        });
+        return urlToExport;
+    }
+    // 默认的url拼装逻辑
+    // 事实上等效："{{@prefix}}/{{@path}}" 和 "api/{{@prefix}}/{{@path}}"
     if (!isIndex)
         splits.push(apiPrefix);
     if (prefix !== "")

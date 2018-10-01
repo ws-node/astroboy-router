@@ -15,6 +15,7 @@ export declare function RouterFactory(prefix: string): IRouterFactory;
  * * 配置router的api前缀
  * * 配置router的business服务
  * * 配置router的authorize
+ * * 配置router的url template
  * @description
  * @author Big Mogician
  * @template S

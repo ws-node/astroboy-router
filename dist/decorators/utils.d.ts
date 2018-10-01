@@ -1,4 +1,4 @@
-import { RouterDefine, IController, Router, Route } from "../metadata";
+import { RouterDefine, IController, Router, Route, UrlTplTuple } from "../metadata";
 /**
  * ## 获取router配置参数
  * * 如果是第一次配置，先做存储
@@ -32,7 +32,11 @@ export declare function tryGetRoute(routes: {
  * @param {string} apiPrefix
  * @param {string} pathStr
  * @param {boolean} isIndex
+ * @param {UrlTplTuple} tpl
+ * @param {{ [key: string]: string }} tplSections
  * @returns
  * @exports
  */
-export declare function routeConnect(prefix: string, apiPrefix: string, pathStr: string, isIndex: boolean): string;
+export declare function routeConnect(prefix: string, apiPrefix: string, pathStr: string, isIndex: boolean, tpl: UrlTplTuple, tplSections: {
+    [key: string]: string;
+}): string;

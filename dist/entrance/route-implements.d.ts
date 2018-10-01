@@ -1,4 +1,4 @@
-import { AuthGuard, Route, Constructor, BodyResolve } from "../metadata";
+import { AuthGuard, Route, Constructor, BodyResolve, METHOD } from "../metadata";
 /**
  * ## 实现未实现的路由方法
  * * 使用astroboy的推荐写法完成默认路由实现
@@ -7,6 +7,7 @@ import { AuthGuard, Route, Constructor, BodyResolve } from "../metadata";
  * @param {({
  *   prototype: any,
  *   method: string,
+ *   methodName: string,
  *   route: Route,
  *   auth: { rules: AuthGuard[], errorMsg: string, error?: any },
  *   serviceCtor: Constructor<any> | undefined,
@@ -18,7 +19,8 @@ import { AuthGuard, Route, Constructor, BodyResolve } from "../metadata";
  */
 export declare function routeMethodImplements(metadata: {
     prototype: any;
-    method: string;
+    method: METHOD;
+    methodName: string;
     route: Route;
     auth: {
         rules: AuthGuard[];

@@ -9,6 +9,7 @@ const utils_1 = require("./utils");
  * @param {({
  *   prototype: any,
  *   method: string,
+ *   methodName: string,
  *   route: Route,
  *   auth: { rules: AuthGuard[], errorMsg: string, error?: any },
  *   serviceCtor: Constructor<any> | undefined,
@@ -19,19 +20,18 @@ const utils_1 = require("./utils");
  * @exports
  */
 function routeMethodImplements(metadata) {
-    const { prototype, method, route, auth, serviceCtor, resolve, scopeService: isScope } = metadata;
-    if (!prototype[method]) {
-        const type = route.method;
+    const { prototype, method, methodName, route, auth, serviceCtor, resolve, scopeService: isScope } = metadata;
+    if (!prototype[methodName]) {
         if (!serviceCtor)
             throw new Error("Create route method failed: init an abstract route method without a service is not allowed.");
-        if (!serviceCtor.prototype[method])
-            throw new Error(`Bind service method failed : no such method which name is "${method}" found in service [${serviceCtor.name}]`);
-        prototype[method] = async function () {
+        if (!serviceCtor.prototype[methodName])
+            throw new Error(`Bind service method failed : no such method which name is "${methodName}" found in service [${serviceCtor.name}]`);
+        prototype[methodName] = async function () {
             const data = [];
             const queryInvoke = resolve.getQuery(this);
             const postInvoke = resolve.getPost(this);
             const jsonInvoke = resolve.toJson(this);
-            switch (type) {
+            switch (method) {
                 case "GET": // GET方法尝试获取query
                     data.push(queryInvoke());
                     break;
@@ -44,13 +44,13 @@ function routeMethodImplements(metadata) {
                 this.business = this[utils_1.routeMeta("business")] = new serviceCtor(this.ctx);
             }
             // 调用business的同名函数，并用json格式要求返回结果
-            jsonInvoke(0, "success", await this.business[method](...data));
+            jsonInvoke(0, "success", await this.business[methodName](...data));
         };
     }
     if (auth.rules.length > 0) {
         const { rules, errorMsg, error } = auth;
-        const oldProtoMethod = prototype[method];
-        prototype[method] = async function () {
+        const oldProtoMethod = prototype[methodName];
+        prototype[methodName] = async function () {
             try {
                 for (const guard of rules) {
                     const valid = await guard(this.ctx);
