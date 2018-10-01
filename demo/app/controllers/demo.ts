@@ -1,21 +1,17 @@
 import { BaseClass } from "astroboy";
-import { Router, Service, Index, API, RouteMethod, Authorize, Inject, NoAuthorize } from '../../../src';
+import { Router, Service, Index, API, RouteMethod, Authorize, Inject, NoAuthorize, CustomRoute } from "../../../src";
 import DemoService from "../services/demo";
 import Demo2Service from "../services/demo2";
 import AuthService from "../services/auth";
-import { AuthGuard } from '../../../src/metadata';
+import { AuthGuard } from "../../../src/metadata";
 
 const authFac: (auth?: "admin" | "s_a") => AuthGuard = (auth) => {
   return async (ctx: AstroboyContext) => {
     let hasAccess = false;
-    if (auth === "admin")
-      hasAccess = await new AuthService(ctx).checkIsAdmin();
-    else if (auth === "s_a")
-      hasAccess = await new AuthService(ctx).checkIsSuperAdmin();
-    else
-      hasAccess = await new AuthService(ctx).checkIsLogin();
-    if (!hasAccess)
-      return new Error("鉴权失败");
+    if (auth === "admin") hasAccess = await new AuthService(ctx).checkIsAdmin();
+    else if (auth === "s_a") hasAccess = await new AuthService(ctx).checkIsSuperAdmin();
+    else hasAccess = await new AuthService(ctx).checkIsLogin();
+    if (!hasAccess) return new Error("鉴权失败");
     return true;
   }
 };
@@ -31,7 +27,12 @@ const scope_meta = { error: new Error("鉴权失败"), extend: false };
 // @Authorize(ad_sa, meta)
 @Router({
   prefix: "demo",
+  apiPrefix: "xxxxxx",
   business: DemoService,
+  urlTpl: {
+    index: "{{@prefix}}/fk/{{@path}}",
+    api: "{{@prefix}}/fk/{{@api}}/{{@path}}"
+  },
   auth: {
     rules: ad_sa,
     metadata: meta
@@ -49,7 +50,9 @@ class DemoController extends BaseClass {
     this.ctx.render("demo/index.html")
   }
 
-  @API("GET", "testA")
+  // @API("GET", "testA")
+  // @API("GET", "testA", { tpl: "new/{{@api}}/different/{{@path}}" })
+  @CustomRoute({ method: "GET", tpls: ["{{@api}}/{{@prefix}}/testA", "m/{{@api}}/{{@prefix}}/testA"] })
   @Service(Demo2Service)
   // @Authorize([], meta)
   public testA!: RouteMethod;
