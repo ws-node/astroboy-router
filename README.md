@@ -1,6 +1,9 @@
 # astroboy-router
 > 配合astroboy框架使用，查看更多：[Astroboy](https://github.com/astroboy-lab/astroboy)
 
+[![Build Status](https://travis-ci.org/ws-node/astroboy-router.svg?branch=master)](https://travis-ci.org/ws-node/astroboy-router)
+[![package version](https://badge.fury.io/js/astroboy-router.svg)](https://badge.fury.io/js/astroboy-router.svg)
+
 ### CHANGE LOGS
 #### 1.0.0-rc.23
 * 支持无前缀的Router控制器（提供空字符串即可）

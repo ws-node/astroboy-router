@@ -6,7 +6,8 @@
   "types": "./dist/index.d.ts",
   "ts:main": "./src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha -r ts-node/register src/**/*.spec.ts",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
@@ -18,11 +19,18 @@
     "@types/koa": "^2.0.46",
     "@types/koa-router": "^7.0.31",
     "@types/node": "^10.9.4",
+    "lodash": "^4.17.11",
     "reflect-metadata": "^0.1.12"
   },
   "devDependencies": {
+    "@types/chai": "^4.1.6",
+    "@types/lodash": "^4.14.116",
+    "@types/mocha": "^5.2.5",
     "astroboy": ">=0.0.30",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "ts-node": "^7.0.1",
     "tslib": "^1.9.3",
-    "typescript": "^2.9.2"
+    "typescript": "^3.0.3"
   }
 }
