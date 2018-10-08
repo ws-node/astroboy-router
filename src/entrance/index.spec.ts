@@ -7,7 +7,7 @@ import "mocha";
 describe("src/extrance/index.ts", () => {
 
   it("test open API", () => {
-    expect(get(pkg, "createRouter", null)).to.exist;
+    expect(get(pkg, "createRouter", undefined)).to.exist;
   });
 
 });

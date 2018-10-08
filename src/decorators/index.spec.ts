@@ -7,16 +7,16 @@ import "mocha";
 describe("src/decorators/index.ts", () => {
 
   it("test open API", () => {
-    expect(get(pkg, "Router", null)).to.exist;
-    expect(get(pkg, "CustomRoute", null)).to.exist;
-    expect(get(pkg, "Service", null)).to.exist;
-    expect(get(pkg, "Index", null)).to.exist;
-    expect(get(pkg, "API", null)).to.exist;
-    expect(get(pkg, "Metadata", null)).to.exist;
-    expect(get(pkg, "Auth", null)).to.exist;
-    expect(get(pkg, "Authorize", null)).to.exist;
-    expect(get(pkg, "NoAuthorize", null)).to.exist;
-    expect(get(pkg, "Inject", null)).to.exist;
+    expect(get(pkg, "Router", undefined)).to.exist;
+    expect(get(pkg, "CustomRoute", undefined)).to.exist;
+    expect(get(pkg, "Service", undefined)).to.exist;
+    expect(get(pkg, "Index", undefined)).to.exist;
+    expect(get(pkg, "API", undefined)).to.exist;
+    expect(get(pkg, "Metadata", undefined)).to.exist;
+    expect(get(pkg, "Auth", undefined)).to.exist;
+    expect(get(pkg, "Authorize", undefined)).to.exist;
+    expect(get(pkg, "NoAuthorize", undefined)).to.exist;
+    expect(get(pkg, "Inject", undefined)).to.exist;
   });
 
 });
