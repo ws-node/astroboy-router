@@ -52,7 +52,7 @@ class DemoController extends BaseClass {
 
   // @API("GET", "testA")
   // @API("GET", "testA", { tpl: "new/{{@api}}/different/{{@path}}" })
-  @CustomRoute({ method: "GET", tpls: ["{{@api}}/{{@prefix}}/testA", "m/{{@api}}/{{@prefix}}/testA"] })
+  @CustomRoute({ method: "GET", tpls: ["api/demo/testA", "m/api/demo/testA"] })
   @Service(Demo2Service)
   // @Authorize([], meta)
   public testA!: RouteMethod;
