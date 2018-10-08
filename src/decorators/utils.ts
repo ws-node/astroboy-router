@@ -98,10 +98,11 @@ export function routeConnect(
   if (!!indexTpl || !!apiTpl) {
     const sections: any = {
       prefix,
+      api: apiPrefix,
       path: pathStr,
       ...tplSections
     };
-    if (!isIndex) sections.api = apiPrefix;
+    if (!isIndex) sections.api = sections.api;
     let urlToExport = (!!isIndex ? indexTpl : apiTpl) || "";
     Object.keys(sections).forEach(key => {
       urlToExport = urlToExport.replace("{{@" + key + "}}", sections[key]);

@@ -82,9 +82,9 @@ function routeConnect(prefix, apiPrefix, pathStr, isIndex, tpl, tplSections) {
     const [indexTpl, apiTpl] = tpl || [undefined, undefined];
     // 没有重置模版，不要进入逻辑分支
     if (!!indexTpl || !!apiTpl) {
-        const sections = Object.assign({ prefix, path: pathStr }, tplSections);
+        const sections = Object.assign({ prefix, api: apiPrefix, path: pathStr }, tplSections);
         if (!isIndex)
-            sections.api = apiPrefix;
+            sections.api = sections.api;
         let urlToExport = (!!isIndex ? indexTpl : apiTpl) || "";
         Object.keys(sections).forEach(key => {
             urlToExport = urlToExport.replace("{{@" + key + "}}", sections[key]);

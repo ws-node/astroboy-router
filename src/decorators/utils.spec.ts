@@ -29,14 +29,23 @@ describe("src/decorators/utils.ts", () => {
   });
 
   it("test routeConnect", () => {
-    const apiResult = routeConnect("testPrifix", "testApiPrefix", "testPath", false, [undefined, undefined]);
+    const apiResult = routeConnect("testPrifix", "testApiPrefix", "testPath", false, [undefined, undefined], {});
     expect(apiResult).to.equal("testApiPrefix/testPrifix/testPath");
-    const apiResult2 = routeConnect("testPrifix", "testApiPrefix", "testPath", false, [undefined, "custom/{{$api}}/xxx/{{$path}}"]);
+
+    const apiResult_x01 = routeConnect("testPrifix", "testApiPrefix", "testPath", false, [undefined, undefined], { api: "xxxxxxAPi" });
+    expect(apiResult_x01).to.equal("testApiPrefix/testPrifix/testPath");
+
+    const apiResult2 = routeConnect("testPrifix", "testApiPrefix", "testPath", false, [undefined, "custom/{{@api}}/xxx/{{@path}}"], {});
     expect(apiResult2).to.equal("custom/testApiPrefix/xxx/testPath");
-    const indexResult = routeConnect("testPrifix", "testApiPrefix", "testPath", true, [undefined, undefined]);
+
+    const apiResult2_x01 = routeConnect("testPrifix", "testApiPrefix", "testPath", false, [undefined, "custom/{{@api}}/xxx/{{@path}}"], { api: "xxxxxxAPi" });
+    expect(apiResult2_x01).to.equal("custom/xxxxxxAPi/xxx/testPath");
+
+    const indexResult = routeConnect("testPrifix", "testApiPrefix", "testPath", true, [undefined, undefined], {});
     expect(indexResult).to.equal("testPrifix/testPath");
-    const indexResult2 = routeConnect("testPrifix", "testApiPrefix", "testPath", true, ["custom/{{$prefix}}/xxx/{{$path}}", undefined]);
-    expect(indexResult2).to.equal("custom/testPrifix/xxx/testPath");
+
+    const indexResult2 = routeConnect("testPrifix", "testApiPrefix", "testPath", true, ["custom/{{@prefix}}/xxx/{{@path}}", undefined], { prefix: "fk________prefix" });
+    expect(indexResult2).to.equal("custom/fk________prefix/xxx/testPath");
   });
 
 });
