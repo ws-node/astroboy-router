@@ -13,7 +13,7 @@ const authFac: (auth?: "admin" | "s_a") => AuthGuard = (auth) => {
     else hasAccess = await new AuthService(ctx).checkIsLogin();
     if (!hasAccess) return new Error("鉴权失败");
     return true;
-  }
+  };
 };
 
 const admin = [authFac("admin")];
@@ -21,6 +21,16 @@ const s_a = [authFac("s_a")];
 const ad_sa = [...admin, ...s_a];
 const meta = { error: new Error("鉴权失败") };
 const scope_meta = { error: new Error("鉴权失败"), extend: false };
+
+function XAPI(method: string, path: string) {
+  return CustomRoute({
+    method: <any>method,
+    tpls: [
+      `api/demo/${path}`,
+      `m/api/demo/${path}`
+    ]
+  });
+}
 
 // @Router("demo")
 // @Service(DemoService)
@@ -52,7 +62,13 @@ class DemoController extends BaseClass {
 
   // @API("GET", "testA")
   // @API("GET", "testA", { tpl: "new/{{@api}}/different/{{@path}}" })
-  @CustomRoute({ method: "GET", tpls: ["api/demo/testA", "m/api/demo/testA"] })
+  // @CustomRoute({
+  //   method: "GET", tpls: [
+  //     "api/demo/testA",
+  //     "m/api/demo/testA"
+  //   ]
+  // })
+  @XAPI("GET", "testA")
   @Service(Demo2Service)
   // @Authorize([], meta)
   public testA!: RouteMethod;
