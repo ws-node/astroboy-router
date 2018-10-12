@@ -1,9 +1,8 @@
 import { BaseClass } from "astroboy";
-import { Router, Service, Index, API, RouteMethod, Authorize, Inject, NoAuthorize, CustomRoute } from "../../../src";
+import { Router, Service, Index, API, RouteMethod, Authorize, Inject, NoAuthorize, CustomRoute, AuthGuard } from "../../../src";
 import DemoService from "../services/demo";
 import Demo2Service from "../services/demo2";
 import AuthService from "../services/auth";
-import { AuthGuard } from "../../../src/metadata";
 
 const authFac: (auth?: "admin" | "s_a") => AuthGuard = (auth) => {
   return async (ctx: AstroboyContext) => {
@@ -22,9 +21,9 @@ const ad_sa = [...admin, ...s_a];
 const meta = { error: new Error("鉴权失败") };
 const scope_meta = { error: new Error("鉴权失败"), extend: false };
 
-function XAPI(method: string, path: string) {
+function XAPI(method: "GET" | "POST" | "PUT" | "DELETE", path: string) {
   return CustomRoute({
-    method: <any>method,
+    method,
     tpls: [
       `api/demo/${path}`,
       `m/api/demo/${path}`
