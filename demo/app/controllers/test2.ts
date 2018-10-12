@@ -1,5 +1,5 @@
 import { BaseClass } from "astroboy";
-import { Router, Service, Index, API, RouteMethod, Authorize, Inject, NoAuthorize } from '../../../src';
+import { Router, Service, Index, API, RouteMethod, Authorize, Inject, NoAuthorize } from "../../../src";
 
 
 @Router("")
