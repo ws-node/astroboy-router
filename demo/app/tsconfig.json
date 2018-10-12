@@ -23,9 +23,6 @@
     "types": [
       "koa",
       "koa-router",
-      "astroboy",
-      "@youzan/youzan-framework",
-      "@youzan/wsc-pc-base",
       "node"
     ]
   }

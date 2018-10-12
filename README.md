@@ -5,6 +5,10 @@
 [![package version](https://badge.fury.io/js/assets-route-plugin.svg)](https://badge.fury.io/js/assets-route-plugin.svg)
 
 ### CHANGE LOGS
+#### 1.0.0-rc.26
+* 去除对astroboy的定义依赖
+#### 1.0.0-rc.25
+* 修复自定义路由无法重写api部分的问题
 #### 1.0.0-rc.24
 * 新增@CustomRoute，代替@Index和@API提供高可定制的路由能力
 * @Index和@API新增一个可选参数，提供部分可定制能力

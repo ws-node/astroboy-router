@@ -19,7 +19,6 @@
     "types": [
       "koa",
       "koa-router",
-      "astroboy",
       "node"
     ]
   },

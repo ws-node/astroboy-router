@@ -1,12 +1,13 @@
 {
   "name": "assets-route-plugin",
-  "version": "1.0.0-rc.24",
+  "version": "1.0.0-rc.26",
   "description": "A router plugin for astroboy.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "ts:main": "./src/index.ts",
   "scripts": {
     "test": "mocha -r ts-node/register src/**/*.spec.ts",
+    "cover": "nyc mocha src/**/*.spec.ts",
     "build": "tsc"
   },
   "repository": {
@@ -15,6 +16,24 @@
   },
   "author": "mogician",
   "license": "MIT",
+  "nyc": {
+    "include": [
+      "src/**/*.ts",
+      "src/**/*.tsx"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "reporter": [
+      "text-summary",
+      "html"
+    ],
+    "sourceMap": true,
+    "instrument": true
+  },
   "dependencies": {
     "@types/koa": "^2.0.46",
     "@types/koa-router": "^7.0.31",
@@ -26,9 +45,10 @@
     "@types/chai": "^4.1.6",
     "@types/lodash": "^4.14.116",
     "@types/mocha": "^5.2.5",
-    "astroboy": ">=0.0.30",
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
+    "nyc": "^13.0.1",
+    "source-map-support": "^0.5.9",
     "ts-node": "^7.0.1",
     "tslib": "^1.9.3",
     "typescript": "^3.0.3"

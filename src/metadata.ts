@@ -1,6 +1,3 @@
-/// <reference types="astroboy"/>
-import { BaseClass } from "astroboy";
-
 /**
  * 表示当前属性或变量的值必然不为undefined
  * * 如果当前字段类型不含null并且字段非可选，则无需进行空值检测
@@ -18,9 +15,13 @@ export type METHOD = "GET" | "POST" | "PUT" | "DELETE";
 /** 未实现的路由方法 */
 export type RouteMethod = () => any;
 
-export type AuthGuard = (context: AstroboyContext) => Promise<boolean | Error> | boolean | Error;
+export type AuthGuard = (context: any) => Promise<boolean | Error> | boolean | Error;
 
 export type UrlTplTuple = [string | undefined, string | undefined];
+
+export interface IAstroboyBaseClass<T = any> {
+  ctx: T;
+}
 
 export interface IRouterMetaConfig<T = any> {
   prefix: string;
@@ -92,16 +93,17 @@ export interface ControllerConstructor<T = any> {
   prototype: RouterPrototype<T>;
 }
 
-export abstract class IController extends BaseClass {
+export abstract class IController implements IAstroboyBaseClass {
   [key: string]: any;
+  ctx: any;
 }
 
 export type IRouteFactory = <T>(target: T, propertyKey: string, descriptor?: PropertyDescriptor) => any;
 export type IRouterFactory = <T>(target: T) => any;
 export type IMixinFactory = <T>(target: T, propertyKey?: string) => any;
 
-type RequestParamsInvokeFactory = (instance: BaseClass) => (() => any);
-type ResponseBodyInvokeFactory = (instance: BaseClass) => (<T>(code: any, msg: any, data: T) => any);
+type RequestParamsInvokeFactory = (instance: IController) => (() => any);
+type ResponseBodyInvokeFactory = (instance: IController) => (<T>(code: any, msg: any, data: T) => any);
 
 export interface BodyResolve {
   getQuery: RequestParamsInvokeFactory;
