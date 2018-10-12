@@ -14,13 +14,13 @@ class AuthService extends BaseClass {
   async checkIsAdmin() {
     await this.sleep(10);
     if (this.ctx.header["auth"] === "admin") return true;
-    return false
+    return false;
   }
 
   async checkIsSuperAdmin() {
     await this.sleep(10);
     if (this.ctx.header["auth"] === "s_a") return true;
-    return false
+    return false;
   }
 
 }
