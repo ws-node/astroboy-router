@@ -5,6 +5,8 @@
 [![package version](https://badge.fury.io/js/astroboy-router.svg)](https://badge.fury.io/js/astroboy-router.svg)
 
 ### CHANGE LOGS
+#### 1.0.0-rc.26
+* 去除对astroboy的定义依赖
 #### 1.0.0-rc.25
 * 修复自定义路由无法重写api部分的问题
 #### 1.0.0-rc.24
