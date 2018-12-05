@@ -1,7 +1,7 @@
 import {
   RouterDefine,
   IController,
-  Router,
+  IRouter,
   Route,
   UrlTplTuple
 } from "../metadata";
@@ -18,8 +18,8 @@ import { RouterMap } from "../core";
  */
 export function tryGetRouter(target: RouterDefine | IController) {
   const routerSaved = RouterMap.get(target);
-  let router: Router;
-  router = <Router>routerSaved;
+  let router: IRouter;
+  router = <IRouter>routerSaved;
   if (!routerSaved) {
     router = {
       prefix: "",

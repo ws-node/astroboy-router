@@ -75,7 +75,7 @@ export function RouterFactory(...args: any[]) {
       // 覆写当前路由的url template
       const tplKey = !route.index ? 1 : 0;
       if (!!route.urlTpl) tplTuple[tplKey] = route.urlTpl;
-      route.path = route.pathConfig.map(p => routeConnect(
+      route.path = route.pathConfig.map((p: any) => routeConnect(
         prefix,
         getApiPrefix(p.sections, apiPrefix),
         p.path,

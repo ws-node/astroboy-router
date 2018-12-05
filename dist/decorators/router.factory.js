@@ -50,7 +50,7 @@ function RouterFactory(...args) {
             const tplKey = !route.index ? 1 : 0;
             if (!!route.urlTpl)
                 tplTuple[tplKey] = route.urlTpl;
-            route.path = route.pathConfig.map(p => utils_1.routeConnect(prefix, getApiPrefix(p.sections, apiPrefix), p.path, route.index, decideTpl(tplTuple, tplKey, p.urlTpl), p.sections || {}));
+            route.path = route.pathConfig.map((p) => utils_1.routeConnect(prefix, getApiPrefix(p.sections, apiPrefix), p.path, route.index, decideTpl(tplTuple, tplKey, p.urlTpl), p.sections || {}));
         });
         if (hasMetadata) {
             const metadata = meta;
