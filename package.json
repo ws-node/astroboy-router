@@ -1,6 +1,6 @@
 {
   "name": "astroboy-router",
-  "version": "1.2.0-rc1",
+  "version": "1.2.0-rc.1",
   "description": "A router plugin for astroboy.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
