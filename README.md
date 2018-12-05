@@ -5,6 +5,8 @@
 [![package version](https://badge.fury.io/js/astroboy-router.svg)](https://badge.fury.io/js/astroboy-router.svg)
 
 ### CHANGE LOGS
+#### 1.1.0
+* 完成1.1.0的版本功能锁定
 #### 1.0.0-rc.26
 * 去除对astroboy的定义依赖
 #### 1.0.0-rc.25
