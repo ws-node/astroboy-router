@@ -1,13 +1,12 @@
-import { tryGetRouter, tryGetRoute, routeConnect } from "./utils";
-import { IController, RouterDefine } from "../metadata";
+import { tryGetRouter, tryGetRoute, routeConnect } from "../../src/decorators/utils";
+import { RouterDefine } from "../../src/metadata";
 
 import { expect } from "chai";
-import "mocha";
+import { defineUnit } from "../unit";
 
-class TEST implements RouterDefine { }
+class TEST implements RouterDefine {}
 
-describe("src/decorators/utils.ts", () => {
-
+defineUnit(["decorators/utils", "decorators' utils"], () => {
   it("test tryGetRouter", () => {
     const result = tryGetRouter(TEST.prototype);
     expect(result.apiPrefix).to.equal("api");
@@ -44,9 +43,9 @@ describe("src/decorators/utils.ts", () => {
     const indexResult = routeConnect("testPrifix", "testApiPrefix", "testPath", true, [undefined, undefined], {});
     expect(indexResult).to.equal("testPrifix/testPath");
 
-    const indexResult2 = routeConnect("testPrifix", "testApiPrefix", "testPath", true, ["custom/{{@prefix}}/xxx/{{@path}}", undefined], { prefix: "fk________prefix" });
+    const indexResult2 = routeConnect("testPrifix", "testApiPrefix", "testPath", true, ["custom/{{@prefix}}/xxx/{{@path}}", undefined], {
+      prefix: "fk________prefix"
+    });
     expect(indexResult2).to.equal("custom/fk________prefix/xxx/testPath");
   });
-
 });
-
