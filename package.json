@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ws-node/astroboy-router"
+    "url": "git+https://github.com/ws-node/astroboy-router.git"
   },
   "author": "mogician",
   "license": "MIT",
