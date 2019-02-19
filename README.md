@@ -2,9 +2,12 @@
 > 配合astroboy框架使用，查看更多：[Astroboy](https://github.com/astroboy-lab/astroboy)
 
 [![Build Status](https://travis-ci.org/ws-node/astroboy-router.svg?branch=plugin)](https://travis-ci.org/ws-node/astroboy-router)
+[![Coverage Status](https://coveralls.io/repos/github/ws-node/astroboy-router/badge.svg?branch=plugin)](https://coveralls.io/github/ws-node/astroboy-router?branch=plugin)
 [![package version](https://badge.fury.io/js/assets-route-plugin.svg)](https://badge.fury.io/js/assets-route-plugin.svg)
 
 ### CHANGE LOGS
+#### 1.0.1
+* 补充单侧，功能定版
 #### 1.0.0-rc.26
 * 去除对astroboy的定义依赖
 #### 1.0.0-rc.25

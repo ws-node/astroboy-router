@@ -1,0 +1,6 @@
+# mocha.opts
+
+--recursive
+--require ts-node/register
+test/*.spec.ts
+test/**/*.spec.ts
