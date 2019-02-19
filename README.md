@@ -1,12 +1,15 @@
-# astroboy-router
+# assets-route-plugin
 > 配合astroboy框架使用，查看更多：[Astroboy](https://github.com/astroboy-lab/astroboy)
 
-[![Build Status](https://travis-ci.org/ws-node/astroboy-router.svg?branch=master)](https://travis-ci.org/ws-node/astroboy-router)
-[![package version](https://badge.fury.io/js/astroboy-router.svg)](https://badge.fury.io/js/astroboy-router.svg)
+[![Build Status](https://travis-ci.org/ws-node/astroboy-router.svg?branch=plugin)](https://travis-ci.org/ws-node/astroboy-router)
+[![Coverage Status](https://coveralls.io/repos/github/ws-node/astroboy-router/badge.svg?branch=master)](https://coveralls.io/github/ws-node/astroboy-router?branch=master)
+[![package version](https://badge.fury.io/js/assets-route-plugin.svg)](https://badge.fury.io/js/assets-route-plugin.svg)
 
 ### CHANGE LOGS
 #### 1.1.0
 * 完成1.1.0的版本功能锁定
+#### 1.0.1
+* 补充单侧，功能定版
 #### 1.0.0-rc.26
 * 去除对astroboy的定义依赖
 #### 1.0.0-rc.25
@@ -40,9 +43,9 @@
 
 ## 1. 安装
 ```zsh
-yarn add astroboy-router --save
+yarn add assets-route-plugin --save
 # or
-npm install astroboy-router --save
+npm install assets-route-plugin --save
 ```
 
 ## 2. 构建Business层
@@ -89,12 +92,12 @@ export = BusinessService;
 ```typescript
 // 导入astroboy框架，如果必要
 // 导入所需的业务逻辑
-// 导入astroboy-router
+// 导入assets-route-plugin
 import { Controller } from "astroboy";
 import BusinessService from "../services/demo/BusinessService";
 import AnotherService from "...xxxx";
 import ThirdService from "....xxxxxxxx";
-import { Router, Service, Index, API, Metadata, RouteMethod, Inject } from "astroboy-router";
+import { Router, Service, Index, API, Metadata, RouteMethod, Inject } from "assets-route-plugin";
 
 // 1.设置router前缀【必要】
 // 2.继承astroboy基础控制器【必要】
@@ -156,7 +159,7 @@ class DemoController extends Controller {
 > router/demo.ts
 ```typescript
 import DEMO from "../controllers/demo/DemoController";
-import { createRouter } from "astroboy-router";
+import { createRouter } from "assets-route-plugin";
 
 export =  createRouter(DEMO, "demo.DemoController", "/section01/section02");
 ```
@@ -198,6 +201,8 @@ export =  createRouter(DEMO, "demo.DemoController", "/section01/section02");
   'demo.DemoController',
   'changeData2' 
 ]
+```changeData2' 
+]
 ```
 
 ## 6. 路由集成鉴权
@@ -238,7 +243,7 @@ export = AuthService;
 ```
 2) 编写鉴权工厂函数（如有必要）,构建鉴权组件
 ```typescript
-import { AuthGuard } from 'astroboy-router';
+import { AuthGuard } from 'assets-route-plugin';
 
 const authFac: (auth?: "admin" | "s_a") => AuthGuard = (auth) => {
   return async (ctx: AstroboyContext) => {

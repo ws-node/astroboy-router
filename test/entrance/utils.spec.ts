@@ -1,10 +1,9 @@
-import { routeMeta, resolveDefaultBodyParser } from "./utils";
+import { routeMeta, resolveDefaultBodyParser } from "../../src/entrance/utils";
 
 import { expect } from "chai";
-import "mocha";
+import { defineUnit } from "../unit";
 
-describe("src/extrance/utils.ts", () => {
-
+defineUnit(["extrance/utils", "entrance utils"], () => {
   it("test routeMeta", () => {
     const result = routeMeta("test");
     expect(result).to.equal("@metadata::test");
@@ -16,5 +15,4 @@ describe("src/extrance/utils.ts", () => {
     expect(typeof result.getQuery).to.equal("function");
     expect(typeof result.toJson).to.equal("function");
   });
-
 });

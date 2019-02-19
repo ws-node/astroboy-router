@@ -5,31 +5,15 @@
     "array-type": false,
     "boolean-trivia": true,
     "class-name": true,
-    "comment-format": [
-      true,
-      "check-space"
-    ],
-    "curly": [
-      true,
-      "ignore-same-line"
-    ],
+    "comment-format": [true, "check-space"],
+    "curly": [true, "ignore-same-line"],
     "debug-assert": true,
-    "indent": [
-      true,
-      "spaces"
-    ],
+    "indent": [true, "spaces"],
     "interface-name": false,
     "interface-over-type-literal": true,
     "jsdoc-format": true,
-    "linebreak-style": [
-      true,
-      "LF"
-    ],
-    "next-line": [
-      true,
-      "check-catch",
-      "check-else"
-    ],
+    "linebreak-style": [true, "LF"],
+    "next-line": [true, "check-catch", "check-else"],
     "no-bom": true,
     "no-double-space": true,
     "no-in-operator": true,
@@ -38,31 +22,16 @@
     "no-internal-module": true,
     "no-null-keyword": false,
     "no-switch-case-fall-through": true,
-    "no-trailing-whitespace": [
-      true,
-      "ignore-template-strings"
-    ],
+    "no-trailing-whitespace": [true, "ignore-template-strings"],
     "no-type-assertion-whitespace": true,
     "no-unnecessary-qualifier": true,
     "no-var-keyword": true,
     "object-literal-shorthand": true,
     "object-literal-surrounding-space": true,
-    "one-line": [
-      true,
-      "check-open-brace",
-      "check-whitespace"
-    ],
+    "one-line": [true, "check-open-brace", "check-whitespace"],
     "prefer-const": true,
-    "quotemark": [
-      true,
-      "double",
-      "avoid-escape"
-    ],
-    "semicolon": [
-      true,
-      "always",
-      "ignore-bound-class-methods"
-    ],
+    "quotemark": [true, "double", "avoid-escape"],
+    "semicolon": [true, "always", "ignore-bound-class-methods"],
     "space-within-parens": true,
     "triple-equals": true,
     "type-operator-spacing": true,
@@ -83,20 +52,9 @@
         "variable-declaration": "onespace"
       }
     ],
-    "whitespace": [
-      true,
-      "check-branch",
-      "check-decl",
-      "check-operator",
-      "check-module",
-      "check-separator",
-      "check-type"
-    ],
+    "whitespace": [true, "check-branch", "check-decl", "check-operator", "check-module", "check-separator", "check-type"],
     "no-implicit-dependencies": false,
-    "object-literal-key-quotes": [
-      true,
-      "consistent-as-needed"
-    ],
+    "object-literal-key-quotes": [true, "consistent-as-needed"],
     "variable-name": false,
     "arrow-parens": false,
     "arrow-return-shorthand": false,

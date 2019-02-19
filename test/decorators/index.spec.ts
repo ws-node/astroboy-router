@@ -1,11 +1,10 @@
-import * as pkg from "./index";
+import * as pkg from "../../src/decorators/index";
 
 import get from "lodash/get";
 import { expect } from "chai";
-import "mocha";
+import { defineUnit } from "../unit";
 
-describe("src/decorators/index.ts", () => {
-
+defineUnit(["decorators/index", "decorators index.ts"], () => {
   it("test open API", () => {
     expect(get(pkg, "Router", undefined)).to.exist;
     expect(get(pkg, "CustomRoute", undefined)).to.exist;
@@ -18,5 +17,4 @@ describe("src/decorators/index.ts", () => {
     expect(get(pkg, "NoAuthorize", undefined)).to.exist;
     expect(get(pkg, "Inject", undefined)).to.exist;
   });
-
 });
