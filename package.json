@@ -1,25 +1,26 @@
 {
   "name": "astroboy-router",
-  "version": "1.2.0-rc.1",
-  "description": "A router plugin for astroboy.",
+  "version": "1.2.0-rc.2",
+  "description": "A router plugin for astroboy.ts.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "ts:main": "./src/index.ts",
   "scripts": {
-    "test": "mocha -r ts-node/register src/**/*.spec.ts",
-    "cover": "nyc mocha src/**/*.spec.ts",
+    "test": "mocha",
+    "cover": "nyc mocha",
+    "coverage": "npm run cover && nyc report --reporter=text-lcov | coveralls",
     "build": "tsc"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ws-node/astroboy-router"
+    "url": "git+https://github.com/ws-node/astroboy-router.git"
   },
   "author": "mogician",
   "license": "MIT",
   "nyc": {
     "include": [
       "src/**/*.ts",
-      "src/**/*.tsx"
+      "test/**/*.ts"
     ],
     "extension": [
       ".ts"
@@ -37,20 +38,21 @@
   "dependencies": {
     "@types/koa": "^2.0.46",
     "@types/koa-router": "^7.0.31",
-    "@types/node": "^10.9.4",
+    "@types/node": "^10.3.2",
     "lodash": "^4.17.11",
-    "reflect-metadata": "^0.1.12"
+    "reflect-metadata": "0.1.12"
   },
   "devDependencies": {
     "@types/chai": "^4.1.6",
     "@types/lodash": "^4.14.116",
     "@types/mocha": "^5.2.5",
     "chai": "^4.2.0",
+    "coveralls": "^3.0.2",
     "mocha": "^5.2.0",
     "nyc": "^13.0.1",
     "source-map-support": "^0.5.9",
-    "ts-node": "^7.0.1",
-    "tslib": "^1.9.3",
+    "ts-node": "7.0.1",
+    "tslib": "1.9.3",
     "typescript": "^3.0.3"
   }
 }
