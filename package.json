@@ -1,7 +1,7 @@
 {
   "name": "assets-route-plugin",
-  "version": "1.0.0-rc.26",
-  "description": "A router plugin for astroboy.",
+  "version": "1.0.1",
+  "description": "An assets router plugin for astroboy.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "ts:main": "./src/index.ts",
@@ -40,7 +40,7 @@
     "@types/koa-router": "^7.0.31",
     "@types/node": "^10.3.2",
     "lodash": "^4.17.11",
-    "reflect-metadata": "^0.1.12"
+    "reflect-metadata": "0.1.12"
   },
   "devDependencies": {
     "@types/chai": "^4.1.6",
@@ -51,8 +51,8 @@
     "mocha": "^5.2.0",
     "nyc": "^13.0.1",
     "source-map-support": "^0.5.9",
-    "ts-node": "^7.0.1",
-    "tslib": "^1.9.3",
+    "ts-node": "7.0.1",
+    "tslib": "1.9.3",
     "typescript": "^3.0.3"
   }
 }
