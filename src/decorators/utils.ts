@@ -1,10 +1,4 @@
-import {
-  RouterDefine,
-  IController,
-  IRouter,
-  Route,
-  UrlTplTuple
-} from "../metadata";
+import { RouterDefine, IController, IRouter, Route, UrlTplTuple } from "../metadata";
 import { RouterMap } from "../core";
 
 /**
@@ -68,7 +62,6 @@ export function tryGetRoute(routes: { [key: string]: Route }, key: string) {
   return route;
 }
 
-
 /**
  * ## 连接路由
  * * 连接router前缀和path
@@ -84,14 +77,7 @@ export function tryGetRoute(routes: { [key: string]: Route }, key: string) {
  * @returns
  * @exports
  */
-export function routeConnect(
-  prefix: string,
-  apiPrefix: string,
-  pathStr: string,
-  isIndex: boolean,
-  tpl: UrlTplTuple,
-  tplSections: { [key: string]: string }
-) {
+export function routeConnect(prefix: string, apiPrefix: string, pathStr: string, isIndex: boolean, tpl: UrlTplTuple, tplSections: { [key: string]: string }) {
   const splits: string[] = [];
   const [indexTpl, apiTpl] = tpl || [undefined, undefined];
   // 没有重置模版，不要进入逻辑分支
@@ -105,7 +91,20 @@ export function routeConnect(
     if (!isIndex) sections.api = sections.api;
     let urlToExport = (!!isIndex ? indexTpl : apiTpl) || "";
     Object.keys(sections).forEach(key => {
-      urlToExport = urlToExport.replace("{{@" + key + "}}", sections[key]);
+      const placeholder = "{{@" + key + "}}";
+      if (urlToExport.includes(placeholder)) {
+        const realValue = sections[key];
+        if (realValue === "" || realValue === undefined) {
+          // 去掉当前section
+          urlToExport = urlToExport.replace(`/${placeholder}`, "");
+        } else if (realValue === "&nbsp;") {
+          // 明确需要保留当前section，场景应该比较少
+          urlToExport = urlToExport.replace(placeholder, "");
+        } else {
+          // 正常替换section模板
+          urlToExport = urlToExport.replace(placeholder, realValue);
+        }
+      }
     });
     return urlToExport;
   }
