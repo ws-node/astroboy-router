@@ -87,7 +87,22 @@ function routeConnect(prefix, apiPrefix, pathStr, isIndex, tpl, tplSections) {
             sections.api = sections.api;
         let urlToExport = (!!isIndex ? indexTpl : apiTpl) || "";
         Object.keys(sections).forEach(key => {
-            urlToExport = urlToExport.replace("{{@" + key + "}}", sections[key]);
+            const placeholder = "{{@" + key + "}}";
+            if (urlToExport.includes(placeholder)) {
+                const realValue = sections[key];
+                if (realValue === "" || realValue === undefined) {
+                    // 去掉当前section
+                    urlToExport = urlToExport.replace(`/${placeholder}`, "");
+                }
+                else if (realValue === "&nbsp;") {
+                    // 明确需要保留当前section，场景应该比较少
+                    urlToExport = urlToExport.replace(placeholder, "");
+                }
+                else {
+                    // 正常替换section模板
+                    urlToExport = urlToExport.replace(placeholder, realValue);
+                }
+            }
         });
         return urlToExport;
     }

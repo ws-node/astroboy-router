@@ -8,6 +8,11 @@
 
 ### CHANGE LOGS
 
+#### 1.2.0-rc.3
+
+- 修复 `CustomRoute` 不支持重置空 `section` 的问题
+- 扩展了 `CustomRoute` 的 `tpl` 参数类型，支持定制额外的 `sections`
+
 #### 1.1.0
 
 - 完成 1.1.0 的版本功能锁定

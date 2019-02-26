@@ -70,11 +70,12 @@ function CustomRouteFactory(options) {
         if (options.name)
             MetadataFactory(options.name)(target, propertyKey, descriptor);
         options.tpls.forEach(item => {
+            const [tpl, sections] = typeof item === "string" ? [item, {}] : [item.tpl, item.sections || {}];
             RouteFactory({
                 method,
-                path: [{ path: "", sections: {}, urlTpl: item }],
+                path: [{ path: "", sections, urlTpl: tpl }],
                 isIndex,
-                tpl: item
+                tpl
             })(target, propertyKey, descriptor);
         });
     };
