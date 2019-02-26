@@ -2,7 +2,7 @@
   [
     "GET",
     [
-      "/test/demo/fk/",
+      "/test/demo/fk",
       "/test/demo/fk/*"
     ],
     "demo",
@@ -11,8 +11,9 @@
   [
     "GET",
     [
-      "/test/xxxxxx/demo/testA",
-      "/test/m/xxxxxx/demo/testA"
+      "/test/api/demo/testA",
+      "/test/m/api/demo/testA",
+      "/test/api/SB/1234/testA"
     ],
     "demo",
     "testA"
