@@ -1,4 +1,4 @@
-import { AuthGuard, IMixinFactory, RouteAuthMetadata, RouterDefine, IController, IRouteFactory } from "../metadata";
+import { AuthGuard, IMixinFactory, RouteAuthMetadata, IRouterDefine, IController, IRouteFactory } from "../metadata";
 import { tryGetRouter, tryGetRoute } from "./utils";
 
 /**
@@ -27,10 +27,10 @@ export function AuthFactory(guards: AuthGuard[]): IMixinFactory;
  */
 export function AuthFactory(guards: AuthGuard[], metadata: RouteAuthMetadata): IMixinFactory;
 export function AuthFactory(arr: AuthGuard[], metadata: RouteAuthMetadata = {}) {
-  return function routeAuth(target: RouterDefine | typeof IController, propertyKey?: string, descriptor?: PropertyDescriptor) {
+  return function routeAuth(target: IRouterDefine | typeof IController, propertyKey?: string, descriptor?: PropertyDescriptor) {
     const { extend = true, errorMsg, error } = metadata;
     if (propertyKey) {
-      const { routes } = tryGetRouter(<RouterDefine>target);
+      const { routes } = tryGetRouter(<IRouterDefine>target);
       const route = tryGetRoute(routes, propertyKey);
       route.auth = {
         rules: arr,
@@ -59,7 +59,7 @@ export function AuthFactory(arr: AuthGuard[], metadata: RouteAuthMetadata = {}) 
  */
 export function NoAuthFactory(): IRouteFactory;
 export function NoAuthFactory() {
-  return function routeNoAuth(target: RouterDefine, propertyKey: string) {
+  return function routeNoAuth(target: IRouterDefine, propertyKey: string) {
     AuthFactory([], { extend: false })(target, propertyKey);
   };
 }

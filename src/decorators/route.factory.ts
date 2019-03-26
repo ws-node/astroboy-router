@@ -1,4 +1,4 @@
-import { METHOD, IRouteFactory, RouterDefine, RoutePathConfig } from "../metadata";
+import { METHOD, IRouteFactory, IRouterDefine, IRoutePathConfig } from "../metadata";
 import { tryGetRouter, tryGetRoute } from "./utils";
 
 interface RouteOptions {
@@ -20,7 +20,7 @@ interface CustonRouteOptions {
 interface RouteBaseConfig {
   name?: string;
   method: METHOD;
-  path: RoutePathConfig[];
+  path: IRoutePathConfig[];
   isIndex: boolean;
   tpl?: string;
 }
@@ -37,7 +37,7 @@ interface RouteBaseConfig {
  * @returns {IRouteFactory}
  */
 function RouteFactory(options: RouteBaseConfig): IRouteFactory {
-  return function route(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
+  return function route(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     const { routes } = tryGetRouter(target);
     const route = tryGetRoute(routes, propertyKey);
     const { method, path, isIndex, tpl } = options;
@@ -73,7 +73,7 @@ export function IndexFactory(path: string, options?: Partial<RouteOptions>): IRo
 export function IndexFactory(path: string[], options?: Partial<RouteOptions>): IRouteFactory;
 export function IndexFactory(...args: any[]): IRouteFactory {
   const options: Partial<RouteOptions> = args[1] || {};
-  return function indexRoute(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
+  return function indexRoute(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     if (options.name) MetadataFactory(options.name)(target, propertyKey, descriptor);
     const paths: string[] = args[0] instanceof Array ? args[0] : [args[0]];
     RouteFactory({
@@ -98,7 +98,7 @@ export function IndexFactory(...args: any[]): IRouteFactory {
 export function APIFactory(method: METHOD, path: string, options?: Partial<RouteOptions>): IRouteFactory;
 export function APIFactory(...args: any[]): IRouteFactory {
   const options: Partial<RouteOptions> = args[2] || {};
-  return function apiRoute(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
+  return function apiRoute(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     if (options.name) MetadataFactory(options.name)(target, propertyKey, descriptor);
     RouteFactory({
       method: args[0],
@@ -121,7 +121,7 @@ export function APIFactory(...args: any[]): IRouteFactory {
 export function CustomRouteFactory(options: CustonRouteOptions): IRouteFactory {
   const method = options.method;
   const isIndex = !!options.isIndex;
-  return function customApiRoute(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
+  return function customApiRoute(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     if (options.name) MetadataFactory(options.name)(target, propertyKey, descriptor);
     options.tpls.forEach(item => {
       const [tpl, sections] = typeof item === "string" ? [item, {}] : [item.tpl, item.sections || {}];
@@ -147,7 +147,7 @@ export function CustomRouteFactory(options: CustonRouteOptions): IRouteFactory {
  * @exports
  */
 export function MetadataFactory(alias: string): IRouteFactory {
-  return function routeMetadata(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
+  return function routeMetadata(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     const { routes } = tryGetRouter(target);
     const route = tryGetRoute(routes, propertyKey);
     route.name = alias;

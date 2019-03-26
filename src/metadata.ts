@@ -33,22 +33,22 @@ export interface IRouterMetaConfig<T = any> {
   };
   auth?: {
     rules: AuthGuard[];
-    metadata?: RouterAuthMetadata;
+    metadata?: IRouterAuthMetadata;
   };
 }
 
-export interface RoutePathConfig {
+export interface IRoutePathConfig {
   isPlainUrl?: boolean;
   path: string;
   urlTpl?: string;
   sections: { [key: string]: string };
 }
 
-export interface Route<T = any> {
+export interface IRoute<T = any> {
   name: Unsure<string>;
   method: METHOD[];
   path: Array<string>;
-  pathConfig: Array<RoutePathConfig>;
+  pathConfig: Array<IRoutePathConfig>;
   index: boolean;
   service?: Constructor<T>;
   urlTpl?: string;
@@ -71,26 +71,26 @@ export interface IRouter<T = any> {
     errorMsg?: string;
     error?: any;
   };
-  routes: { [key: string]: Route };
+  routes: { [key: string]: IRoute };
 }
 
-export interface RouterAuthMetadata {
+export interface IRouterAuthMetadata {
   errorMsg?: string;
   error?: any;
 }
 
-export interface RouteAuthMetadata extends RouterAuthMetadata {
+export interface RouteAuthMetadata extends IRouterAuthMetadata {
   extend?: boolean;
 }
 
-export interface RouterDefine {
+export interface IRouterDefine {
   "@router"?: IRouter;
 }
 
-export type RouterPrototype<T = {}> = T & RouterDefine;
+export type IRouterPrototype<T = {}> = T & IRouterDefine;
 
-export interface ControllerConstructor<T = any> {
-  prototype: RouterPrototype<T>;
+export interface IControllerConstructor<T = any> {
+  prototype: IRouterPrototype<T>;
 }
 
 export abstract class IController implements IAstroboyBaseClass {

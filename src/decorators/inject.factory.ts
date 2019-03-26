@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { IRouteFactory, RouterDefine } from "../metadata";
+import { IRouteFactory, IRouterDefine } from "../metadata";
 import { tryGetRouter } from "./utils";
 
 /**
@@ -15,7 +15,7 @@ import { tryGetRouter } from "./utils";
  * @exports
  */
 export function InjectFactory<T = any>(): IRouteFactory {
-  return function injectProperty(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
+  return function injectProperty(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     const router = tryGetRouter(target);
     const type = Reflect.getOwnMetadata("design:type", target, propertyKey);
     router.dependency.set(type, propertyKey);

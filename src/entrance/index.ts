@@ -1,11 +1,11 @@
 /// <reference types="@types/koa-router"/>
-import { IRouter, ControllerConstructor } from "../metadata";
+import { IRouter, IControllerConstructor } from "../metadata";
 import { routerBusinessCreate } from "./service-init";
 import { routeMethodImplements } from "./route-implements";
 import { resolveDefaultBodyParser } from "./utils";
 
 interface RouterOptions {
-  router: ControllerConstructor;
+  router: IControllerConstructor;
   name: string;
   root: string;
   debug?: boolean;
@@ -16,16 +16,16 @@ interface RouterOptions {
  * @description
  * @author Big Mogician
  * @export
- * @param {ControllerConstructor} ctor
+ * @param {IControllerConstructor} ctor
  * @param {string} name
  * @param {string} root
  * @returns
  * @exports
  */
-export function createRouter(ctor: ControllerConstructor, name: string, root: string): (string | string[])[][];
+export function createRouter(ctor: IControllerConstructor, name: string, root: string): (string | string[])[][];
 export function createRouter(options: RouterOptions): (string | string[])[][];
 export function createRouter(...args: any[]) {
-  let ctor!: ControllerConstructor;
+  let ctor!: IControllerConstructor;
   let name!: string;
   let root!: string;
   let debug = false;

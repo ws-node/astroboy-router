@@ -1,3 +1,3 @@
-import { RouterPrototype, IRouter } from "./metadata";
+import { IRouterPrototype, IRouter } from "./metadata";
 
-export const RouterMap: Map<RouterPrototype<any>, IRouter> = new Map();
+export const RouterMap: Map<IRouterPrototype<any>, IRouter> = new Map();

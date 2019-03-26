@@ -1,4 +1,4 @@
-import { Constructor, IMixinFactory, RouterDefine, IController } from "../metadata";
+import { Constructor, IMixinFactory, IRouterDefine, IController } from "../metadata";
 import { tryGetRouter, tryGetRoute } from "./utils";
 
 /**
@@ -14,9 +14,9 @@ import { tryGetRouter, tryGetRoute } from "./utils";
  */
 export function ServiceFactory<S>(service: Constructor<S>): IMixinFactory;
 export function ServiceFactory<S>(service: Constructor<S>) {
-  return function router_service<T extends (RouterDefine | typeof IController)>(target: T, propertyKey?: string, descriptor?: PropertyDescriptor) {
+  return function router_service<T extends IRouterDefine | typeof IController>(target: T, propertyKey?: string, descriptor?: PropertyDescriptor) {
     if (propertyKey) {
-      const prototype = <RouterDefine>target;
+      const prototype = <IRouterDefine>target;
       const { routes } = tryGetRouter(prototype);
       const route = tryGetRoute(routes, propertyKey);
       route.service = service;

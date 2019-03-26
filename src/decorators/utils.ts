@@ -1,4 +1,4 @@
-import { RouterDefine, IController, IRouter, Route, UrlTplTuple } from "../metadata";
+import { IRouterDefine, IController, IRouter, IRoute, UrlTplTuple } from "../metadata";
 import { RouterMap } from "../core";
 
 /**
@@ -6,11 +6,11 @@ import { RouterMap } from "../core";
  * * 如果是第一次配置，先做存储
  * @description
  * @author Big Mogician
- * @param {(RouterDefine | IController)} target 控制器原型
+ * @param {(IRouterDefine | IController)} target 控制器原型
  * @returns
  * @exports
  */
-export function tryGetRouter(target: RouterDefine | IController) {
+export function tryGetRouter(target: IRouterDefine | IController) {
   const routerSaved = RouterMap.get(target);
   let router: IRouter;
   router = <IRouter>routerSaved;
@@ -36,12 +36,12 @@ export function tryGetRouter(target: RouterDefine | IController) {
  * * 如果是第一次配置当前路由项，先做初始化
  * @description
  * @author Big Mogician
- * @param {{ [key: string]: Route }} routes
+ * @param {{ [key: string]: IRoute }} routes
  * @param {string} key
  * @returns
  * @exports
  */
-export function tryGetRoute(routes: { [key: string]: Route }, key: string) {
+export function tryGetRoute(routes: { [key: string]: IRoute }, key: string) {
   let route = routes[key];
   if (!route) {
     route = routes[key] = {
