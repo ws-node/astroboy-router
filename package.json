@@ -1,5 +1,5 @@
 {
-  "name": "assets-route-plugin",
+  "name": "@youzan/assets-route-plugin",
   "version": "1.0.4",
   "description": "An assets router plugin for astroboy.",
   "main": "./dist/index.js",
