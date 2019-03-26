@@ -50,5 +50,13 @@
     ],
     "test2",
     "testC"
+  ],
+  [
+    "GET",
+    [
+      "/test3/api/fktest3/fkb"
+    ],
+    "test3",
+    "woqinm"
   ]
 ]
