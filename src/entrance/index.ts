@@ -61,11 +61,10 @@ export function createRouter(...args: any[]) {
         prototype,
         method,
         methodName,
-        route,
         auth: {
           rules: extend ? [...router.auth.rules, ...rules] : rules,
-          errorMsg: extend ? errorMsg : router.auth.errorMsg,
-          error: extend ? error : router.auth.error
+          errorMsg: errorMsg || router.auth.errorMsg,
+          error: error || router.auth.error
         },
         serviceCtor: route.service || service || undefined,
         scopeService: route.service !== undefined,
