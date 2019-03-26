@@ -5,3 +5,6 @@ build:
 
 rc: build
 	npx ts-node ./scripts/pkg.rc.ts
+
+publish: build
+	npx ts-node ./scripts/pkg.publish.ts
