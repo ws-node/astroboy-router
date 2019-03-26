@@ -6,7 +6,10 @@ branches:
     - master
     - plugin
 before_script:
-  - npm install
-  - npm install typescript@3.0.3 -g
+  - yarn install
+  - yarn global add typescript
 script:
-  - npm run build
+  - yarn run build
+  - yarn run test
+after_success:
+  - yarn run coverage
