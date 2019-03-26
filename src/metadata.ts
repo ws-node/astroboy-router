@@ -32,22 +32,22 @@ interface LifeCycleMethod {
 }
 
 export interface IRouterBuildContext {
-  name?: string;
   router: IRouter;
-  route: IRoute;
+  name?: string;
+  route?: IRoute;
 }
 
 interface IRouterBuilderDefine {
-  <T extends IRouterBuildContext = IRouterBuildContext>(context: T, prototype: any): void | Promise<void>;
+  <T extends IRouterBuildContext = IRouterBuildContext>(context: T, prototype: any): void;
 }
 
 interface ConstructorInitMethod {
-  <T extends IRouterBuildContext = IRouterBuildContext>(context: T, prototype: any): void | Promise<void>;
+  <T extends IRouterBuildContext = IRouterBuildContext>(context: T, prototype: any): void;
 }
 
 type LifeCycleRegister = <K extends keyof IRouterLifeCycle>(
   name: K,
-  resolver: K extends "OnCreate" ? ConstructorInitMethod : LifeCycleMethod,
+  resolver: K extends "onCreate" ? ConstructorInitMethod : LifeCycleMethod,
   reset?: boolean
 ) => void;
 type BuilderRegister = (resolver: IRouterBuilderDefine, reset?: boolean) => void;
@@ -74,7 +74,7 @@ export interface IPipeResolveContext {
 
 export interface IRouterMetaConfig {
   group: string;
-  pipes: IPipeResolveContext;
+  pipes?: IPipeResolveContext;
   register?(process: IRouterEvents): void;
 }
 

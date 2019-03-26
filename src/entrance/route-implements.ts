@@ -1,12 +1,12 @@
 import { CtxMiddleware, Constructor, BodyResolve, METHOD, IRoute, IRouter, IRouterBuildContext } from "../metadata";
 import { routeMeta } from "./utils";
 
-export async function buildRouteMethod(prototype: any, methodName: string, router: IRouter, route: IRoute) {
+export function buildRouteMethod(prototype: any, methodName: string, router: IRouter, route: IRoute) {
   const { onBuild = [] } = router;
   if (onBuild.length === 0) onBuild.push(defaultOnBuild);
   try {
     for (const eachBuild of onBuild) {
-      await eachBuild({ router, route, name: methodName }, prototype);
+      eachBuild({ router, route, name: methodName }, prototype);
     }
   } catch (error) {
     // tslint:disable-next-line: no-console
@@ -40,7 +40,7 @@ function defaultOnBuild({ router, name = "" }: IRouterBuildContext, prototype: a
     for (const eachOnEnter of lifeCycle.onEnter || []) {
       await eachOnEnter(<any>this);
     }
-    await sourceRouteMethod(...args);
+    await sourceRouteMethod.call(this, ...args);
     for (const eachOnQuit of lifeCycle.onQuit || []) {
       await eachOnQuit(<any>this);
     }

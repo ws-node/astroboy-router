@@ -1,13 +1,13 @@
 import { Constructor, IRouter, IRoute, IRouterBuildContext } from "../metadata";
 import { routeMeta } from "./utils";
 
-export async function buildRouterInstance(prototype: any, methodName: string, router: IRouter, route: IRoute) {
+export function buildRouterInstance(prototype: any, router: IRouter) {
   const { lifeCycle } = router;
   const onCreate = lifeCycle.onCreate || [];
   if (onCreate.length === 0) onCreate.push(defaultOnCreate);
   try {
     for (const each of onCreate) {
-      await each({ router, route }, prototype);
+      each({ router }, prototype);
     }
   } catch (error) {
     // tslint:disable-next-line: no-console

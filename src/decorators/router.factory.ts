@@ -1,4 +1,4 @@
-import { IRouterFactory, IRouterMetaConfig, IController, IRouterLifeCycle } from "../metadata";
+import { IRouterFactory, IRouterMetaConfig, IController, IRouterLifeCycle, IPipeResolveContext } from "../metadata";
 import { tryGetRouter, readPath, readPipes } from "./utils";
 
 const noop = () => {};
@@ -29,12 +29,17 @@ export function RouterFactory(...args: any[]) {
   const hasMetadata = typeof meta !== "string";
   const group = hasMetadata ? (<IRouterMetaConfig>meta).group : <string>meta;
   const register = hasMetadata ? (<IRouterMetaConfig>meta).register : noop;
+  const pipes: Partial<IPipeResolveContext> = hasMetadata ? (<IRouterMetaConfig>meta).pipes || {} : {};
   return function router<T extends typeof IController>(target: T) {
     const router = tryGetRouter(target.prototype);
     router.group = group;
+    router.pipes = {
+      rules: pipes.rules || [],
+      handler: pipes.handler
+    };
     Object.keys(router.routes).forEach(key => {
       const route = router.routes[key];
-      readPath(route);
+      readPath(group, route);
       readPipes(router, route);
     });
     if (register) {
@@ -42,7 +47,7 @@ export function RouterFactory(...args: any[]) {
         lifecycle(name, resolver, reset = false) {
           let lifes = router.lifeCycle[name];
           if (!lifes) lifes = router.lifeCycle[name] = [];
-          return !reset ? (<any[]>lifes).push(resolver) : (lifes = [resolver]);
+          return !reset ? (<any[]>lifes).push(resolver) : (lifes = [<any>resolver]);
         },
         onbuild(resolver, reset = false) {
           if (!router.onBuild) router.onBuild = [];

@@ -1,4 +1,4 @@
-import { IRouterDefine, IController, IRouter, IRoute } from "../metadata";
+import { IRouterDefine, IController, IRouter, IRoute, IPipeResolveContext } from "../metadata";
 import { RouterMap } from "../core";
 
 /**
@@ -58,13 +58,13 @@ export function tryGetRoute(routes: { [key: string]: IRoute }, key: string) {
   return route;
 }
 
-export function readPath(route: IRoute) {
+export function readPath(group: string, route: IRoute) {
   const { pathConfig: configs = [] } = route;
   route.path = configs.map(config => {
     const { path, urlTpl: tpl, sections: data = {} } = config;
     const isPlainUrl = tpl === undefined;
     if (isPlainUrl) return path || "";
-    const sections: { [prop: string]: any } = { path, ...data };
+    const sections: { [prop: string]: any } = { path, group, ...data };
     let urlToExport: string = tpl || "";
     Object.keys(sections).forEach(key => {
       const placeholder = "{{@" + key + "}}";

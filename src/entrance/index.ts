@@ -1,6 +1,7 @@
 /// <reference types="@types/koa-router"/>
 import { IRouter, IControllerConstructor } from "../metadata";
 import { buildRouteMethod } from "./route-implements";
+import { buildRouterInstance } from "./service-init";
 // import { routerBusinessCreate } from "./service-init";
 // import { routeMethodImplements } from "./route-implements";
 // import { resolveDefaultBodyParser } from "./utils";
@@ -43,9 +44,10 @@ export function createRouter(...args: any[]) {
   // const service = router.service;
   // routerBusinessCreate(service, prototype, router.dependency);
   const result: (string | string[])[][] = [];
-  Object.keys(router.routes).forEach(methodName => {
+  for (const methodName in router.routes) {
     const route = router.routes[methodName];
     const allRouteMethods: (string | string[])[][] = [];
+    buildRouterInstance(prototype, router);
     route.method.forEach(method => {
       const routeArr: (string | string[])[] = [];
       if (!!route.name) routeArr.push(route.name);
@@ -61,7 +63,8 @@ export function createRouter(...args: any[]) {
       allRouteMethods.push(routeArr);
     });
     result.push(...allRouteMethods);
-  });
+  }
+  Object.keys(router.routes).forEach(async methodName => {});
   if (debug) {
     // tslint:disable-next-line:no-console
     console.log(`======${name}======`);
