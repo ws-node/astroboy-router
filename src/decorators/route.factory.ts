@@ -52,6 +52,7 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
 
 /**
  * ## 定义Index页面
+ * * ⚠️ `@deperacted` this decorator will be deperacted soon.
  * @description
  * @author Big Mogician
  * @param {string} path
@@ -66,7 +67,7 @@ export function IndexFactory(path: string, options?: Partial<RouteOptions>): IRo
  * @description
  * @author Big Mogician
  * @param {string[]} path
- * @param {Partial<RouteOptions>} [options=undefined]
+ * @param {Partial<RouteOptions>} [options={}]
  * @returns {IRouteFactory}
  * @exports
  */
@@ -87,11 +88,12 @@ export function IndexFactory(...args: any[]): IRouteFactory {
 
 /**
  * ## 定义api
+ * * ⚠️ `@deperacted` this decorator will be deperacted soon.
  * @description
  * @author Big Mogician
  * @param {METHOD} method
  * @param {string} path
- * @param {Partial<RouteOptions>} [options=undefined]
+ * @param {Partial<RouteOptions>} [options={}]
  * @returns {IRouteFactory}
  * @exports
  */
