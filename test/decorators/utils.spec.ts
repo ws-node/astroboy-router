@@ -24,7 +24,7 @@ defineUnit(["decorators/utils", "decorators' utils"], () => {
     expect(result.name).to.equal(undefined);
     expect(Object.keys(result.path).length).to.equal(0);
     expect(result.service).to.equal(undefined);
-    expect(Object.keys(result.auth).length).to.equal(3);
+    expect(Object.keys(result.auth).length).to.equal(2);
   });
 
   it("test routeConnect", () => {

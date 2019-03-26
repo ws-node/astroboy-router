@@ -7,7 +7,7 @@ type Exist<T> = Exclude<T, undefined>;
 /** 明确表示当前目标可能为undefined */
 type Unsure<T> = Exist<T> | undefined;
 export interface Constructor<T> {
-  new(...args: any[]): T;
+  new (...args: any[]): T;
 }
 
 export type METHOD = "GET" | "POST" | "PUT" | "DELETE";
@@ -55,7 +55,7 @@ export interface Route<T = any> {
   auth: {
     rules: AuthGuard[];
     extend: boolean;
-    errorMsg: string;
+    errorMsg?: string;
     error?: any;
   };
 }
@@ -68,7 +68,7 @@ export interface IRouter<T = any> {
   urlTpl: UrlTplTuple;
   auth: {
     rules: AuthGuard[];
-    errorMsg: string;
+    errorMsg?: string;
     error?: any;
   };
   routes: { [key: string]: Route };
@@ -102,8 +102,8 @@ export type IRouteFactory = <T>(target: T, propertyKey: string, descriptor?: Pro
 export type IRouterFactory = <T>(target: T) => any;
 export type IMixinFactory = <T>(target: T, propertyKey?: string) => any;
 
-type RequestParamsInvokeFactory = (instance: IController) => (() => any);
-type ResponseBodyInvokeFactory = (instance: IController) => (<T>(code: any, msg: any, data: T) => any);
+type RequestParamsInvokeFactory = (instance: IController) => () => any;
+type ResponseBodyInvokeFactory = (instance: IController) => <T>(code: any, msg: any, data: T) => any;
 
 export interface BodyResolve {
   getQuery: RequestParamsInvokeFactory;

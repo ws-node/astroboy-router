@@ -26,16 +26,16 @@ export function AuthFactory(guards: AuthGuard[]): IMixinFactory;
  * @exports
  */
 export function AuthFactory(guards: AuthGuard[], metadata: RouteAuthMetadata): IMixinFactory;
-export function AuthFactory(arr: AuthGuard[], metadata?: RouteAuthMetadata) {
+export function AuthFactory(arr: AuthGuard[], metadata: RouteAuthMetadata = {}) {
   return function routeAuth(target: RouterDefine | typeof IController, propertyKey?: string, descriptor?: PropertyDescriptor) {
-    const { extend, errorMsg, error } = metadata || { extend: true, errorMsg: undefined, error: undefined };
+    const { extend = true, errorMsg, error } = metadata;
     if (propertyKey) {
       const { routes } = tryGetRouter(<RouterDefine>target);
       const route = tryGetRoute(routes, propertyKey);
       route.auth = {
         rules: arr,
-        extend: extend === undefined ? true : !!extend,
-        errorMsg: errorMsg || "Auth failed.",
+        extend: !!extend,
+        errorMsg,
         error
       };
     } else {

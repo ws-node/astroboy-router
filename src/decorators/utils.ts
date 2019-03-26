@@ -22,8 +22,7 @@ export function tryGetRouter(target: RouterDefine | IController) {
       dependency: new Map(),
       urlTpl: [undefined, undefined],
       auth: {
-        rules: [],
-        errorMsg: "Auth failed."
+        rules: []
       }
     };
     RouterMap.set(target, router);
@@ -54,8 +53,7 @@ export function tryGetRoute(routes: { [key: string]: Route }, key: string) {
       urlTpl: undefined,
       auth: {
         rules: [],
-        extend: true,
-        errorMsg: "Auth failed."
+        extend: true
       }
     };
   }
