@@ -2,7 +2,7 @@
   "name": "router-demo",
   "version": "1.0.0",
   "scripts": {
-    "demo": "ENABLE_CDN=true ast dev --env qa --ts --inspect --tsconfig app/tsconfig.json"
+    "start": "ENABLE_CDN=true ast dev --env qa --ts --inspect --tsconfig app/tsconfig.json"
   },
   "repository": {
     "type": "git",
