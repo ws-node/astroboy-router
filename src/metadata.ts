@@ -15,7 +15,7 @@ export type METHOD = "GET" | "POST" | "PUT" | "DELETE";
 /** 未实现的路由方法 */
 export type RouteMethod = () => any;
 
-export type AuthGuard = (context: any) => Promise<boolean | Error> | boolean | Error;
+export type CtxMiddleware = (context: any) => Promise<boolean | Error> | boolean | Error;
 
 export type UrlTplTuple = [string | undefined, string | undefined];
 
@@ -32,7 +32,7 @@ export interface IRouterMetaConfig<T = any> {
     api?: string;
   };
   auth?: {
-    rules: AuthGuard[];
+    rules: CtxMiddleware[];
     metadata?: IRouterAuthMetadata;
   };
 }
@@ -53,7 +53,7 @@ export interface IRoute<T = any> {
   service?: Constructor<T>;
   urlTpl?: string;
   auth: {
-    rules: AuthGuard[];
+    rules: CtxMiddleware[];
     extend: boolean;
     errorMsg?: string;
     error?: any;
@@ -67,7 +67,7 @@ export interface IRouter<T = any> {
   dependency: Map<Constructor<any>, string>;
   urlTpl: UrlTplTuple;
   auth: {
-    rules: AuthGuard[];
+    rules: CtxMiddleware[];
     errorMsg?: string;
     error?: any;
   };

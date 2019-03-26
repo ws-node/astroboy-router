@@ -1,4 +1,4 @@
-import { AuthGuard, Constructor, BodyResolve, METHOD } from "../metadata";
+import { CtxMiddleware, Constructor, BodyResolve, METHOD } from "../metadata";
 import { routeMeta } from "./utils";
 
 /**
@@ -10,7 +10,7 @@ import { routeMeta } from "./utils";
  *   prototype: any,
  *   method: string,
  *   methodName: string,
- *   auth: { rules: AuthGuard[], errorMsg: string, error?: any },
+ *   auth: { rules: CtxMiddleware[], errorMsg: string, error?: any },
  *   serviceCtor: Constructor<any> | undefined,
  *   scopeService: boolean,
  *   resolve: BodyResolve
@@ -22,7 +22,7 @@ export function routeMethodImplements(metadata: {
   prototype: any;
   method: METHOD;
   methodName: string;
-  auth: { rules: AuthGuard[]; errorMsg: string; error?: any };
+  auth: { rules: CtxMiddleware[]; errorMsg: string; error?: any };
   serviceCtor: Constructor<any> | undefined;
   scopeService: boolean;
   resolve: BodyResolve;

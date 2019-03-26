@@ -1,8 +1,8 @@
 export * from "./entrance";
 export * from "./decorators";
-import { RouteMethod, AuthGuard } from "./metadata";
+import { RouteMethod, CtxMiddleware } from "./metadata";
 
-export {
-  RouteMethod,
-  AuthGuard
-};
+/** @deperacted don't use this type, replace it with `CtxMiddleware` */
+export type AuthGuard = CtxMiddleware;
+
+export { RouteMethod, CtxMiddleware };

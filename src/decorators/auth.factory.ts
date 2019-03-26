@@ -1,4 +1,4 @@
-import { AuthGuard, IMixinFactory, RouteAuthMetadata, IRouterDefine, IController, IRouteFactory } from "../metadata";
+import { CtxMiddleware, IMixinFactory, RouteAuthMetadata, IRouterDefine, IController, IRouteFactory } from "../metadata";
 import { tryGetRouter, tryGetRoute } from "./utils";
 
 /**
@@ -7,11 +7,11 @@ import { tryGetRouter, tryGetRoute } from "./utils";
  * * 在任意一个处理程序失败后短路
  * @description
  * @author Big Mogician
- * @param {AuthGuard[]} guards
+ * @param {CtxMiddleware[]} guards
  * @returns {IMixinFactory}
  * @exports
  */
-export function AuthFactory(guards: AuthGuard[]): IMixinFactory;
+export function AuthFactory(guards: CtxMiddleware[]): IMixinFactory;
 /**
  * ## 为Router/Route定义鉴权逻辑
  * * 支持多个处理程序顺序执行
@@ -20,13 +20,13 @@ export function AuthFactory(guards: AuthGuard[]): IMixinFactory;
  * * 支持route继承
  * @description
  * @author Big Mogician
- * @param {AuthGuard[]} guards
+ * @param {CtxMiddleware[]} guards
  * @param {RouteAuthMetadata} metadata
  * @returns {IMixinFactory}
  * @exports
  */
-export function AuthFactory(guards: AuthGuard[], metadata: RouteAuthMetadata): IMixinFactory;
-export function AuthFactory(arr: AuthGuard[], metadata: RouteAuthMetadata = {}) {
+export function AuthFactory(guards: CtxMiddleware[], metadata: RouteAuthMetadata): IMixinFactory;
+export function AuthFactory(arr: CtxMiddleware[], metadata: RouteAuthMetadata = {}) {
   return function routeAuth(target: IRouterDefine | typeof IController, propertyKey?: string, descriptor?: PropertyDescriptor) {
     const { extend = true, errorMsg, error } = metadata;
     if (propertyKey) {
