@@ -35,7 +35,7 @@ export function AuthFactory(arr: AuthGuard[], metadata?: RouteAuthMetadata) {
       route.auth = {
         rules: arr,
         extend: extend === undefined ? true : !!extend,
-        errorMsg: errorMsg || "Auth failed.",
+        errorMsg,
         error
       };
     } else {
