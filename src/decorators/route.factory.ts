@@ -7,12 +7,12 @@ interface RouteOptions {
   /** 重置当前路由模板 */
   tpl: string;
   /** 提供当前路由模板的参数 */
-  sections?: { [key: string]: string; };
+  sections?: { [key: string]: string };
 }
 
 interface CustonRouteOptions {
   method: METHOD;
-  tpls: string[];
+  tpls: (string | { tpl: string; sections?: { [key: string]: string } })[];
   name?: string;
   isIndex?: boolean;
 }
@@ -124,11 +124,12 @@ export function CustomRouteFactory(options: CustonRouteOptions): IRouteFactory {
   return function customApiRoute(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     if (options.name) MetadataFactory(options.name)(target, propertyKey, descriptor);
     options.tpls.forEach(item => {
+      const [tpl, sections] = typeof item === "string" ? [item, {}] : [item.tpl, item.sections || {}];
       RouteFactory({
         method,
-        path: [{ path: "", sections: {}, urlTpl: item }],
+        path: [{ path: "", sections, urlTpl: tpl }],
         isIndex,
-        tpl: item
+        tpl
       })(target, propertyKey, descriptor);
     });
   };

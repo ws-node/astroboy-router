@@ -1,4 +1,4 @@
-import { RouterDefine, IController, Router, Route, UrlTplTuple } from "../metadata";
+import { RouterDefine, IController, IRouter, Route, UrlTplTuple } from "../metadata";
 /**
  * ## 获取router配置参数
  * * 如果是第一次配置，先做存储
@@ -8,7 +8,7 @@ import { RouterDefine, IController, Router, Route, UrlTplTuple } from "../metada
  * @returns
  * @exports
  */
-export declare function tryGetRouter(target: RouterDefine | IController): Router<any>;
+export declare function tryGetRouter(target: RouterDefine | IController): IRouter<any>;
 /**
  * ## 获取route配置参数
  * * 如果是第一次配置当前路由项，先做初始化

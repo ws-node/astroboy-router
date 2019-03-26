@@ -11,7 +11,12 @@ interface RouteOptions {
 }
 interface CustonRouteOptions {
     method: METHOD;
-    tpls: string[];
+    tpls: (string | {
+        tpl: string;
+        sections?: {
+            [key: string]: string;
+        };
+    })[];
     name?: string;
     isIndex?: boolean;
 }

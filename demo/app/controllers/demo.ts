@@ -4,7 +4,7 @@ import DemoService from "../services/demo";
 import Demo2Service from "../services/demo2";
 import AuthService from "../services/auth";
 
-const authFac: (auth?: "admin" | "s_a") => AuthGuard = (auth) => {
+const authFac: (auth?: "admin" | "s_a") => AuthGuard = auth => {
   return async (ctx: AstroboyContext) => {
     let hasAccess = false;
     if (auth === "admin") hasAccess = await new AuthService(ctx).checkIsAdmin();
@@ -26,7 +26,11 @@ function XAPI(method: "GET" | "POST" | "PUT" | "DELETE", path: string) {
     method,
     tpls: [
       `api/demo/${path}`,
-      `m/api/demo/${path}`
+      `m/api/{{@prefix}}/${path}`,
+      {
+        tpl: `api/{{@prefix}}/{{@wsnd}}/{{@path}}`,
+        sections: { prefix: "SB", path, wsnd: "1234" }
+      }
     ]
   });
 }
@@ -48,7 +52,6 @@ function XAPI(method: "GET" | "POST" | "PUT" | "DELETE", path: string) {
   }
 })
 class DemoController extends BaseClass {
-
   private readonly business!: DemoService;
 
   @Inject()
@@ -56,7 +59,7 @@ class DemoController extends BaseClass {
 
   @Index(["", "*"])
   public async getIndexHtml() {
-    this.ctx.render("demo/index.html")
+    this.ctx.render("demo/index.html");
   }
 
   // @API("GET", "testA")
@@ -84,7 +87,6 @@ class DemoController extends BaseClass {
     console.log(result);
     this.ctx.body = this;
   }
-
 }
 
 export = DemoController;

@@ -1,5 +1,5 @@
 /// <reference types="@types/koa-router"/>
-import { Router, ControllerConstructor } from "../metadata";
+import { IRouter, ControllerConstructor } from "../metadata";
 import { routerBusinessCreate } from "./service-init";
 import { routeMethodImplements } from "./route-implements";
 import { resolveDefaultBodyParser } from "./utils";
@@ -36,7 +36,7 @@ export function createRouter(...args: any[]) {
     [ctor, name, root] = args;
   }
   const prototype = <any>ctor.prototype;
-  const router = <Router>ctor.prototype["@router"];
+  const router = <IRouter>ctor.prototype["@router"];
   // 未经装饰，不符合Router的要求，终止应用程序
   if (!router) throw new Error(`Create router failed : invalid router controller [${ctor && (<any>ctor).name}]`);
   const service = router.service;

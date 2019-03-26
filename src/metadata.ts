@@ -60,7 +60,7 @@ export interface Route<T = any> {
   };
 }
 
-export interface Router<T = any> {
+export interface IRouter<T = any> {
   prefix: string;
   apiPrefix: string;
   service?: Constructor<T>;
@@ -84,7 +84,7 @@ export interface RouteAuthMetadata extends RouterAuthMetadata {
 }
 
 export interface RouterDefine {
-  "@router"?: Router;
+  "@router"?: IRouter;
 }
 
 export type RouterPrototype<T = {}> = T & RouterDefine;
