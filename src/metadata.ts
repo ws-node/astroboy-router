@@ -33,7 +33,7 @@ export interface IRouterMetaConfig<T = any> {
   };
   auth?: {
     rules: CtxMiddleware[];
-    metadata?: IRouterAuthMetadata;
+    metadata?: IRouteMiddlewareDefine;
   };
 }
 
@@ -74,12 +74,13 @@ export interface IRouter<T = any> {
   routes: { [key: string]: IRoute };
 }
 
-export interface IRouterAuthMetadata {
+export interface IRouteMiddlewareDefine {
   errorMsg?: string;
   error?: any;
+  handler?(event: { error?: Error; msg?: string }): void;
 }
 
-export interface RouteAuthMetadata extends IRouterAuthMetadata {
+export interface IRouterMiddlewareDefine extends IRouteMiddlewareDefine {
   extend?: boolean;
 }
 

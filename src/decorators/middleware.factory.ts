@@ -1,4 +1,4 @@
-import { CtxMiddleware, IMixinFactory, RouteAuthMetadata, IRouterDefine, IController, IRouteFactory } from "../metadata";
+import { CtxMiddleware, IMixinFactory, IRouterMiddlewareDefine, IRouterDefine, IController, IRouteFactory } from "../metadata";
 import { tryGetRouter, tryGetRoute } from "./utils";
 
 /**
@@ -21,12 +21,12 @@ export function MiddlewareFactory(middlewares: CtxMiddleware[]): IMixinFactory;
  * @description
  * @author Big Mogician
  * @param {CtxMiddleware[]} middlewares
- * @param {RouteAuthMetadata} metadata
+ * @param {IRouterMiddlewareDefine} metadata
  * @returns {IMixinFactory}
  * @exports
  */
-export function MiddlewareFactory(middlewares: CtxMiddleware[], metadata: RouteAuthMetadata): IMixinFactory;
-export function MiddlewareFactory(middlewares: CtxMiddleware[], metadata: RouteAuthMetadata = {}) {
+export function MiddlewareFactory(middlewares: CtxMiddleware[], metadata: IRouterMiddlewareDefine): IMixinFactory;
+export function MiddlewareFactory(middlewares: CtxMiddleware[], metadata: IRouterMiddlewareDefine = {}) {
   return function routeAuth(target: IRouterDefine | typeof IController, propertyKey?: string, descriptor?: PropertyDescriptor) {
     const { extend = true, errorMsg, error } = metadata;
     if (propertyKey) {
