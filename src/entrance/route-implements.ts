@@ -1,4 +1,4 @@
-import { AuthGuard, Route, Constructor, BodyResolve, METHOD } from "../metadata";
+import { AuthGuard, Constructor, BodyResolve, METHOD } from "../metadata";
 import { routeMeta } from "./utils";
 
 /**

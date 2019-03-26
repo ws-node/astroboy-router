@@ -68,7 +68,7 @@ export interface IRouter<T = any> {
   urlTpl: UrlTplTuple;
   auth: {
     rules: AuthGuard[];
-    errorMsg: string;
+    errorMsg?: string;
     error?: any;
   };
   routes: { [key: string]: Route };
