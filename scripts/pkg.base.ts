@@ -2,6 +2,7 @@ import { IConfig } from "@bigmogician/publisher/actions";
 
 export const config: IConfig = {
   rc: false,
+  add: 0,
   useYarn: true,
   whiteSpace: "  ",
   debug: false,
