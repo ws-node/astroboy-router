@@ -4,7 +4,7 @@ export const config: IConfig = {
   rc: false,
   useYarn: true,
   whiteSpace: "  ",
-  debug: true,
+  debug: false,
   outTransform: json => ({
     ...json,
     main: "index.js",
