@@ -1,35 +1,7 @@
-import { IRouterFactory, IRouterMetaConfig, IController, UrlTplTuple } from "../metadata";
-import { tryGetRouter, routeConnect } from "./utils";
-import { ServiceFactory } from "./service.factory";
-import { MiddlewareFactory } from "./middleware.factory";
-import get from "lodash/get";
+import { IRouterFactory, IRouterMetaConfig, IController, IRouterLifeCycle } from "../metadata";
+import { tryGetRouter, readPath, readPipes } from "./utils";
 
-/**
- * 尝试有先从单url配置中读取api前缀
- * * 没有自定义，默认会使用高一级配置
- * @description
- * @author Big Mogician
- * @param {*} sections
- * @param {string} [apiPrefix]
- * @returns
- */
-function getApiPrefix(sections: any, apiPrefix?: string) {
-  return get(sections, "api", undefined) || apiPrefix;
-}
-
-/**
- * 尝试优先使用url配置的url template
- * * 没有自定义，默认会使用高一级配置
- * @description
- * @author Big Mogician
- * @param {UrlTplTuple} defaultTuple
- * @param {(0 | 1)} key
- * @param {string} [tpl]
- * @returns {UrlTplTuple}
- */
-function decideTpl(defaultTuple: UrlTplTuple, key: 0 | 1, tpl?: string): UrlTplTuple {
-  return !tpl ? defaultTuple : key === 0 ? [tpl, defaultTuple[1]] : [defaultTuple[0], tpl];
-}
+const noop = () => {};
 
 /**
  * ## 定义控制器Router
@@ -44,52 +16,39 @@ export function RouterFactory(prefix: string): IRouterFactory;
 /**
  * ## 定义控制器Router
  * * 配置router的前缀
- * * 配置router的api前缀
- * * 配置router的business服务
- * * 配置router的authorize
- * * 配置router的url template
  * @description
  * @author Big Mogician
  * @template S
- * @param {IRouterMetaConfig<S>} metadata
+ * @param {IRouterMetaConfig} metadata
  * @returns {IRouterFactory}
  * @exports
  */
-export function RouterFactory<S>(metadata: IRouterMetaConfig<S>): IRouterFactory;
+export function RouterFactory<S>(metadata: IRouterMetaConfig): IRouterFactory;
 export function RouterFactory(...args: any[]) {
   const meta = args[0];
   const hasMetadata = typeof meta !== "string";
-  const prefix = hasMetadata ? (<IRouterMetaConfig>meta).prefix : <string>meta;
-  const apiPrefix = (hasMetadata ? (<IRouterMetaConfig>meta).apiPrefix : undefined) || "api";
-  // 初始化router默认url template
-  const urlTpl = hasMetadata ? (<IRouterMetaConfig>meta).urlTpl : undefined;
-  const routerTplTuple: UrlTplTuple = [urlTpl && urlTpl.index, urlTpl && urlTpl.api];
+  const group = hasMetadata ? (<IRouterMetaConfig>meta).group : <string>meta;
+  const register = hasMetadata ? (<IRouterMetaConfig>meta).register : noop;
   return function router<T extends typeof IController>(target: T) {
     const router = tryGetRouter(target.prototype);
-    router.prefix = prefix;
-    router.apiPrefix = apiPrefix;
+    router.group = group;
     Object.keys(router.routes).forEach(key => {
       const route = router.routes[key];
-      // 拷贝原始 url template
-      const tplTuple: UrlTplTuple = <any>[...routerTplTuple];
-      // 覆写当前路由的url template
-      const tplKey = !route.index ? 1 : 0;
-      if (!!route.urlTpl) tplTuple[tplKey] = route.urlTpl;
-      route.path = route.pathConfig.map((p: any) =>
-        routeConnect(prefix, getApiPrefix(p.sections, apiPrefix), p.path, route.index, decideTpl(tplTuple, tplKey, p.urlTpl), p.sections || {})
-      );
+      readPath(route);
+      readPipes(router, route);
     });
-    if (hasMetadata) {
-      const metadata = <IRouterMetaConfig>meta;
-      if (!!metadata.business) ServiceFactory(metadata.business)(target);
-      if (!!metadata.auth) {
-        const { rules, metadata: m } = metadata.auth;
-        if (!m) {
-          MiddlewareFactory(rules)(target);
-        } else {
-          MiddlewareFactory(rules, m)(target);
+    if (register) {
+      register({
+        lifecycle(name, resolver, reset = false) {
+          let lifes = router.lifeCycle[name];
+          if (!lifes) lifes = router.lifeCycle[name] = [];
+          return !reset ? (<any[]>lifes).push(resolver) : (lifes = [resolver]);
+        },
+        onbuild(resolver, reset = false) {
+          if (!router.onBuild) router.onBuild = [];
+          return !reset ? router.onBuild.push(resolver) : (router.onBuild = [resolver]);
         }
-      }
+      });
     }
     return <T>target;
   };

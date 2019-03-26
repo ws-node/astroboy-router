@@ -14,15 +14,12 @@ interface CustonRouteOptions {
   method: METHOD;
   tpls: (string | { tpl: string; sections?: { [key: string]: string } })[];
   name?: string;
-  isIndex?: boolean;
 }
 
 interface RouteBaseConfig {
   name?: string;
   method: METHOD;
   path: IRoutePathConfig[];
-  isIndex: boolean;
-  tpl?: string;
 }
 
 /**
@@ -40,74 +37,10 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
   return function route(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     const { routes } = tryGetRouter(target);
     const route = tryGetRoute(routes, propertyKey);
-    const { method, path, isIndex, tpl } = options;
-    // 封锁多method的能力，暂时没有用单一路由处理多method的需求，
-    // 根据情况未来可能考虑做开放
+    const { method, path, name } = options;
     route.method = [method];
     route.pathConfig.push(...path);
-    route.index = !!isIndex;
-    route.urlTpl = tpl;
-  };
-}
-
-/**
- * ## 定义Index页面
- * * ⚠️ `@deperacted` this decorator will be deperacted soon.
- * @description
- * @author Big Mogician
- * @param {string} path
- * @param {Partial<RouteOptions>} [options=undefined]
- * @returns {IRouteFactory}
- * @exports
- */
-export function IndexFactory(path: string, options?: Partial<RouteOptions>): IRouteFactory;
-/**
- * ## 定义Index页面
- * * 多路由支持
- * @description
- * @author Big Mogician
- * @param {string[]} path
- * @param {Partial<RouteOptions>} [options={}]
- * @returns {IRouteFactory}
- * @exports
- */
-export function IndexFactory(path: string[], options?: Partial<RouteOptions>): IRouteFactory;
-export function IndexFactory(...args: any[]): IRouteFactory {
-  const options: Partial<RouteOptions> = args[1] || {};
-  return function indexRoute(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
-    if (options.name) MetadataFactory(options.name)(target, propertyKey, descriptor);
-    const paths: string[] = args[0] instanceof Array ? args[0] : [args[0]];
-    RouteFactory({
-      method: "GET",
-      path: paths.map(path => ({ path, sections: options.sections || {} })),
-      isIndex: true,
-      tpl: options.tpl
-    })(target, propertyKey, descriptor);
-  };
-}
-
-/**
- * ## 定义api
- * * ⚠️ `@deperacted` this decorator will be deperacted soon.
- * @description
- * @author Big Mogician
- * @param {METHOD} method
- * @param {string} path
- * @param {Partial<RouteOptions>} [options={}]
- * @returns {IRouteFactory}
- * @exports
- */
-export function APIFactory(method: METHOD, path: string, options?: Partial<RouteOptions>): IRouteFactory;
-export function APIFactory(...args: any[]): IRouteFactory {
-  const options: Partial<RouteOptions> = args[2] || {};
-  return function apiRoute(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
-    if (options.name) MetadataFactory(options.name)(target, propertyKey, descriptor);
-    RouteFactory({
-      method: args[0],
-      path: [{ path: args[1], sections: options.sections || {} }],
-      isIndex: false,
-      tpl: options.tpl
-    })(target, propertyKey, descriptor);
+    route.name = route.name || name;
   };
 }
 
@@ -122,16 +55,13 @@ export function APIFactory(...args: any[]): IRouteFactory {
  */
 export function CustomRouteFactory(options: CustonRouteOptions): IRouteFactory {
   const method = options.method;
-  const isIndex = !!options.isIndex;
   return function customApiRoute(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     if (options.name) MetadataFactory(options.name)(target, propertyKey, descriptor);
     options.tpls.forEach(item => {
       const [tpl, sections] = typeof item === "string" ? [item, {}] : [item.tpl, item.sections || {}];
       RouteFactory({
         method,
-        path: [{ path: "", sections, urlTpl: tpl }],
-        isIndex,
-        tpl
+        path: [{ path: undefined, sections, urlTpl: tpl }]
       })(target, propertyKey, descriptor);
     });
   };

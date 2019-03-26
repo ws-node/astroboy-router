@@ -1,8 +1,9 @@
 /// <reference types="@types/koa-router"/>
 import { IRouter, IControllerConstructor } from "../metadata";
-import { routerBusinessCreate } from "./service-init";
-import { routeMethodImplements } from "./route-implements";
-import { resolveDefaultBodyParser } from "./utils";
+import { buildRouteMethod } from "./route-implements";
+// import { routerBusinessCreate } from "./service-init";
+// import { routeMethodImplements } from "./route-implements";
+// import { resolveDefaultBodyParser } from "./utils";
 
 interface RouterOptions {
   router: IControllerConstructor;
@@ -39,8 +40,8 @@ export function createRouter(...args: any[]) {
   const router = <IRouter>ctor.prototype["@router"];
   // 未经装饰，不符合Router的要求，终止应用程序
   if (!router) throw new Error(`Create router failed : invalid router controller [${ctor && (<any>ctor).name}]`);
-  const service = router.service;
-  routerBusinessCreate(service, prototype, router.dependency);
+  // const service = router.service;
+  // routerBusinessCreate(service, prototype, router.dependency);
   const result: (string | string[])[][] = [];
   Object.keys(router.routes).forEach(methodName => {
     const route = router.routes[methodName];
@@ -56,20 +57,7 @@ export function createRouter(...args: any[]) {
       }
       routeArr.push(name);
       routeArr.push(methodName);
-      const { extend, rules, errorMsg, error } = route.auth;
-      routeMethodImplements({
-        prototype,
-        method,
-        methodName,
-        auth: {
-          rules: extend ? [...router.auth.rules, ...rules] : rules,
-          errorMsg: errorMsg || router.auth.errorMsg || "Middleware failed.",
-          error: error || router.auth.error
-        },
-        serviceCtor: route.service || service || undefined,
-        scopeService: route.service !== undefined,
-        resolve: resolveDefaultBodyParser()
-      });
+      buildRouteMethod(prototype, methodName, router, route);
       allRouteMethods.push(routeArr);
     });
     result.push(...allRouteMethods);

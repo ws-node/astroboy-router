@@ -1,5 +1,52 @@
-import { CtxMiddleware, Constructor, BodyResolve, METHOD } from "../metadata";
+import { CtxMiddleware, Constructor, BodyResolve, METHOD, IRoute, IRouter, IRouterBuildContext } from "../metadata";
 import { routeMeta } from "./utils";
+
+export async function buildRouteMethod(prototype: any, methodName: string, router: IRouter, route: IRoute) {
+  const { onBuild = [] } = router;
+  if (onBuild.length === 0) onBuild.push(defaultOnBuild);
+  try {
+    for (const eachBuild of onBuild) {
+      await eachBuild({ router, route, name: methodName }, prototype);
+    }
+  } catch (error) {
+    // tslint:disable-next-line: no-console
+    console.error(error);
+    throw new Error("Create route method failed");
+  }
+}
+
+function defaultOnBuild({ router, name = "" }: IRouterBuildContext, prototype: any) {
+  const { lifeCycle, pipes } = router;
+  const descriptor = Object.getOwnPropertyDescriptor(prototype, name);
+  if (!descriptor) throw new Error("Create route method failed: init an abstract route method without a service is not allowed.");
+  const needPipe = pipes.rules.length > 0;
+  const sourceRouteMethod: (...args: any[]) => Promise<any> = descriptor.value!;
+  descriptor!.value = async function(...args: any[]) {
+    if (needPipe) {
+      for (const eachOnPipe of lifeCycle.onPipes || []) {
+        await eachOnPipe(<any>this);
+      }
+      try {
+        for (const eachPipe of pipes.rules || []) {
+          await eachPipe(<any>this);
+        }
+      } catch (error) {
+        if (!pipes.handler) {
+          throw error;
+        }
+        pipes.handler(error, error.msg);
+      }
+    }
+    for (const eachOnEnter of lifeCycle.onEnter || []) {
+      await eachOnEnter(<any>this);
+    }
+    await sourceRouteMethod(...args);
+    for (const eachOnQuit of lifeCycle.onQuit || []) {
+      await eachOnQuit(<any>this);
+    }
+  };
+  Object.defineProperty(prototype, name, descriptor!);
+}
 
 /**
  * ## 实现未实现的路由方法

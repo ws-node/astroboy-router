@@ -10,6 +10,10 @@ export interface Constructor<T> {
   new (...args: any[]): T;
 }
 
+interface MapLike<T> {
+  [prop: string]: T;
+}
+
 export type METHOD = "GET" | "POST" | "PUT" | "DELETE";
 
 /** 未实现的路由方法 */
@@ -23,61 +27,82 @@ export interface IAstroboyBaseClass<T = any> {
   ctx: T;
 }
 
-export interface IRouterMetaConfig<T = any> {
-  prefix: string;
-  apiPrefix?: string;
-  business?: Constructor<T>;
-  urlTpl?: {
-    index?: string;
-    api?: string;
-  };
-  auth?: {
-    rules: CtxMiddleware[];
-    metadata?: IRouteMiddlewareDefine;
-  };
+interface LifeCycleMethod {
+  <T = any>(ctor: IAstroboyBaseClass<T>): void | Promise<void>;
+}
+
+export interface IRouterBuildContext {
+  name?: string;
+  router: IRouter;
+  route: IRoute;
+}
+
+interface IRouterBuilderDefine {
+  <T extends IRouterBuildContext = IRouterBuildContext>(context: T, prototype: any): void | Promise<void>;
+}
+
+interface ConstructorInitMethod {
+  <T extends IRouterBuildContext = IRouterBuildContext>(context: T, prototype: any): void | Promise<void>;
+}
+
+type LifeCycleRegister = <K extends keyof IRouterLifeCycle>(
+  name: K,
+  resolver: K extends "OnCreate" ? ConstructorInitMethod : LifeCycleMethod,
+  reset?: boolean
+) => void;
+type BuilderRegister = (resolver: IRouterBuilderDefine, reset?: boolean) => void;
+
+interface IRouterEvents {
+  lifecycle: LifeCycleRegister;
+  onbuild: BuilderRegister;
+}
+
+interface IRouteRunLifeCycle {
+  onPipes: LifeCycleMethod[];
+  onEnter: LifeCycleMethod[];
+  onQuit: LifeCycleMethod[];
+}
+
+export interface IRouterLifeCycle extends IRouteRunLifeCycle {
+  onCreate: ConstructorInitMethod[];
+}
+
+export interface IPipeResolveContext {
+  rules: Array<CtxMiddleware>;
+  handler?: (error?: Error, msg?: string) => void;
+}
+
+export interface IRouterMetaConfig {
+  group: string;
+  pipes: IPipeResolveContext;
+  register?(process: IRouterEvents): void;
 }
 
 export interface IRoutePathConfig {
-  isPlainUrl?: boolean;
-  path: string;
-  urlTpl?: string;
+  path: string | undefined;
+  urlTpl: string | undefined;
   sections: { [key: string]: string };
 }
 
-export interface IRoute<T = any> {
+export interface IRoute {
   name: Unsure<string>;
   method: METHOD[];
   path: Array<string>;
   pathConfig: Array<IRoutePathConfig>;
-  index: boolean;
-  service?: Constructor<T>;
-  urlTpl?: string;
-  auth: {
-    rules: CtxMiddleware[];
-    extend: boolean;
-    errorMsg?: string;
-    error?: any;
-  };
+  pipes: IPipeResolveContext & { extend: boolean };
 }
 
-export interface IRouter<T = any> {
-  prefix: string;
-  apiPrefix: string;
-  service?: Constructor<T>;
+export interface IRouter {
+  group: string;
+  routes: MapLike<IRoute>;
   dependency: Map<Constructor<any>, string>;
-  urlTpl: UrlTplTuple;
-  auth: {
-    rules: CtxMiddleware[];
-    errorMsg?: string;
-    error?: any;
-  };
-  routes: { [key: string]: IRoute };
+  pipes: IPipeResolveContext;
+  onBuild: Array<IRouterBuilderDefine>;
+  lifeCycle: Partial<IRouterLifeCycle>;
 }
 
 export interface IRouteMiddlewareDefine {
-  errorMsg?: string;
-  error?: any;
-  handler?(event: { error?: Error; msg?: string }): void;
+  handler: (error?: Error, msg?: string) => void;
 }
 
 export interface IRouterMiddlewareDefine extends IRouteMiddlewareDefine {

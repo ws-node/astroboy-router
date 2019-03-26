@@ -1,5 +1,24 @@
-import { Constructor } from "../metadata";
+import { Constructor, IRouter, IRoute, IRouterBuildContext } from "../metadata";
 import { routeMeta } from "./utils";
+
+export async function buildRouterInstance(prototype: any, methodName: string, router: IRouter, route: IRoute) {
+  const { lifeCycle } = router;
+  const onCreate = lifeCycle.onCreate || [];
+  if (onCreate.length === 0) onCreate.push(defaultOnCreate);
+  try {
+    for (const each of onCreate) {
+      await each({ router, route }, prototype);
+    }
+  } catch (error) {
+    // tslint:disable-next-line: no-console
+    console.error(error);
+    throw new Error("Create router class failed");
+  }
+}
+
+function defaultOnCreate({ router }: IRouterBuildContext, prototype: any) {
+  // DO NOTHING
+}
 
 /**
  * ## 初始化业务服务
@@ -20,7 +39,9 @@ export function routerBusinessCreate(service: Constructor<any> | undefined, prot
     const metaKey = routeMeta(key);
     try {
       Object.defineProperty(prototype, key, {
-        get() { return this[metaKey] || (this[metaKey] = new service(this.ctx)); },
+        get() {
+          return this[metaKey] || (this[metaKey] = new service(this.ctx));
+        },
         configurable: false,
         enumerable: false
       });
@@ -29,8 +50,8 @@ export function routerBusinessCreate(service: Constructor<any> | undefined, prot
     }
   });
   if (service) {
-    const oldInit = prototype.init || (() => { });
-    prototype.init = async function () {
+    const oldInit = prototype.init || (() => {});
+    prototype.init = async function() {
       await oldInit.bind(this)();
       this.business = new service(this.ctx);
     };
