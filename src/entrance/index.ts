@@ -63,7 +63,7 @@ export function createRouter(...args: any[]) {
         methodName,
         auth: {
           rules: extend ? [...router.auth.rules, ...rules] : rules,
-          errorMsg: errorMsg || router.auth.errorMsg || "Auth failed.",
+          errorMsg: errorMsg || router.auth.errorMsg || "Middleware failed.",
           error: error || router.auth.error
         },
         serviceCtor: route.service || service || undefined,

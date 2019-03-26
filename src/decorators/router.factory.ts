@@ -1,7 +1,7 @@
 import { IRouterFactory, IRouterMetaConfig, IController, UrlTplTuple } from "../metadata";
 import { tryGetRouter, routeConnect } from "./utils";
 import { ServiceFactory } from "./service.factory";
-import { AuthFactory } from "./auth.factory";
+import { MiddlewareFactory } from "./middleware.factory";
 import get from "lodash/get";
 
 /**
@@ -62,8 +62,8 @@ export function RouterFactory(...args: any[]) {
   const prefix = hasMetadata ? (<IRouterMetaConfig>meta).prefix : <string>meta;
   const apiPrefix = (hasMetadata ? (<IRouterMetaConfig>meta).apiPrefix : undefined) || "api";
   // 初始化router默认url template
-  const urlTpl = (hasMetadata ? (<IRouterMetaConfig>meta).urlTpl : undefined);
-  const routerTplTuple: UrlTplTuple = [(urlTpl && urlTpl.index), (urlTpl && urlTpl.api)];
+  const urlTpl = hasMetadata ? (<IRouterMetaConfig>meta).urlTpl : undefined;
+  const routerTplTuple: UrlTplTuple = [urlTpl && urlTpl.index, urlTpl && urlTpl.api];
   return function router<T extends typeof IController>(target: T) {
     const router = tryGetRouter(target.prototype);
     router.prefix = prefix;
@@ -75,13 +75,8 @@ export function RouterFactory(...args: any[]) {
       // 覆写当前路由的url template
       const tplKey = !route.index ? 1 : 0;
       if (!!route.urlTpl) tplTuple[tplKey] = route.urlTpl;
-      route.path = route.pathConfig.map((p: any) => routeConnect(
-        prefix,
-        getApiPrefix(p.sections, apiPrefix),
-        p.path,
-        route.index,
-        decideTpl(tplTuple, tplKey, p.urlTpl),
-        p.sections || {}),
+      route.path = route.pathConfig.map((p: any) =>
+        routeConnect(prefix, getApiPrefix(p.sections, apiPrefix), p.path, route.index, decideTpl(tplTuple, tplKey, p.urlTpl), p.sections || {})
       );
     });
     if (hasMetadata) {
@@ -90,12 +85,12 @@ export function RouterFactory(...args: any[]) {
       if (!!metadata.auth) {
         const { rules, metadata: m } = metadata.auth;
         if (!m) {
-          AuthFactory(rules)(target);
+          MiddlewareFactory(rules)(target);
         } else {
-          AuthFactory(rules, m)(target);
+          MiddlewareFactory(rules, m)(target);
         }
       }
     }
-    return <T>(target);
+    return <T>target;
   };
 }

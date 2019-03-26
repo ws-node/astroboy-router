@@ -2,38 +2,38 @@ import { CtxMiddleware, IMixinFactory, RouteAuthMetadata, IRouterDefine, IContro
 import { tryGetRouter, tryGetRoute } from "./utils";
 
 /**
- * ## 为Router/Route定义鉴权逻辑
+ * ## 为Router/Route定义Middleware逻辑
  * * 支持多个处理程序顺序执行
  * * 在任意一个处理程序失败后短路
  * @description
  * @author Big Mogician
- * @param {CtxMiddleware[]} guards
+ * @param {CtxMiddleware[]} middlewares
  * @returns {IMixinFactory}
  * @exports
  */
-export function AuthFactory(guards: CtxMiddleware[]): IMixinFactory;
+export function MiddlewareFactory(middlewares: CtxMiddleware[]): IMixinFactory;
 /**
- * ## 为Router/Route定义鉴权逻辑
+ * ## 为Router/Route定义Middleware逻辑
  * * 支持多个处理程序顺序执行
  * * 在任意一个处理程序失败后短路
  * * 支持自定义通用错误信息
  * * 支持route继承
  * @description
  * @author Big Mogician
- * @param {CtxMiddleware[]} guards
+ * @param {CtxMiddleware[]} middlewares
  * @param {RouteAuthMetadata} metadata
  * @returns {IMixinFactory}
  * @exports
  */
-export function AuthFactory(guards: CtxMiddleware[], metadata: RouteAuthMetadata): IMixinFactory;
-export function AuthFactory(arr: CtxMiddleware[], metadata: RouteAuthMetadata = {}) {
+export function MiddlewareFactory(middlewares: CtxMiddleware[], metadata: RouteAuthMetadata): IMixinFactory;
+export function MiddlewareFactory(middlewares: CtxMiddleware[], metadata: RouteAuthMetadata = {}) {
   return function routeAuth(target: IRouterDefine | typeof IController, propertyKey?: string, descriptor?: PropertyDescriptor) {
     const { extend = true, errorMsg, error } = metadata;
     if (propertyKey) {
       const { routes } = tryGetRouter(<IRouterDefine>target);
       const route = tryGetRoute(routes, propertyKey);
       route.auth = {
-        rules: arr,
+        rules: middlewares,
         extend: !!extend,
         errorMsg,
         error
@@ -41,8 +41,8 @@ export function AuthFactory(arr: CtxMiddleware[], metadata: RouteAuthMetadata = 
     } else {
       const router = tryGetRouter((<typeof IController>target).prototype);
       router.auth = {
-        rules: arr,
-        errorMsg: errorMsg || "Auth failed.",
+        rules: middlewares,
+        errorMsg: errorMsg || "Middleware failed.",
         error
       };
     }
@@ -50,16 +50,16 @@ export function AuthFactory(arr: CtxMiddleware[], metadata: RouteAuthMetadata = 
 }
 
 /**
- * ## 清空当前route的鉴权
- * * 配合`@Authorize()`使用
+ * ## 清空当前route的Middlewares
+ * * 配合`@Middlewares()`使用
  * @description
  * @author Big Mogician
  * @returns {IRouteFactory}
  * @exports
  */
-export function NoAuthFactory(): IRouteFactory;
-export function NoAuthFactory() {
+export function NoMiddlewareFactory(): IRouteFactory;
+export function NoMiddlewareFactory() {
   return function routeNoAuth(target: IRouterDefine, propertyKey: string) {
-    AuthFactory([], { extend: false })(target, propertyKey);
+    MiddlewareFactory([], { extend: false })(target, propertyKey);
   };
 }
