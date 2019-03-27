@@ -1,4 +1,4 @@
-import { METHOD, IRouteFactory, IRouterDefine, IRoutePathConfig, CtxMiddleware, PipeErrorHandler } from "../metadata";
+import { METHOD, IRouteFactory, IRouterDefine, IRoutePathConfig, IPipeProcess, PipeErrorHandler } from "../metadata";
 import { tryGetRouter, tryGetRoute } from "./utils";
 
 export interface CustomRouteOptions {
@@ -12,7 +12,7 @@ export interface CustomPipeOptions extends Partial<IPipeBaseCOnfig> {}
 interface IPipeBaseCOnfig {
   override: boolean;
   zIndex: "unshift" | "push";
-  rules: CtxMiddleware[];
+  rules: IPipeProcess[];
   handler: PipeErrorHandler;
 }
 

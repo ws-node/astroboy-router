@@ -1,5 +1,5 @@
 export * from "./entrance";
 export * from "./decorators";
-import { CtxMiddleware } from "./metadata";
+import { IPipeProcess } from "./metadata";
 
-export { CtxMiddleware };
+export { IPipeProcess as CtxMiddleware };

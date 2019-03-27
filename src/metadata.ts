@@ -19,7 +19,7 @@ export type METHOD = "GET" | "POST" | "PUT" | "DELETE";
 /** 未实现的路由方法 */
 export type RouteMethod = () => any;
 
-export type CtxMiddleware = (context: any) => Promise<boolean | Error> | boolean | Error;
+export type IPipeProcess<T = void> = (context: any) => Promise<T> | T;
 
 export type UrlTplTuple = [string | undefined, string | undefined];
 
@@ -70,7 +70,7 @@ export interface IRouterLifeCycle extends IRouteRunLifeCycle {
 export type PipeErrorHandler = (error?: Error, msg?: string) => void;
 
 export interface IPipeResolveContext {
-  rules: Array<CtxMiddleware>;
+  rules: Array<IPipeProcess>;
   handler?: PipeErrorHandler;
 }
 
