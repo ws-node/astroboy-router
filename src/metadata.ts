@@ -67,9 +67,11 @@ export interface IRouterLifeCycle extends IRouteRunLifeCycle {
   onCreate: ConstructorInitMethod[];
 }
 
+export type PipeErrorHandler = (error?: Error, msg?: string) => void;
+
 export interface IPipeResolveContext {
   rules: Array<CtxMiddleware>;
-  handler?: (error?: Error, msg?: string) => void;
+  handler?: PipeErrorHandler;
 }
 
 export interface IRouterMetaConfig {
@@ -102,7 +104,7 @@ export interface IRouter {
 }
 
 export interface IRouteMiddlewareDefine {
-  handler: (error?: Error, msg?: string) => void;
+  handler: PipeErrorHandler;
 }
 
 export interface IRouterMiddlewareDefine extends IRouteMiddlewareDefine {

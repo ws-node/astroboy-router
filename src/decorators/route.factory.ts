@@ -1,46 +1,51 @@
-import { METHOD, IRouteFactory, IRouterDefine, IRoutePathConfig } from "../metadata";
+import { METHOD, IRouteFactory, IRouterDefine, IRoutePathConfig, CtxMiddleware, PipeErrorHandler } from "../metadata";
 import { tryGetRouter, tryGetRoute } from "./utils";
 
-interface RouteOptions {
-  /** 路由命名，实现@Metadata相同能力 */
-  name: string;
-  /** 重置当前路由模板 */
-  tpl: string;
-  /** 提供当前路由模板的参数 */
-  sections?: { [key: string]: string };
-}
-
-interface CustonRouteOptions {
+export interface CustomRouteOptions {
   method: METHOD;
   tpls: (string | { tpl: string; sections?: { [key: string]: string } })[];
   name?: string;
 }
 
+export interface CustomPipeOptions extends Partial<IPipeBaseCOnfig> {}
+
+interface IPipeBaseCOnfig {
+  override: boolean;
+  zIndex: "unshift" | "push";
+  rules: CtxMiddleware[];
+  handler: PipeErrorHandler;
+}
+
 interface RouteBaseConfig {
   name?: string;
-  method: METHOD;
-  path: IRoutePathConfig[];
+  method?: METHOD;
+  path?: IRoutePathConfig[];
+  pipeConfigs?: Partial<IPipeBaseCOnfig>;
 }
 
 /**
  * ## 定义路由方法
- * * 支持多路径
- * * 支持定义METHOD
- * * 区分Index和API
  * * Route不公开，做后续扩展支持
  * @description
  * @author Big Mogician
  * @param {RouteBaseConfig} options
  * @returns {IRouteFactory}
  */
-function RouteFactory(options: RouteBaseConfig): IRouteFactory {
+export function RouteFactory(options: RouteBaseConfig): IRouteFactory {
   return function route(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     const { routes } = tryGetRouter(target);
     const route = tryGetRoute(routes, propertyKey);
-    const { method, path, name } = options;
-    route.method = [method];
-    route.pathConfig.push(...path);
-    route.name = route.name || name;
+    const { method, path = [], name, pipeConfigs = {} } = options;
+    const { handler, rules = [], zIndex = "push", override = false } = pipeConfigs;
+    route.method = !!method ? [method] : route.method;
+    route.name = name || route.name;
+    route.pipes.handler = handler || route.pipes.handler;
+    if (path.length > 0) {
+      route.pathConfig.push(...path);
+    }
+    if (rules.length > 0) {
+      route.pipes.rules[zIndex](...rules);
+    }
   };
 }
 
@@ -49,21 +54,36 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
  * @description
  * @author Big Mogician
  * @export
- * @param {CustonRouteOptions} options
+ * @param {CustomRouteOptions} options
  * @returns {IRouteFactory}
  * @exports
  */
-export function CustomRouteFactory(options: CustonRouteOptions): IRouteFactory {
+export function CustomRouteFactory(options: CustomRouteOptions): IRouteFactory {
   const method = options.method;
-  return function customApiRoute(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
-    if (options.name) MetadataFactory(options.name)(target, propertyKey, descriptor);
+  return function customRoute(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     options.tpls.forEach(item => {
       const [tpl, sections] = typeof item === "string" ? [item, {}] : [item.tpl, item.sections || {}];
       RouteFactory({
+        name: options.name,
         method,
         path: [{ path: undefined, sections, urlTpl: tpl }]
       })(target, propertyKey, descriptor);
     });
+  };
+}
+
+/**
+ * ## 自定义的管道
+ * @description
+ * @author Big Mogician
+ * @export
+ * @param {CustomPipeOptions} options
+ * @returns {IRouteFactory}
+ * @exports
+ */
+export function CustomPipeFactory(options: CustomPipeOptions): IRouteFactory {
+  return function customPipe(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
+    RouteFactory({ pipeConfigs: options })(target, propertyKey, descriptor);
   };
 }
 
