@@ -31,18 +31,21 @@ export interface IRouteLifeCycleMethod {
   <T = any>(ctor: IAstroboyBaseClass<T>): void | Promise<void>;
 }
 
-export interface IRouterBuildContext {
-  router: IRouter;
-  name?: string;
-  route?: IRoute;
+export interface IRouterBuildContext<P = void> {
+  router: IRouter<P>;
 }
 
-export interface IRouteBuilderDefine {
-  <T extends IRouterBuildContext = IRouterBuildContext>(context: T, prototype: any): void;
+export interface IRouteBuildContext<P = void> extends IRouterBuildContext<P> {
+  name: string;
+  route: IRoute<P>;
 }
 
-export interface IRouterCreateDefine {
-  <T extends IRouterBuildContext = IRouterBuildContext>(context: T, prototype: any): void;
+export interface IRouteBuilderDefine<T = IRouteBuildContext<void>> {
+  (context: T, prototype: any): void;
+}
+
+export interface IRouterCreateDefine<T = IRouterBuildContext<void>> {
+  (context: T, prototype: any): void;
 }
 
 export type LifeCycleRegister = <K extends keyof IRouterLifeCycle>(

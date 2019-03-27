@@ -1,4 +1,4 @@
-import { IRoute, IRouter, IRouterBuildContext } from "../metadata";
+import { IRoute, IRouter, IRouteBuildContext } from "../metadata";
 
 export function buildRouteMethod(prototype: any, methodName: string, router: IRouter, route: IRoute) {
   const { lifeCycle = {} } = router;
@@ -14,7 +14,7 @@ export function buildRouteMethod(prototype: any, methodName: string, router: IRo
   }
 }
 
-export function defaultOnBuild({ router, name = "" }: IRouterBuildContext, prototype: any) {
+export function defaultOnBuild({ router, name = "" }: IRouteBuildContext, prototype: any) {
   const { lifeCycle, pipes } = router;
   const descriptor = Object.getOwnPropertyDescriptor(prototype, name);
   if (!descriptor) throw new Error("Create route method failed: init an abstract route method without a service is not allowed.");
