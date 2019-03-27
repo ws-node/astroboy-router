@@ -28,7 +28,6 @@ export function RouterFactory(meta: string | IRouterMetaConfig) {
   let options: IRouterMetaConfig = <any>meta;
   if (typeof meta === "string") options = { group: meta };
   const { rules = [], handler = undefined } = options.pipes || {};
-  const { depedencies = [] } = options;
   return function router<T extends typeof IController>(target: T) {
     const router = tryGetRouter(target.prototype);
     router.group = options.group || router.group;
@@ -40,7 +39,6 @@ export function RouterFactory(meta: string | IRouterMetaConfig) {
       ...router.extensions,
       ...options.extensions
     };
-    depedencies.forEach(([ctor, name]) => router.dependency.set(ctor, name));
     Object.keys(router.routes).forEach(key => {
       const route = router.routes[key];
       if (route.resolved) return;

@@ -80,7 +80,6 @@ export interface IPipeResolveContext<T = void> {
 export interface IRouterMetaConfig<P = void> {
   group?: string;
   pipes?: IPipeResolveContext<P>;
-  depedencies?: Array<[Constructor<any>, string]>;
   extensions?: MapLike<any>;
   register?(process: IRouterEvents): void;
 }
