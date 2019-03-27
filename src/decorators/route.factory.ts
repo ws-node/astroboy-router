@@ -1,10 +1,11 @@
-import { METHOD, IRouteFactory, IRouterDefine, IRoutePathConfig, IPipeProcess, PipeErrorHandler } from "../metadata";
+import { METHOD, IRouteFactory, IRouterDefine, IRoutePathConfig, IPipeProcess, PipeErrorHandler, MapLike } from "../metadata";
 import { tryGetRouter, tryGetRoute } from "./utils";
 
 export interface CustomRouteOptions {
   method?: METHOD;
   tpls?: (string | { tpl: string; sections?: { [key: string]: string } })[];
   name?: string;
+  extensions?: any;
 }
 
 export interface CustomPipeOptions extends Partial<IPipeBaseCOnfig> {}
@@ -21,6 +22,7 @@ interface RouteBaseConfig {
   method?: METHOD;
   path?: IRoutePathConfig[];
   pipeConfigs?: Partial<IPipeBaseCOnfig>;
+  extensions?: MapLike<any>;
 }
 
 /**
@@ -35,11 +37,15 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
   return function route(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     const { routes } = tryGetRouter(target);
     const route = tryGetRoute(routes, propertyKey);
-    const { method, path = [], name, pipeConfigs = {} } = options;
+    const { method, path = [], name, pipeConfigs = {}, extensions = {} } = options;
     const { handler, rules = [], zIndex = "push", override = false } = pipeConfigs;
     route.method = !!method ? [method] : route.method;
     route.name = name || route.name;
     route.pipes.handler = handler || route.pipes.handler;
+    route.extensions = {
+      ...route.extensions,
+      ...extensions
+    };
     if (path.length > 0) {
       route.pathConfig.push(...path);
     }

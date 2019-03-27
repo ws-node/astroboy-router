@@ -21,13 +21,14 @@ export function tryGetRouter(target: IRouterDefine | IController) {
       group: "",
       dependency: new Map(),
       routes: {},
+      extensions: {},
+      onCreate: [defaultOnCreate],
       lifeCycle: {
         onBuild: [defaultOnBuild],
         onEnter: [],
         onPipes: [],
         onQuit: []
       },
-      onCreate: [defaultOnCreate],
       pipes: {
         rules: []
       }
@@ -55,6 +56,7 @@ export function tryGetRoute(routes: { [key: string]: IRoute }, key: string) {
       name: undefined,
       method: [],
       path: [],
+      extensions: {},
       pathConfig: [],
       pipes: {
         rules: [],

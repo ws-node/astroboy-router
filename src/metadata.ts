@@ -80,6 +80,7 @@ export interface IPipeResolveContext<T = void> {
 export interface IRouterMetaConfig<P = void> {
   group: string;
   pipes?: IPipeResolveContext<P>;
+  extensions?: MapLike<any>;
   register?(process: IRouterEvents): void;
 }
 
@@ -95,6 +96,7 @@ export interface IRoute<P = void> {
   path: Array<string>;
   pathConfig: Array<IRoutePathConfig>;
   pipes: IPipeResolveContext<P> & { extend: boolean };
+  extensions: MapLike<any>;
 }
 
 export interface IRouter<P = void> {
@@ -104,6 +106,7 @@ export interface IRouter<P = void> {
   pipes: IPipeResolveContext<P>;
   onCreate: Array<IRouterCreateDefine>;
   lifeCycle: Partial<IRouterLifeCycle>;
+  extensions: MapLike<any>;
 }
 
 export interface IRoutePipeDefine {
