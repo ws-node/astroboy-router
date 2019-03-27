@@ -24,33 +24,32 @@ export function RouterFactory(prefix: string): IRouterFactory;
  * @exports
  */
 export function RouterFactory<S>(metadata: IRouterMetaConfig): IRouterFactory;
-export function RouterFactory(...args: any[]) {
-  const meta = args[0];
-  const hasMetadata = typeof meta !== "string";
-  const group = hasMetadata ? (<IRouterMetaConfig>meta).group : <string>meta;
-  const register = hasMetadata ? (<IRouterMetaConfig>meta).register : noop;
-  const pipes: Partial<IPipeResolveContext> = hasMetadata ? (<IRouterMetaConfig>meta).pipes || {} : {};
-  const extensions = hasMetadata ? (<IRouterMetaConfig>meta).extensions || {} : {};
+export function RouterFactory(meta: string | IRouterMetaConfig) {
+  let options: IRouterMetaConfig = <any>meta;
+  if (typeof meta === "string") options = { group: meta };
+  const { rules = [], handler = undefined } = options.pipes || {};
+  const { depedencies = [] } = options;
   return function router<T extends typeof IController>(target: T) {
     const router = tryGetRouter(target.prototype);
-    router.group = group || router.group;
+    router.group = options.group || router.group;
     router.pipes = {
-      rules: [...router.pipes.rules, ...(pipes.rules || [])],
-      handler: pipes.handler || router.pipes.handler
+      rules: [...router.pipes.rules, ...(rules || [])],
+      handler: handler || router.pipes.handler
     };
     router.extensions = {
       ...router.extensions,
-      ...extensions
+      ...options.extensions
     };
+    depedencies.forEach(([ctor, name]) => router.dependency.set(ctor, name));
     Object.keys(router.routes).forEach(key => {
       const route = router.routes[key];
       if (route.resolved) return;
-      readPath(group, route);
+      readPath(router.group, route);
       readPipes(router, route);
       route.resolved = true;
     });
-    if (register) {
-      register({
+    if (options.register) {
+      options.register({
         lifecycle(name, resolver, reset = false) {
           let lifes = router.lifeCycle[name];
           if (!lifes) lifes = router.lifeCycle[name] = [];
