@@ -1,4 +1,4 @@
-import { IRouterFactory, IRouterMetaConfig, IController, IRouterLifeCycle, IPipeResolveContext } from "../metadata";
+import { IRouterFactory, IRouterMetaConfig, IController, IPipeResolveContext } from "../metadata";
 import { tryGetRouter, readPath, readPipes } from "./utils";
 
 const noop = () => {};
@@ -33,10 +33,10 @@ export function RouterFactory(...args: any[]) {
   const extensions = hasMetadata ? (<IRouterMetaConfig>meta).extensions || {} : {};
   return function router<T extends typeof IController>(target: T) {
     const router = tryGetRouter(target.prototype);
-    router.group = group;
+    router.group = group || router.group;
     router.pipes = {
-      rules: pipes.rules || [],
-      handler: pipes.handler
+      rules: [...router.pipes.rules, ...(pipes.rules || [])],
+      handler: pipes.handler || router.pipes.handler
     };
     router.extensions = {
       ...router.extensions,
@@ -44,8 +44,10 @@ export function RouterFactory(...args: any[]) {
     };
     Object.keys(router.routes).forEach(key => {
       const route = router.routes[key];
+      if (route.resolved) return;
       readPath(group, route);
       readPipes(router, route);
+      route.resolved = true;
     });
     if (register) {
       register({

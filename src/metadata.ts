@@ -91,6 +91,7 @@ export interface IRoutePathConfig {
 }
 
 export interface IRoute<P = void> {
+  resolved: boolean;
   name: Unsure<string>;
   method: METHOD[];
   path: Array<string>;

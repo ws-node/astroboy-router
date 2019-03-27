@@ -56,6 +56,7 @@ export function tryGetRoute(routes: { [key: string]: IRoute }, key: string) {
   let route = routes[key];
   if (!route) {
     route = routes[key] = {
+      resolved: false,
       name: undefined,
       method: [],
       path: [],
