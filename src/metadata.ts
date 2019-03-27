@@ -70,7 +70,7 @@ export interface IRouterLifeCycle extends IRouteRunLifeCycle {
   onBuild: IRouteBuilderDefine[];
 }
 
-export type PipeErrorHandler = (error?: Error, msg?: string) => void;
+export type PipeErrorHandler = (context: any, error?: Error) => void;
 
 export interface IPipeResolveContext<T = void> {
   rules: Array<IPipeProcess<T>>;

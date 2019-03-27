@@ -61,7 +61,7 @@ export function createLifeHooks(lifeCycle: Partial<IRouterLifeCycle>) {
         if (!pipes.handler) {
           throw error;
         }
-        pipes.handler(error, error.msg);
+        pipes.handler(this, error);
       }
     }
   };
