@@ -85,10 +85,10 @@ export function readPath(group: string, route: IRoute) {
         const realValue = sections[key];
         if (realValue === "" || realValue === undefined) {
           // 去掉当前section
-          if (urlToExport.startsWith("/")) {
+          if (urlToExport.indexOf(`/${placeholder}`) >= 0) {
             urlToExport = urlToExport.replace(`/${placeholder}`, "");
           } else {
-            urlToExport = urlToExport.replace(`${placeholder}/`, "");
+            urlToExport = urlToExport.replace(placeholder, "");
           }
         } else if (realValue === "&nbsp;") {
           // 明确需要保留当前section，场景应该比较少
