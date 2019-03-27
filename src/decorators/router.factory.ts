@@ -51,7 +51,7 @@ export function RouterFactory(meta: string | IRouterMetaConfig) {
         lifecycle(name, resolver, reset = false) {
           let lifes = router.lifeCycle[name];
           if (!lifes) lifes = router.lifeCycle[name] = [];
-          return !reset ? (<any[]>lifes).push(resolver) : (lifes = [<any>resolver]);
+          return !reset ? (<any[]>lifes).push(resolver) : (router.lifeCycle[name] = [<any>resolver]);
         },
         create(resolver, reset = false) {
           if (!router.onCreate) router.onCreate = [];

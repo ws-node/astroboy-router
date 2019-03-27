@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    /* 简单 debug 文件. 在开启 inspect 与 mock 的情况下可用 */
+    /* qa 环境: yarn start */
+    /* pre 环境: yarn start:pre */
+    /* daily 环境: yarn start:daily */
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach-Debug",
+      "port": 9229,
+      "restart": true
+    }
+  ]
+}
