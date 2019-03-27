@@ -69,14 +69,14 @@ export interface IRouterLifeCycle extends IRouteRunLifeCycle {
 
 export type PipeErrorHandler = (error?: Error, msg?: string) => void;
 
-export interface IPipeResolveContext {
-  rules: Array<IPipeProcess>;
+export interface IPipeResolveContext<T = void> {
+  rules: Array<IPipeProcess<T>>;
   handler?: PipeErrorHandler;
 }
 
-export interface IRouterMetaConfig {
+export interface IRouterMetaConfig<P = void> {
   group: string;
-  pipes?: IPipeResolveContext;
+  pipes?: IPipeResolveContext<P>;
   register?(process: IRouterEvents): void;
 }
 
@@ -86,28 +86,28 @@ export interface IRoutePathConfig {
   sections: { [key: string]: string };
 }
 
-export interface IRoute {
+export interface IRoute<P = void> {
   name: Unsure<string>;
   method: METHOD[];
   path: Array<string>;
   pathConfig: Array<IRoutePathConfig>;
-  pipes: IPipeResolveContext & { extend: boolean };
+  pipes: IPipeResolveContext<P> & { extend: boolean };
 }
 
-export interface IRouter {
+export interface IRouter<P = void> {
   group: string;
   routes: MapLike<IRoute>;
   dependency: Map<Constructor<any>, string>;
-  pipes: IPipeResolveContext;
+  pipes: IPipeResolveContext<P>;
   onCreate: Array<IRouterCreateDefine>;
   lifeCycle: Partial<IRouterLifeCycle>;
 }
 
-export interface IRouteMiddlewareDefine {
+export interface IRoutePipeDefine {
   handler: PipeErrorHandler;
 }
 
-export interface IRouterMiddlewareDefine extends IRouteMiddlewareDefine {
+export interface IRouterPipeDefine extends IRoutePipeDefine {
   extend?: boolean;
 }
 
