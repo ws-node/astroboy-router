@@ -10,7 +10,7 @@ export interface Constructor<T> {
   new (...args: any[]): T;
 }
 
-interface MapLike<T> {
+export interface MapLike<T> {
   [prop: string]: T;
 }
 
@@ -27,7 +27,7 @@ export interface IAstroboyBaseClass<T = any> {
   ctx: T;
 }
 
-interface LifeCycleMethod {
+export interface LifeCycleMethod {
   <T = any>(ctor: IAstroboyBaseClass<T>): void | Promise<void>;
 }
 
@@ -37,27 +37,27 @@ export interface IRouterBuildContext {
   route?: IRoute;
 }
 
-interface IRouterBuilderDefine {
+export interface IRouterBuilderDefine {
   <T extends IRouterBuildContext = IRouterBuildContext>(context: T, prototype: any): void;
 }
 
-interface ConstructorInitMethod {
+export interface ConstructorInitMethod {
   <T extends IRouterBuildContext = IRouterBuildContext>(context: T, prototype: any): void;
 }
 
-type LifeCycleRegister = <K extends keyof IRouterLifeCycle>(
+export type LifeCycleRegister = <K extends keyof IRouterLifeCycle>(
   name: K,
   resolver: K extends "onCreate" ? ConstructorInitMethod : LifeCycleMethod,
   reset?: boolean
 ) => void;
-type BuilderRegister = (resolver: IRouterBuilderDefine, reset?: boolean) => void;
+export type BuilderRegister = (resolver: IRouterBuilderDefine, reset?: boolean) => void;
 
-interface IRouterEvents {
+export interface IRouterEvents {
   lifecycle: LifeCycleRegister;
   onbuild: BuilderRegister;
 }
 
-interface IRouteRunLifeCycle {
+export interface IRouteRunLifeCycle {
   onPipes: LifeCycleMethod[];
   onEnter: LifeCycleMethod[];
   onQuit: LifeCycleMethod[];
@@ -130,8 +130,8 @@ export type IRouteFactory = <T>(target: T, propertyKey: string, descriptor?: Pro
 export type IRouterFactory = <T>(target: T) => any;
 export type IMixinFactory = <T>(target: T, propertyKey?: string) => any;
 
-type RequestParamsInvokeFactory = (instance: IController) => () => any;
-type ResponseBodyInvokeFactory = (instance: IController) => <T>(code: any, msg: any, data: T) => any;
+export type RequestParamsInvokeFactory = (instance: IController) => () => any;
+export type ResponseBodyInvokeFactory = (instance: IController) => <T>(code: any, msg: any, data: T) => any;
 
 export interface BodyResolve {
   getQuery: RequestParamsInvokeFactory;
