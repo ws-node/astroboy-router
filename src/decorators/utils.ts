@@ -12,7 +12,9 @@ import { RouterMap } from "../core";
  * @returns
  * @exports
  */
-export function tryGetRouter(target: IRouterDefine | IController) {
+export function tryGetRouter(target: IRouterDefine | IController): IRouter<any>;
+export function tryGetRouter<K extends keyof IRouter>(target: IRouterDefine | IController, key: K): IRouter<any>[K];
+export function tryGetRouter(target: IRouterDefine | IController, key?: string): any {
   const routerSaved = RouterMap.get(target);
   let router: IRouter;
   router = <IRouter>routerSaved;
@@ -36,7 +38,8 @@ export function tryGetRouter(target: IRouterDefine | IController) {
     RouterMap.set(target, router);
   }
   target["@router"] = router;
-  return router;
+  if (!key) return router;
+  return (<any>router)[key];
 }
 
 /**

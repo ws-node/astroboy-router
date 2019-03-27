@@ -8,7 +8,9 @@ export interface CustomRouteOptions {
   extensions?: any;
 }
 
-export interface CustomPipeOptions extends Partial<IPipeBaseCOnfig> {}
+export interface CustomPipeOptions extends Partial<IPipeBaseCOnfig> {
+  extensions?: any;
+}
 
 interface IPipeBaseCOnfig {
   override: boolean;
@@ -91,26 +93,8 @@ export function CustomRouteFactory(options: CustomRouteOptions): IRouteFactory {
  * @exports
  */
 export function CustomPipeFactory(options: CustomPipeOptions): IRouteFactory {
+  const { extensions, ...others } = options;
   return function customPipe(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
-    RouteFactory({ pipeConfigs: options })(target, propertyKey, descriptor);
-  };
-}
-
-/**
- * #### deprecated : 使用@Index或者@API的最后一个options参数代替
- * ## 路由元数据
- * * 目前支持为路由命名
- * @deprecated
- * @description
- * @author Big Mogician
- * @param {string} alias
- * @returns {RouteFactory}
- * @exports
- */
-export function MetadataFactory(alias: string): IRouteFactory {
-  return function routeMetadata(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
-    const { routes } = tryGetRouter(target);
-    const route = tryGetRoute(routes, propertyKey);
-    route.name = alias;
+    RouteFactory({ pipeConfigs: others, extensions })(target, propertyKey, descriptor);
   };
 }
