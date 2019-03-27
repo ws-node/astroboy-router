@@ -1,4 +1,6 @@
-import { IRouterDefine, IController, IRouter, IRoute, IPipeResolveContext } from "../metadata";
+import { IRouterDefine, IController, IRouter, IRoute } from "../metadata";
+import { defaultOnBuild } from "../entrance/route-implements";
+import { defaultOnCreate } from "../entrance/service-init";
 import { RouterMap } from "../core";
 
 /**
@@ -19,8 +21,13 @@ export function tryGetRouter(target: IRouterDefine | IController) {
       group: "",
       dependency: new Map(),
       routes: {},
-      lifeCycle: {},
-      onBuild: [],
+      lifeCycle: {
+        onCreate: [defaultOnCreate],
+        onEnter: [],
+        onPipes: [],
+        onQuit: []
+      },
+      onBuild: [defaultOnBuild],
       pipes: {
         rules: []
       }

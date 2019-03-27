@@ -1,9 +1,7 @@
-import { IPipeProcess, Constructor, BodyResolve, METHOD, IRoute, IRouter, IRouterBuildContext } from "../metadata";
-import { routeMeta } from "./utils";
+import { IRoute, IRouter, IRouterBuildContext } from "../metadata";
 
 export function buildRouteMethod(prototype: any, methodName: string, router: IRouter, route: IRoute) {
   const { onBuild = [] } = router;
-  if (onBuild.length === 0) onBuild.push(defaultOnBuild);
   try {
     for (const eachBuild of onBuild) {
       eachBuild({ router, route, name: methodName }, prototype);
@@ -15,7 +13,7 @@ export function buildRouteMethod(prototype: any, methodName: string, router: IRo
   }
 }
 
-function defaultOnBuild({ router, name = "" }: IRouterBuildContext, prototype: any) {
+export function defaultOnBuild({ router, name = "" }: IRouterBuildContext, prototype: any) {
   const { lifeCycle, pipes } = router;
   const descriptor = Object.getOwnPropertyDescriptor(prototype, name);
   if (!descriptor) throw new Error("Create route method failed: init an abstract route method without a service is not allowed.");
