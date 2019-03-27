@@ -87,6 +87,8 @@ export function readPath(group: string, route: IRoute) {
           // 去掉当前section
           if (urlToExport.indexOf(`/${placeholder}`) >= 0) {
             urlToExport = urlToExport.replace(`/${placeholder}`, "");
+          } else if (urlToExport.indexOf(`${placeholder}/`) >= 0) {
+            urlToExport = urlToExport.replace(`${placeholder}/`, "");
           } else {
             urlToExport = urlToExport.replace(placeholder, "");
           }
