@@ -40,7 +40,7 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
     const { routes } = tryGetRouter(target);
     const route = tryGetRoute(routes, propertyKey);
     const { method, path = [], name, pipeConfigs = {}, extensions = {} } = options;
-    const { handler, rules = [], zIndex = "push", override = false } = pipeConfigs;
+    const { handler, rules, zIndex = "push", override = undefined } = pipeConfigs;
     route.method = !!method ? [method] : route.method;
     route.name = name || route.name;
     route.pipes.handler = handler || route.pipes.handler;
@@ -51,6 +51,7 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
     if (path.length > 0) {
       route.pathConfig.push(...path);
     }
+    if (!rules) return;
     if (!override) {
       route.pipes.extend = true;
       route.pipes.rules[zIndex](...rules);
