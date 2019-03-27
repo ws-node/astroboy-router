@@ -14,10 +14,11 @@ export function buildRouteMethod(prototype: any, methodName: string, router: IRo
   }
 }
 
-export function defaultOnBuild({ router, name = "" }: IRouteBuildContext, prototype: any) {
+export function defaultOnBuild({ router, route, name = "" }: IRouteBuildContext, prototype: any) {
   const descriptor = Object.getOwnPropertyDescriptor(prototype, name);
   if (!descriptor) throw new Error("Create route method failed: no method found.");
-  const { lifeCycle, pipes } = router;
+  const { lifeCycle } = router;
+  const { pipes } = route;
   const needPipe = pipes.rules.length > 0;
   const needOnPipe = (lifeCycle.onPipes || []).length > 0;
   const needOnEnter = (lifeCycle.onEnter || []).length > 0;
