@@ -2,8 +2,8 @@ import { METHOD, IRouteFactory, IRouterDefine, IRoutePathConfig, IPipeProcess, P
 import { tryGetRouter, tryGetRoute } from "./utils";
 
 export interface CustomRouteOptions {
-  method: METHOD;
-  tpls: (string | { tpl: string; sections?: { [key: string]: string } })[];
+  method?: METHOD;
+  tpls?: (string | { tpl: string; sections?: { [key: string]: string } })[];
   name?: string;
 }
 
@@ -31,7 +31,7 @@ interface RouteBaseConfig {
  * @param {RouteBaseConfig} options
  * @returns {IRouteFactory}
  */
-export function RouteFactory(options: RouteBaseConfig): IRouteFactory {
+function RouteFactory(options: RouteBaseConfig): IRouteFactory {
   return function route(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     const { routes } = tryGetRouter(target);
     const route = tryGetRoute(routes, propertyKey);
@@ -63,16 +63,15 @@ export function RouteFactory(options: RouteBaseConfig): IRouteFactory {
  * @exports
  */
 export function CustomRouteFactory(options: CustomRouteOptions): IRouteFactory {
-  const method = options.method;
+  const { method, name, tpls = [] } = options;
   return function customRoute(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
-    options.tpls.forEach(item => {
-      const [tpl, sections] = typeof item === "string" ? [item, {}] : [item.tpl, item.sections || {}];
-      RouteFactory({
-        name: options.name,
-        method,
-        path: [{ path: undefined, sections, urlTpl: tpl }]
-      })(target, propertyKey, descriptor);
-    });
+    RouteFactory({
+      name,
+      method,
+      path: tpls.map(item =>
+        typeof item === "string" ? { path: undefined, sections: {}, urlTpl: item } : { path: undefined, sections: item.sections || {}, urlTpl: item.tpl }
+      )
+    })(target, propertyKey, descriptor);
   };
 }
 
