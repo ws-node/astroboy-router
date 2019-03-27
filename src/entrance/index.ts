@@ -41,13 +41,11 @@ export function createRouter(...args: any[]) {
   const router = <IRouter>ctor.prototype["@router"];
   // 未经装饰，不符合Router的要求，终止应用程序
   if (!router) throw new Error(`Create router failed : invalid router controller [${ctor && (<any>ctor).name}]`);
-  // const service = router.service;
-  // routerBusinessCreate(service, prototype, router.dependency);
+  buildRouterInstance(prototype, router);
   const result: (string | string[])[][] = [];
   for (const methodName in router.routes) {
     const route = router.routes[methodName];
     const allRouteMethods: (string | string[])[][] = [];
-    buildRouterInstance(prototype, router);
     route.method.forEach(method => {
       const routeArr: (string | string[])[] = [];
       if (!!route.name) routeArr.push(route.name);
