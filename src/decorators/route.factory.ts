@@ -43,8 +43,12 @@ export function RouteFactory(options: RouteBaseConfig): IRouteFactory {
     if (path.length > 0) {
       route.pathConfig.push(...path);
     }
-    if (rules.length > 0) {
+    if (!override) {
+      route.pipes.extend = true;
       route.pipes.rules[zIndex](...rules);
+    } else {
+      route.pipes.extend = false;
+      route.pipes.rules = rules;
     }
   };
 }
