@@ -27,7 +27,7 @@ export interface IAstroboyBaseClass<T = any> {
   ctx: T;
 }
 
-export interface LifeCycleMethod {
+export interface IRouteLifeCycleMethod {
   <T = any>(ctor: IAstroboyBaseClass<T>): void | Promise<void>;
 }
 
@@ -37,34 +37,34 @@ export interface IRouterBuildContext {
   route?: IRoute;
 }
 
-export interface IRouterBuilderDefine {
+export interface IRouteBuilderDefine {
   <T extends IRouterBuildContext = IRouterBuildContext>(context: T, prototype: any): void;
 }
 
-export interface ConstructorInitMethod {
+export interface IRouterCreateDefine {
   <T extends IRouterBuildContext = IRouterBuildContext>(context: T, prototype: any): void;
 }
 
 export type LifeCycleRegister = <K extends keyof IRouterLifeCycle>(
   name: K,
-  resolver: K extends "onCreate" ? ConstructorInitMethod : LifeCycleMethod,
+  resolver: K extends "onBuild" ? IRouteBuilderDefine : IRouteLifeCycleMethod,
   reset?: boolean
 ) => void;
-export type BuilderRegister = (resolver: IRouterBuilderDefine, reset?: boolean) => void;
+export type OnCreateRegister = (resolver: IRouterCreateDefine, reset?: boolean) => void;
 
 export interface IRouterEvents {
   lifecycle: LifeCycleRegister;
-  onbuild: BuilderRegister;
+  create: OnCreateRegister;
 }
 
 export interface IRouteRunLifeCycle {
-  onPipes: LifeCycleMethod[];
-  onEnter: LifeCycleMethod[];
-  onQuit: LifeCycleMethod[];
+  onPipes: IRouteLifeCycleMethod[];
+  onEnter: IRouteLifeCycleMethod[];
+  onQuit: IRouteLifeCycleMethod[];
 }
 
 export interface IRouterLifeCycle extends IRouteRunLifeCycle {
-  onCreate: ConstructorInitMethod[];
+  onBuild: IRouteBuilderDefine[];
 }
 
 export type PipeErrorHandler = (error?: Error, msg?: string) => void;
@@ -99,7 +99,7 @@ export interface IRouter {
   routes: MapLike<IRoute>;
   dependency: Map<Constructor<any>, string>;
   pipes: IPipeResolveContext;
-  onBuild: Array<IRouterBuilderDefine>;
+  onCreate: Array<IRouterCreateDefine>;
   lifeCycle: Partial<IRouterLifeCycle>;
 }
 

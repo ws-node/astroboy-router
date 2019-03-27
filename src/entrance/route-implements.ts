@@ -1,7 +1,8 @@
 import { IRoute, IRouter, IRouterBuildContext } from "../metadata";
 
 export function buildRouteMethod(prototype: any, methodName: string, router: IRouter, route: IRoute) {
-  const { onBuild = [] } = router;
+  const { lifeCycle = {} } = router;
+  const onBuild = lifeCycle.onBuild || [];
   try {
     for (const eachBuild of onBuild) {
       eachBuild({ router, route, name: methodName }, prototype);

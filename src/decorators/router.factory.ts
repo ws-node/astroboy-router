@@ -49,9 +49,9 @@ export function RouterFactory(...args: any[]) {
           if (!lifes) lifes = router.lifeCycle[name] = [];
           return !reset ? (<any[]>lifes).push(resolver) : (lifes = [<any>resolver]);
         },
-        onbuild(resolver, reset = false) {
-          if (!router.onBuild) router.onBuild = [];
-          return !reset ? router.onBuild.push(resolver) : (router.onBuild = [resolver]);
+        create(resolver, reset = false) {
+          if (!router.onCreate) router.onCreate = [];
+          return !reset ? router.onCreate.push(resolver) : (router.onCreate = [resolver]);
         }
       });
     }

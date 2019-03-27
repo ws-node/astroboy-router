@@ -22,12 +22,12 @@ export function tryGetRouter(target: IRouterDefine | IController) {
       dependency: new Map(),
       routes: {},
       lifeCycle: {
-        onCreate: [defaultOnCreate],
+        onBuild: [defaultOnBuild],
         onEnter: [],
         onPipes: [],
         onQuit: []
       },
-      onBuild: [defaultOnBuild],
+      onCreate: [defaultOnCreate],
       pipes: {
         rules: []
       }

@@ -1,8 +1,7 @@
 import { IRouter, IRouterBuildContext } from "../metadata";
 
 export function buildRouterInstance(prototype: any, router: IRouter) {
-  const { lifeCycle } = router;
-  const onCreate = lifeCycle.onCreate || [];
+  const { onCreate = [] } = router;
   try {
     for (const each of onCreate) {
       each({ router }, prototype);
