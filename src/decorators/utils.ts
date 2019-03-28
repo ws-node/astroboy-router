@@ -1,11 +1,11 @@
 import { IRouterDefine, IController, IRouter, IRoute } from "../metadata";
-import { defaultOnBuild } from "../entrance/route-implements";
-import { defaultOnCreate } from "../entrance/service-init";
+import { defaultOnBuild } from "../entrance/build";
+import { defaultOnCreate } from "../entrance/create";
 import { RouterMap } from "../core";
 
 /**
  * ## 获取router配置参数
- * * 如果是第一次配置，先做存储
+ * * 如果是第一次配置，会先做初始化和存储
  * @description
  * @author Big Mogician
  * @param {(IRouterDefine | IController)} target 控制器原型
@@ -44,7 +44,7 @@ export function tryGetRouter(target: IRouterDefine | IController, key?: string):
 
 /**
  * ## 获取route配置参数
- * * 如果是第一次配置当前路由项，先做初始化
+ * * 如果是第一次配置当前路由项，会先做初始化和存储
  * @description
  * @author Big Mogician
  * @param {{ [key: string]: IRoute }} routes
@@ -52,22 +52,31 @@ export function tryGetRouter(target: IRouterDefine | IController, key?: string):
  * @returns
  * @exports
  */
-export function tryGetRoute(routes: { [key: string]: IRoute }, key: string) {
-  let route = routes[key];
+export function tryGetRoute(target: IRouterDefine | IController, key: string): IRoute;
+export function tryGetRoute<K extends keyof IRoute>(target: IRouterDefine | IController, key: string, subKey: K): IRoute[K];
+export function tryGetRoute(routes: { [key: string]: IRoute }, key: string): IRoute;
+export function tryGetRoute<K extends keyof IRoute>(routes: { [key: string]: IRoute }, key: string, subKey: K): IRoute;
+export function tryGetRoute(options: any, key: string, subKey?: string) {
+  if (!!options.constructor) options = tryGetRouter(options).routes;
+  let route = options[key];
   if (!route) {
-    route = routes[key] = {
+    route = options[key] = {
       resolved: false,
       name: undefined,
       method: [],
       path: [],
       extensions: {},
       pathConfig: [],
+      args: {
+        queue: []
+      },
       pipes: {
         rules: [],
         extend: true
       }
     };
   }
+  if (!!subKey) return route[subKey];
   return route;
 }
 

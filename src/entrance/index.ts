@@ -1,10 +1,7 @@
 /// <reference types="@types/koa-router"/>
 import { IRouter, IControllerConstructor } from "../metadata";
-import { buildRouteMethod } from "./route-implements";
-import { buildRouterInstance } from "./service-init";
-// import { routerBusinessCreate } from "./service-init";
-// import { routeMethodImplements } from "./route-implements";
-// import { resolveDefaultBodyParser } from "./utils";
+import { buildRouteMethod } from "./build";
+import { buildRouterInstance } from "./create";
 
 interface RouterOptions {
   router: IControllerConstructor;

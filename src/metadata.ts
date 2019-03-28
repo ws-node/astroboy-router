@@ -16,12 +16,16 @@ export interface MapLike<T> {
 
 export type METHOD = "GET" | "POST" | "PUT" | "DELETE";
 
+export type ARGS = "params" | "body" | "query";
+
 /** 未实现的路由方法 */
 export type RouteMethod = () => any;
 
 export type IPipeProcess<T = void> = (context: any) => Promise<T> | T;
 
-export type UrlTplTuple = [string | undefined, string | undefined];
+export type ArgsResolver<T = any, R = any> = (source: T) => R;
+
+export type ArgsFactory<T = any> = (target: T, propertyKey: string, index: number) => void;
 
 export interface IAstroboyBaseClass<T = any> {
   ctx: T;
@@ -90,6 +94,23 @@ export interface IRoutePathConfig {
   sections: { [key: string]: string };
 }
 
+export interface IArgsOptions {
+  transform: ArgsResolver;
+  useStatic: boolean;
+}
+
+export interface IRouteArgument {
+  type: ARGS;
+  index: number;
+  resolver?: ArgsResolver;
+  static?: boolean;
+  ctor?: any;
+}
+
+export interface IRouteArguContent {
+  queue: IRouteArgument[];
+}
+
 export interface IRoute<P = void> {
   resolved: boolean;
   name: Unsure<string>;
@@ -97,6 +118,7 @@ export interface IRoute<P = void> {
   path: Array<string>;
   pathConfig: Array<IRoutePathConfig>;
   pipes: IPipeResolveContext<P> & { extend: boolean };
+  args: IRouteArguContent;
   extensions: MapLike<any>;
 }
 
