@@ -1,35 +1,34 @@
-import { METHOD, IRouteFactory, RouterDefine, RoutePathConfig } from "../metadata";
+import { METHOD, IRouteFactory, IRouterDefine, IRoutePathConfig, IPipeProcess, PipeErrorHandler, MapLike } from "../metadata";
 import { tryGetRouter, tryGetRoute } from "./utils";
 
-interface RouteOptions {
-  /** 路由命名，实现@Metadata相同能力 */
-  name: string;
-  /** 重置当前路由模板 */
-  tpl: string;
-  /** 提供当前路由模板的参数 */
-  sections?: { [key: string]: string };
+export interface CustomRouteOptions {
+  method?: METHOD;
+  tpls?: (string | { tpl: string; sections?: { [key: string]: string } })[];
+  name?: string;
+  extensions?: any;
 }
 
-interface CustonRouteOptions {
-  method: METHOD;
-  tpls: (string | { tpl: string; sections?: { [key: string]: string } })[];
-  name?: string;
-  isIndex?: boolean;
+export interface CustomPipeOptions extends Partial<IPipeBaseCOnfig> {
+  extensions?: any;
+}
+
+interface IPipeBaseCOnfig {
+  override: boolean;
+  zIndex: "unshift" | "push";
+  rules: IPipeProcess[];
+  handler: PipeErrorHandler;
 }
 
 interface RouteBaseConfig {
   name?: string;
-  method: METHOD;
-  path: RoutePathConfig[];
-  isIndex: boolean;
-  tpl?: string;
+  method?: METHOD;
+  path?: IRoutePathConfig[];
+  pipeConfigs?: Partial<IPipeBaseCOnfig>;
+  extensions?: MapLike<any>;
 }
 
 /**
  * ## 定义路由方法
- * * 支持多路径
- * * 支持定义METHOD
- * * 区分Index和API
  * * Route不公开，做后续扩展支持
  * @description
  * @author Big Mogician
@@ -37,75 +36,29 @@ interface RouteBaseConfig {
  * @returns {IRouteFactory}
  */
 function RouteFactory(options: RouteBaseConfig): IRouteFactory {
-  return function route(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
+  return function route(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     const { routes } = tryGetRouter(target);
     const route = tryGetRoute(routes, propertyKey);
-    const { method, path, isIndex, tpl } = options;
-    // 封锁多method的能力，暂时没有用单一路由处理多method的需求，
-    // 根据情况未来可能考虑做开放
-    route.method = [method];
-    route.pathConfig.push(...path);
-    route.index = !!isIndex;
-    route.urlTpl = tpl;
-  };
-}
-
-/**
- * ## 定义Index页面
- * @description
- * @author Big Mogician
- * @param {string} path
- * @param {Partial<RouteOptions>} [options=undefined]
- * @returns {IRouteFactory}
- * @exports
- */
-export function IndexFactory(path: string, options?: Partial<RouteOptions>): IRouteFactory;
-/**
- * ## 定义Index页面
- * * 多路由支持
- * @description
- * @author Big Mogician
- * @param {string[]} path
- * @param {Partial<RouteOptions>} [options=undefined]
- * @returns {IRouteFactory}
- * @exports
- */
-export function IndexFactory(path: string[], options?: Partial<RouteOptions>): IRouteFactory;
-export function IndexFactory(...args: any[]): IRouteFactory {
-  const options: Partial<RouteOptions> = args[1] || {};
-  return function indexRoute(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
-    if (options.name) MetadataFactory(options.name)(target, propertyKey, descriptor);
-    const paths: string[] = args[0] instanceof Array ? args[0] : [args[0]];
-    RouteFactory({
-      method: "GET",
-      path: paths.map(path => ({ path, sections: options.sections || {} })),
-      isIndex: true,
-      tpl: options.tpl
-    })(target, propertyKey, descriptor);
-  };
-}
-
-/**
- * ## 定义api
- * @description
- * @author Big Mogician
- * @param {METHOD} method
- * @param {string} path
- * @param {Partial<RouteOptions>} [options=undefined]
- * @returns {IRouteFactory}
- * @exports
- */
-export function APIFactory(method: METHOD, path: string, options?: Partial<RouteOptions>): IRouteFactory;
-export function APIFactory(...args: any[]): IRouteFactory {
-  const options: Partial<RouteOptions> = args[2] || {};
-  return function apiRoute(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
-    if (options.name) MetadataFactory(options.name)(target, propertyKey, descriptor);
-    RouteFactory({
-      method: args[0],
-      path: [{ path: args[1], sections: options.sections || {} }],
-      isIndex: false,
-      tpl: options.tpl
-    })(target, propertyKey, descriptor);
+    const { method, path = [], name, pipeConfigs = {}, extensions = {} } = options;
+    const { handler, rules, zIndex = "push", override = undefined } = pipeConfigs;
+    route.method = !!method ? [method] : route.method;
+    route.name = name || route.name;
+    route.pipes.handler = handler || route.pipes.handler;
+    route.extensions = {
+      ...route.extensions,
+      ...extensions
+    };
+    if (path.length > 0) {
+      route.pathConfig.push(...path);
+    }
+    if (!rules) return;
+    if (!override) {
+      route.pipes.extend = true;
+      route.pipes.rules[zIndex](...rules);
+    } else {
+      route.pipes.extend = false;
+      route.pipes.rules = rules;
+    }
   };
 }
 
@@ -114,42 +67,35 @@ export function APIFactory(...args: any[]): IRouteFactory {
  * @description
  * @author Big Mogician
  * @export
- * @param {CustonRouteOptions} options
+ * @param {CustomRouteOptions} options
  * @returns {IRouteFactory}
  * @exports
  */
-export function CustomRouteFactory(options: CustonRouteOptions): IRouteFactory {
-  const method = options.method;
-  const isIndex = !!options.isIndex;
-  return function customApiRoute(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
-    if (options.name) MetadataFactory(options.name)(target, propertyKey, descriptor);
-    options.tpls.forEach(item => {
-      const [tpl, sections] = typeof item === "string" ? [item, {}] : [item.tpl, item.sections || {}];
-      RouteFactory({
-        method,
-        path: [{ path: "", sections, urlTpl: tpl }],
-        isIndex,
-        tpl
-      })(target, propertyKey, descriptor);
-    });
+export function CustomRouteFactory(options: CustomRouteOptions): IRouteFactory {
+  const { method, name, tpls = [] } = options;
+  return function customRoute(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
+    RouteFactory({
+      name,
+      method,
+      path: tpls.map(item =>
+        typeof item === "string" ? { path: undefined, sections: {}, urlTpl: item } : { path: undefined, sections: item.sections || {}, urlTpl: item.tpl }
+      )
+    })(target, propertyKey, descriptor);
   };
 }
 
 /**
- * #### deprecated : 使用@Index或者@API的最后一个options参数代替
- * ## 路由元数据
- * * 目前支持为路由命名
- * @deprecated
+ * ## 自定义的管道
  * @description
  * @author Big Mogician
- * @param {string} alias
- * @returns {RouteFactory}
+ * @export
+ * @param {CustomPipeOptions} options
+ * @returns {IRouteFactory}
  * @exports
  */
-export function MetadataFactory(alias: string): IRouteFactory {
-  return function routeMetadata(target: RouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
-    const { routes } = tryGetRouter(target);
-    const route = tryGetRoute(routes, propertyKey);
-    route.name = alias;
+export function CustomPipeFactory(options: CustomPipeOptions): IRouteFactory {
+  const { extensions, ...others } = options;
+  return function customPipe(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
+    RouteFactory({ pipeConfigs: others, extensions })(target, propertyKey, descriptor);
   };
 }

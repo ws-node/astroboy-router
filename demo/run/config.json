@@ -1,7 +1,7 @@
 {
   "view": {
     "root": "/Users/bigmogician/Documents/github.com/ws-node/astroboy-router/demo/app/views",
-    "cache": true,
+    "cache": false,
     "defaultExtension": ".html",
     "defaultViewEngine": "",
     "mapping": {}

@@ -8,6 +8,10 @@
 
 ### CHANGE LOGS
 
+#### 1.2.0-rc.6
+
+- 修复 `Authorize` 不支持重配置路由级别错误的问题
+
 #### 1.2.0-rc.3
 
 - 修复 `CustomRoute` 不支持重置空 `section` 的问题
