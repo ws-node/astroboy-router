@@ -1,4 +1,4 @@
-import { IRoute, IRouter, IRouteBuildContext, IPipeResolveContext, IRouterLifeCycle } from "../metadata";
+import { IRoute, IRouter, IRouteBuildContext, IPipeResolveContext, IRouterLifeCycle, IArgsSolutionsContext, ArgSolution, ArgTransform } from "../metadata";
 
 export function buildRouteMethod(prototype: any, methodName: string, router: IRouter, route: IRoute) {
   const { lifeCycle = {} } = router;
@@ -25,14 +25,35 @@ export function defaultOnBuild({ router, route, name = "" }: IRouteBuildContext,
   const needOnQuit = (lifeCycle.onQuit || []).length > 0;
   const sourceRouteMethod: (...args: any[]) => Promise<any> = descriptor.value!;
   const hooks = createLifeHooks(lifeCycle);
-  descriptor!.value = async function(...args: any[]) {
+  const helpers = createBuildHelper({ router, route, name });
+  descriptor!.value = async function() {
     if (needOnPipe) await hooks.runOnPipes.call(this);
     if (needPipe) await hooks.runPipes.call(this, pipes);
     if (needOnEnter) await hooks.runOnEnters.call(this);
+    const args = helpers.parseArgs.call(this);
     await sourceRouteMethod.call(this, ...args);
     if (needOnQuit) await hooks.runOnQuits.call(this);
   };
   Object.defineProperty(prototype, name, descriptor!);
+}
+
+export function createBuildHelper({ route }: IRouteBuildContext<any>) {
+  const { args } = route;
+  return {
+    parseArgs(this: any, contextResolve?: (caller: any) => IArgsSolutionsContext) {
+      if (!args.hasArgs) return [];
+      const context: IArgsSolutionsContext = !contextResolve
+        ? {
+            query: this.ctx.query || {},
+            params: this.ctx.params || {},
+            body: this.ctx.request.body || {}
+          }
+        : contextResolve(this);
+      return args.solutions.map(([fetch, transform]) => {
+        return transform(fetch(context));
+      });
+    }
+  };
 }
 
 export function createLifeHooks(lifeCycle: Partial<IRouterLifeCycle>) {

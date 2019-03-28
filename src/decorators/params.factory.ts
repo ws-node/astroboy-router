@@ -1,5 +1,5 @@
 import { ArgsFactory, IArgsOptions, ARGS } from "../metadata";
-import { tryGetRoute } from "./utils";
+import { tryGetRoute, tryGetRouter } from "./utils";
 
 import "reflect-metadata";
 
@@ -13,7 +13,7 @@ import "reflect-metadata";
 export function FromParamsFactory(): ArgsFactory;
 export function FromParamsFactory(options: Partial<IArgsOptions>): ArgsFactory;
 export function FromParamsFactory(options: Partial<IArgsOptions> = {}) {
-  return BaseArgsFactory("params", options);
+  return BaseArgsFactory(ARGS.Params, options);
 }
 
 /**
@@ -26,7 +26,7 @@ export function FromParamsFactory(options: Partial<IArgsOptions> = {}) {
 export function FromQueryFactory(): ArgsFactory;
 export function FromQueryFactory(options: Partial<IArgsOptions>): ArgsFactory;
 export function FromQueryFactory(options: Partial<IArgsOptions> = {}) {
-  return BaseArgsFactory("query", options);
+  return BaseArgsFactory(ARGS.Query, options);
 }
 
 /**
@@ -39,7 +39,7 @@ export function FromQueryFactory(options: Partial<IArgsOptions> = {}) {
 export function FromBodyFactory(): ArgsFactory;
 export function FromBodyFactory(options: Partial<IArgsOptions>): ArgsFactory;
 export function FromBodyFactory(options: Partial<IArgsOptions> = {}) {
-  return BaseArgsFactory("body", options);
+  return BaseArgsFactory(ARGS.BodyAppJson, options);
 }
 
 function BaseArgsFactory(type: ARGS): ArgsFactory;
@@ -47,15 +47,17 @@ function BaseArgsFactory(type: ARGS, options: Partial<IArgsOptions>): ArgsFactor
 function BaseArgsFactory(type: ARGS, options: Partial<IArgsOptions> = {}) {
   const { transform, useStatic } = options;
   return function dynamic_args<T>(prototype: T, propertyKey: string, index: number) {
-    const args = tryGetRoute(prototype, propertyKey, "args");
+    const routes = tryGetRouter(prototype, "routes");
+    const args = tryGetRoute(routes, propertyKey, "args");
     const types = Reflect.getMetadata("design:paramtypes", prototype, propertyKey) || [];
-    args.queue.push({
+    if (index > args.maxIndex) args.maxIndex = index;
+    args.context[index] = {
       index,
       type,
       resolver: transform,
       static: !!useStatic,
       ctor: typeFilter(types[index])
-    });
+    };
   };
 }
 

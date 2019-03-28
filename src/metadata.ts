@@ -16,7 +16,11 @@ export interface MapLike<T> {
 
 export type METHOD = "GET" | "POST" | "PUT" | "DELETE";
 
-export type ARGS = "params" | "body" | "query";
+export enum ARGS {
+  Params = "params",
+  Query = "query",
+  BodyAppJson = "body-application/json"
+}
 
 /** 未实现的路由方法 */
 export type RouteMethod = () => any;
@@ -26,6 +30,10 @@ export type IPipeProcess<T = void> = (context: any) => Promise<T> | T;
 export type ArgsResolver<T = any, R = any> = (source: T) => R;
 
 export type ArgsFactory<T = any> = (target: T, propertyKey: string, index: number) => void;
+
+export type ArgSolution = (context: IArgsSolutionsContext) => any;
+
+export type ArgTransform = (arg: any) => any;
 
 export interface IAstroboyBaseClass<T = any> {
   ctx: T;
@@ -107,8 +115,19 @@ export interface IRouteArgument {
   ctor?: any;
 }
 
+export interface IArgsSolutionsContext {
+  body?: any;
+  params?: any;
+  query?: any;
+}
+
 export interface IRouteArguContent {
-  queue: IRouteArgument[];
+  hasArgs: boolean;
+  context: {
+    [index: number]: IRouteArgument;
+  };
+  maxIndex: number;
+  solutions: Array<[ArgSolution, ArgTransform]>;
 }
 
 export interface IRoute<P = void> {

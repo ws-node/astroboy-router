@@ -1,5 +1,5 @@
 import { IRouterFactory, IRouterMetaConfig, IController, IPipeResolveContext } from "../metadata";
-import { tryGetRouter, readPath, readPipes } from "./utils";
+import { tryGetRouter, readPath, readPipes, createArgsSolution } from "./utils";
 
 const noop = () => {};
 
@@ -44,6 +44,7 @@ export function RouterFactory(meta: string | IRouterMetaConfig) {
       if (route.resolved) return;
       readPath(router.group, route);
       readPipes(router, route);
+      createArgsSolution(route);
       route.resolved = true;
     });
     if (options.register) {

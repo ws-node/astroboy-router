@@ -1,4 +1,4 @@
-import { IRouterDefine, IController, IRouter, IRoute } from "../metadata";
+import { IRouterDefine, IController, IRouter, IRoute, ArgTransform, ArgSolution, IArgsSolutionsContext, ARGS } from "../metadata";
 import { defaultOnBuild } from "../entrance/build";
 import { defaultOnCreate } from "../entrance/create";
 import { RouterMap } from "../core";
@@ -52,15 +52,12 @@ export function tryGetRouter(target: IRouterDefine | IController, key?: string):
  * @returns
  * @exports
  */
-export function tryGetRoute(target: IRouterDefine | IController, key: string): IRoute;
-export function tryGetRoute<K extends keyof IRoute>(target: IRouterDefine | IController, key: string, subKey: K): IRoute[K];
 export function tryGetRoute(routes: { [key: string]: IRoute }, key: string): IRoute;
-export function tryGetRoute<K extends keyof IRoute>(routes: { [key: string]: IRoute }, key: string, subKey: K): IRoute;
-export function tryGetRoute(options: any, key: string, subKey?: string) {
-  if (!!options.constructor) options = tryGetRouter(options).routes;
-  let route = options[key];
+export function tryGetRoute<K extends keyof IRoute>(routes: { [key: string]: IRoute }, key: string, subKey: K): IRoute[K];
+export function tryGetRoute(routes: any, key: string, subKey?: string) {
+  let route: IRoute = routes[key];
   if (!route) {
-    route = options[key] = {
+    route = routes[key] = <IRoute>{
       resolved: false,
       name: undefined,
       method: [],
@@ -68,7 +65,10 @@ export function tryGetRoute(options: any, key: string, subKey?: string) {
       extensions: {},
       pathConfig: [],
       args: {
-        queue: []
+        hasArgs: false,
+        context: {},
+        maxIndex: -1,
+        solutions: []
       },
       pipes: {
         rules: [],
@@ -76,7 +76,7 @@ export function tryGetRoute(options: any, key: string, subKey?: string) {
       }
     };
   }
-  if (!!subKey) return route[subKey];
+  if (!!subKey) return (<any>route)[subKey];
   return route;
 }
 
@@ -122,4 +122,59 @@ export function readPipes(router: IRouter, route: IRoute) {
     rules: pipes.extend ? [...parent.rules, ...pipes.rules] : pipes.rules,
     handler: pipes.extend ? pipes.handler || parent.handler : pipes.handler
   };
+}
+
+const defaultTransform = (d: any) => d;
+const useAll: ArgSolution = context => context;
+const useQuery: ArgSolution = ({ query }) => query;
+const useBody: ArgSolution = ({ body }) => body;
+const useParams: ArgSolution = ({ params }) => params;
+
+export function createArgsSolution(route: IRoute<any>): void {
+  const { maxIndex = -1, context = {}, solutions } = route.args;
+  const len = maxIndex + 1;
+  if (len === 0) return;
+  for (let step = 0; step < len; step++) {
+    const { type, ctor: classType, resolver = defaultTransform, static: useStatic = false } = context[step];
+    if (!context[step]) {
+      solutions.push([useAll, resolver]);
+      continue;
+    }
+    switch (type) {
+      case ARGS.Query:
+        solutions.push([useQuery, typeTransform({ resolver, useStatic, type: classType, strictBool: false })]);
+        break;
+      case ARGS.Params:
+        solutions.push([useParams, typeTransform({ resolver, useStatic, type: classType, strictBool: false })]);
+        break;
+      // 默认按照 application/json 处理
+      default:
+        solutions.push([useBody, typeTransform({ resolver, useStatic, type: classType })]);
+        break;
+    }
+  }
+  route.args.hasArgs = true;
+}
+
+interface ITypeTransformContext {
+  type: any;
+  resolver: ArgTransform;
+  strictBool?: boolean;
+  useStatic?: boolean;
+}
+
+function typeTransform(context: ITypeTransformContext): ArgTransform {
+  const { type, resolver, strictBool = true, useStatic = false } = context;
+  if (!useStatic) return resolver;
+  switch (type) {
+    case String:
+    case Number:
+      return d => type(resolver(d));
+    case Boolean:
+      return strictBool ? d => resolver(d) === true : d => String(resolver(d)) === "true";
+    // 暂时不支持其他复杂类型的类型转换处理
+    // TODO 支持静态类型转换
+    default:
+      return resolver;
+  }
 }
