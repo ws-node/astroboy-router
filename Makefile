@@ -1,5 +1,5 @@
 build:
-	# yarn test
+	yarn test
 	tsc
 	cp README.md dist/
 

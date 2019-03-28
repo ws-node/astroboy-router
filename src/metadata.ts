@@ -136,12 +136,3 @@ export abstract class IController implements IAstroboyBaseClass {
 export type IRouteFactory = <T>(target: T, propertyKey: string, descriptor?: PropertyDescriptor) => any;
 export type IRouterFactory = <T>(target: T) => any;
 export type IMixinFactory = <T>(target: T, propertyKey?: string) => any;
-
-export type RequestParamsInvokeFactory = (instance: IController) => () => any;
-export type ResponseBodyInvokeFactory = (instance: IController) => <T>(code: any, msg: any, data: T) => any;
-
-export interface BodyResolve {
-  getQuery: RequestParamsInvokeFactory;
-  getPost: RequestParamsInvokeFactory;
-  toJson: ResponseBodyInvokeFactory;
-}
