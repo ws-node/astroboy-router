@@ -1,4 +1,6 @@
-import { RouterDefine, IController, IRouter, Route, UrlTplTuple } from "../metadata";
+import { IRouterDefine, IController, IRouter, IRoute } from "../metadata";
+import { defaultOnBuild } from "../entrance/route-implements";
+import { defaultOnCreate } from "../entrance/service-init";
 import { RouterMap } from "../core";
 
 /**
@@ -6,29 +8,38 @@ import { RouterMap } from "../core";
  * * 如果是第一次配置，先做存储
  * @description
  * @author Big Mogician
- * @param {(RouterDefine | IController)} target 控制器原型
+ * @param {(IRouterDefine | IController)} target 控制器原型
  * @returns
  * @exports
  */
-export function tryGetRouter(target: RouterDefine | IController) {
+export function tryGetRouter(target: IRouterDefine | IController): IRouter<any>;
+export function tryGetRouter<K extends keyof IRouter>(target: IRouterDefine | IController, key: K): IRouter<any>[K];
+export function tryGetRouter(target: IRouterDefine | IController, key?: string): any {
   const routerSaved = RouterMap.get(target);
   let router: IRouter;
   router = <IRouter>routerSaved;
   if (!routerSaved) {
     router = {
-      prefix: "",
-      apiPrefix: "api",
-      routes: {},
+      group: "",
       dependency: new Map(),
-      urlTpl: [undefined, undefined],
-      auth: {
+      routes: {},
+      extensions: {},
+      onCreate: [defaultOnCreate],
+      lifeCycle: {
+        onBuild: [defaultOnBuild],
+        onEnter: [],
+        onPipes: [],
+        onQuit: []
+      },
+      pipes: {
         rules: []
       }
     };
     RouterMap.set(target, router);
   }
   target["@router"] = router;
-  return router;
+  if (!key) return router;
+  return (<any>router)[key];
 }
 
 /**
@@ -36,22 +47,22 @@ export function tryGetRouter(target: RouterDefine | IController) {
  * * 如果是第一次配置当前路由项，先做初始化
  * @description
  * @author Big Mogician
- * @param {{ [key: string]: Route }} routes
+ * @param {{ [key: string]: IRoute }} routes
  * @param {string} key
  * @returns
  * @exports
  */
-export function tryGetRoute(routes: { [key: string]: Route }, key: string) {
+export function tryGetRoute(routes: { [key: string]: IRoute }, key: string) {
   let route = routes[key];
   if (!route) {
     route = routes[key] = {
+      resolved: false,
       name: undefined,
       method: [],
       path: [],
+      extensions: {},
       pathConfig: [],
-      index: false,
-      urlTpl: undefined,
-      auth: {
+      pipes: {
         rules: [],
         extend: true
       }
@@ -60,56 +71,46 @@ export function tryGetRoute(routes: { [key: string]: Route }, key: string) {
   return route;
 }
 
-/**
- * ## 连接路由
- * * 连接router前缀和path
- * * API路由在前缀和路由根之间插入`api`层级
- * @description
- * @author Big Mogician
- * @param {string} prefix
- * @param {string} apiPrefix
- * @param {string} pathStr
- * @param {boolean} isIndex
- * @param {UrlTplTuple} tpl
- * @param {{ [key: string]: string }} tplSections
- * @returns
- * @exports
- */
-export function routeConnect(prefix: string, apiPrefix: string, pathStr: string, isIndex: boolean, tpl: UrlTplTuple, tplSections: { [key: string]: string }) {
-  const splits: string[] = [];
-  const [indexTpl, apiTpl] = tpl || [undefined, undefined];
-  // 没有重置模版，不要进入逻辑分支
-  if (!!indexTpl || !!apiTpl) {
-    const sections: any = {
-      prefix,
-      api: apiPrefix,
-      path: pathStr,
-      ...tplSections
-    };
-    if (!isIndex) sections.api = sections.api;
-    let urlToExport = (!!isIndex ? indexTpl : apiTpl) || "";
+export function readPath(group: string, route: IRoute) {
+  const { pathConfig: configs = [] } = route;
+  route.path = configs.map(config => {
+    const { path, urlTpl: tpl, sections: data = {} } = config;
+    const isPlainUrl = tpl === undefined;
+    if (isPlainUrl) return path || "";
+    const sections: { [prop: string]: any } = { path, group, ...data };
+    let urlToExport: string = tpl || "";
     Object.keys(sections).forEach(key => {
       const placeholder = "{{@" + key + "}}";
       if (urlToExport.includes(placeholder)) {
         const realValue = sections[key];
         if (realValue === "" || realValue === undefined) {
           // 去掉当前section
-          urlToExport = urlToExport.replace(`/${placeholder}`, "");
+          if (urlToExport.indexOf(`/${placeholder}`) >= 0) {
+            urlToExport = urlToExport.replace(`/${placeholder}`, "");
+          } else if (urlToExport.indexOf(`${placeholder}/`) >= 0) {
+            urlToExport = urlToExport.replace(`${placeholder}/`, "");
+          } else {
+            urlToExport = urlToExport.replace(placeholder, "");
+          }
         } else if (realValue === "&nbsp;") {
           // 明确需要保留当前section，场景应该比较少
           urlToExport = urlToExport.replace(placeholder, "");
         } else {
           // 正常替换section模板
-          urlToExport = urlToExport.replace(placeholder, realValue);
+          urlToExport = urlToExport.replace(placeholder, String(realValue));
         }
       }
     });
     return urlToExport;
-  }
-  // 默认的url拼装逻辑
-  // 事实上等效："{{@prefix}}/{{@path}}" 和 "api/{{@prefix}}/{{@path}}"
-  if (!isIndex) splits.push(apiPrefix);
-  if (prefix !== "") splits.push(prefix);
-  if (!!pathStr) splits.push(pathStr);
-  return splits.join("/");
+  });
+}
+
+export function readPipes(router: IRouter, route: IRoute) {
+  const { pipes: parent } = router;
+  const { pipes } = route;
+  route.pipes = {
+    ...pipes,
+    rules: pipes.extend ? [...parent.rules, ...pipes.rules] : pipes.rules,
+    handler: pipes.extend ? pipes.handler || parent.handler : pipes.handler
+  };
 }

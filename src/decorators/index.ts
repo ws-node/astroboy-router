@@ -1,19 +1,2 @@
-import { RouterFactory } from "./router.factory";
-import { ServiceFactory } from "./service.factory";
-import { IndexFactory, APIFactory, MetadataFactory, CustomRouteFactory } from "./route.factory";
-import { AuthFactory, NoAuthFactory } from "./auth.factory";
-import { InjectFactory } from "./inject.factory";
-
-export {
-  RouterFactory as Router,
-  // RouteFactory as Route, // 不公开
-  CustomRouteFactory as CustomRoute,
-  ServiceFactory as Service,
-  IndexFactory as Index,
-  APIFactory as API,
-  MetadataFactory as Metadata,
-  AuthFactory as Auth,
-  AuthFactory as Authorize,
-  NoAuthFactory as NoAuthorize,
-  InjectFactory as Inject
-};
+export { CustomPipeOptions, CustomRouteOptions, CustomRouteFactory as CustomRoute, CustomPipeFactory as CustomPipe } from "./route.factory";
+export { RouterFactory as Router } from "./router.factory";

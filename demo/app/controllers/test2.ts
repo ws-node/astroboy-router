@@ -1,16 +1,48 @@
 import { BaseClass } from "astroboy";
-import { Router, Service, Index, API, RouteMethod, Authorize, Inject, NoAuthorize } from "../../../src";
+import { Router, CustomRoute } from "../../../src";
 
-@Router("")
-class Test2Controller extends BaseClass {
-  @Index(["", "*"])
-  public async getIndexHtml() {
-    this.ctx.render("demo/index.html");
+function GET(path: string) {
+  return CustomRoute({
+    method: "GET",
+    tpls: [
+      {
+        tpl: "{{@group}}/{{@path}}",
+        sections: { path }
+      }
+    ]
+  });
+}
+
+@Router({
+  group: "myspace",
+  pipes: {
+    rules: [],
+    handler: error => console.log(error)
+  },
+  register(process) {
+    process.lifecycle("onCreate", (context, proto) => {
+      // console.log("onCreate");
+      // console.log([context, proto]);
+    });
+    process.lifecycle("onEnter", (instance: any) => {
+      console.log("onEnter");
+      console.log([instance]);
+    });
+    process.lifecycle("onQuit", (instance: any) => {
+      console.log("onQuit");
+      console.log([instance]);
+    });
+    // process.onbuild((context, proto) => {
+    // console.log("onBuild");
+    // console.log([context, proto]);
+    // });
   }
-
-  @API("GET", "testC")
+})
+class Test2Controller extends BaseClass {
+  @GET("testC")
   public testC() {
-    this.ctx.body = {};
+    console.log("wr3wtrtwr");
+    this.ctx.body = { data: "wr3wtrtwr" };
   }
 }
 

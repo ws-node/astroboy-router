@@ -1,11 +1,13 @@
 /// <reference types="@types/koa-router"/>
-import { IRouter, ControllerConstructor } from "../metadata";
-import { routerBusinessCreate } from "./service-init";
-import { routeMethodImplements } from "./route-implements";
-import { resolveDefaultBodyParser } from "./utils";
+import { IRouter, IControllerConstructor } from "../metadata";
+import { buildRouteMethod } from "./route-implements";
+import { buildRouterInstance } from "./service-init";
+// import { routerBusinessCreate } from "./service-init";
+// import { routeMethodImplements } from "./route-implements";
+// import { resolveDefaultBodyParser } from "./utils";
 
 interface RouterOptions {
-  router: ControllerConstructor;
+  router: IControllerConstructor;
   name: string;
   root: string;
   debug?: boolean;
@@ -16,16 +18,16 @@ interface RouterOptions {
  * @description
  * @author Big Mogician
  * @export
- * @param {ControllerConstructor} ctor
+ * @param {IControllerConstructor} ctor
  * @param {string} name
  * @param {string} root
  * @returns
  * @exports
  */
-export function createRouter(ctor: ControllerConstructor, name: string, root: string): (string | string[])[][];
+export function createRouter(ctor: IControllerConstructor, name: string, root: string): (string | string[])[][];
 export function createRouter(options: RouterOptions): (string | string[])[][];
 export function createRouter(...args: any[]) {
-  let ctor!: ControllerConstructor;
+  let ctor!: IControllerConstructor;
   let name!: string;
   let root!: string;
   let debug = false;
@@ -39,10 +41,9 @@ export function createRouter(...args: any[]) {
   const router = <IRouter>ctor.prototype["@router"];
   // 未经装饰，不符合Router的要求，终止应用程序
   if (!router) throw new Error(`Create router failed : invalid router controller [${ctor && (<any>ctor).name}]`);
-  const service = router.service;
-  routerBusinessCreate(service, prototype, router.dependency);
+  buildRouterInstance(prototype, router);
   const result: (string | string[])[][] = [];
-  Object.keys(router.routes).forEach(methodName => {
+  for (const methodName in router.routes) {
     const route = router.routes[methodName];
     const allRouteMethods: (string | string[])[][] = [];
     route.method.forEach(method => {
@@ -56,24 +57,12 @@ export function createRouter(...args: any[]) {
       }
       routeArr.push(name);
       routeArr.push(methodName);
-      const { extend, rules, errorMsg, error } = route.auth;
-      routeMethodImplements({
-        prototype,
-        method,
-        methodName,
-        auth: {
-          rules: extend ? [...router.auth.rules, ...rules] : rules,
-          errorMsg: errorMsg || router.auth.errorMsg || "Auth failed.",
-          error: error || router.auth.error
-        },
-        serviceCtor: route.service || service || undefined,
-        scopeService: route.service !== undefined,
-        resolve: resolveDefaultBodyParser()
-      });
+      buildRouteMethod(prototype, methodName, router, route);
       allRouteMethods.push(routeArr);
     });
     result.push(...allRouteMethods);
-  });
+  }
+  Object.keys(router.routes).forEach(async methodName => {});
   if (debug) {
     // tslint:disable-next-line:no-console
     console.log(`======${name}======`);
