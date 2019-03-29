@@ -1,4 +1,4 @@
-import { IRoute, IRouter, IRouteBuildContext, IPipeResolveContext, IRouterLifeCycle, IArgsSolutionsContext, IRouteDescriptor } from "../metadata";
+import { IRoute, IRouter, IRouteBuildContext, IPipeResolveContext, IRouterLifeCycle, IArgSolutionsContext, IRouteDescriptor } from "../metadata";
 
 export function buildRouteMethod(prototype: any, methodName: string, router: IRouter, route: IRoute) {
   const { lifeCycle = {} } = router;
@@ -56,11 +56,11 @@ export function createBuildHelper({ route }: IRouteBuildContext<any>) {
      *
      * @author Big Mogician
      * @param {*} this
-     * @param {(caller: any) => IArgsSolutionsContext} [contextResolve]
+     * @param {(caller: any) => IArgSolutionsContext} [contextResolve]
      */
-    parseArgs(this: any, contextResolve?: (caller: any) => IArgsSolutionsContext) {
+    parseArgs(this: any, contextResolve?: (caller: any) => IArgSolutionsContext) {
       if (!args.hasArgs) return [];
-      const context: IArgsSolutionsContext = !contextResolve
+      const context: IArgSolutionsContext = !contextResolve
         ? {
             query: this.ctx.query || {},
             params: this.ctx.params || {},
