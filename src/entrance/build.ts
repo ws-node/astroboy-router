@@ -65,8 +65,8 @@ export function createBuildHelper({ route }: IRouteBuildContext<any>) {
         params: this.ctx.params || {},
         body: this.ctx.request.body || {}
       };
-      return args.solutions.map(({ extract: fetch, transform, static: typeResolve }) => {
-        return !typeResolve ? transform(fetch(context)) : typeResolve(transform(fetch(context)), options);
+      return args.solutions.map(({ extract: fetch, transform, static: typeResolve, type }) => {
+        return !typeResolve ? transform(fetch(context)) : typeResolve(transform(fetch(context)), { ...options, type });
       });
     }
   };

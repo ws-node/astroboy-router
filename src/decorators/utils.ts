@@ -144,7 +144,7 @@ export function createArgSolution(route: IRoute<any>): void {
     }
     const { type, ctor: classType, extract, transform = defaultTransform, static: useStatic, strict: useStrict = false } = context[step];
     const staticX = typeTransform({ useStatic, type: classType, useStrict });
-    const solution = { static: staticX, transform };
+    const solution = { static: staticX, transform, type: classType };
     switch (type) {
       case ARGS.Custom:
         solutions.push({ ...solution, extract: extract || useAll });

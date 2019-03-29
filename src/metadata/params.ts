@@ -17,7 +17,7 @@ export type ArgsExtraction = (context: IArgSolutionsContext) => any;
 export type ArgsTransform<T = any, R = any> = (source: T) => R;
 
 /** Args静态类型转换，决定如何处理静态类型对象反序列化 */
-export type ArgsResolveStatic<T = any> = (data: any, options?: T) => any;
+export type ArgsResolveStatic<T = any, OPTIONS = {}> = (data: any, options?: { type: T } & OPTIONS) => any;
 
 /**
  * ## Args上下文
@@ -100,6 +100,13 @@ export interface IRouteArgument {
   ctor?: any;
 }
 
+export interface IArgSolutionPack<SOURCE = any, TYPE = any, OPTIONS = any> {
+  extract: ArgsExtraction;
+  transform: ArgsTransform<SOURCE, TYPE>;
+  static?: ArgsResolveStatic<TYPE, OPTIONS>;
+  type?: TYPE;
+}
+
 export interface IRouteArguContent {
   /** 是否进行参数解析：默认：`false` */
   hasArgs: boolean;
@@ -110,9 +117,5 @@ export interface IRouteArguContent {
   /** 最大参数索引，默认：`-1` */
   maxIndex: number;
   /** args解决方案，默认：`[]` */
-  solutions: Array<{
-    extract: ArgsExtraction;
-    transform: ArgsTransform;
-    static?: ArgsResolveStatic;
-  }>;
+  solutions: Array<IArgSolutionPack>;
 }
