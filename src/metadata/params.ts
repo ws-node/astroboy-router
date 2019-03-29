@@ -8,13 +8,16 @@ export enum ARGS {
   BodyFormData = "body::multipart/form-data"
 }
 
-/** Args转换解析，决定如何处理当前args */
-export type ArgsTransform<T = any, R = any> = (source: T) => R;
-
 export type ArgsFactory<T = any> = (target: T, propertyKey: string, index: number) => void;
 
 /** Args提取函数，决定提取哪一部分的args */
 export type ArgsExtraction = (context: IArgSolutionsContext) => any;
+
+/** Args转换解析，决定如何处理当前args */
+export type ArgsTransform<T = any, R = any> = (source: T) => R;
+
+/** Args静态类型转换，决定如何处理静态类型对象反序列化 */
+export type ArgsResolveStatic<T = any> = (data: any, options?: T) => any;
 
 /**
  * ## Args上下文
@@ -89,12 +92,12 @@ export interface IRouteArgument {
   extract?: ArgsExtraction;
   /** args的转换函数，默认：`data => data` */
   transform?: ArgsTransform;
+  /** args的静态类型处理函数，默认：`data => data` */
+  static?: ArgsResolveStatic;
   /** args的严格模式，兼容url-encoded的类型模糊问题，默认：`false` */
   strict?: boolean;
   /** args的类型，默认：`undefined` */
   ctor?: any;
-  /** args的静态类型处理函数，默认：`data => data` */
-  static?: (data: any) => any;
 }
 
 export interface IRouteArguContent {
@@ -107,5 +110,9 @@ export interface IRouteArguContent {
   /** 最大参数索引，默认：`-1` */
   maxIndex: number;
   /** args解决方案，默认：`[]` */
-  solutions: Array<[ArgsExtraction, ArgsTransform]>;
+  solutions: Array<{
+    extract: ArgsExtraction;
+    transform: ArgsTransform;
+    static?: ArgsResolveStatic;
+  }>;
 }

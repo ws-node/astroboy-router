@@ -55,20 +55,18 @@ export function createBuildHelper({ route }: IRouteBuildContext<any>) {
      * 解析注入参数
      *
      * @author Big Mogician
-     * @param {*} this
-     * @param {(caller: any) => IArgSolutionsContext} [contextResolve]
+     * @param {any} this
+     * @param {any} [options={}]
      */
-    parseArgs(this: any, contextResolve?: (caller: any) => IArgSolutionsContext) {
+    parseArgs(this: any, options: any = {}) {
       if (!args.hasArgs) return [];
-      const context: IArgSolutionsContext = !contextResolve
-        ? {
-            query: this.ctx.query || {},
-            params: this.ctx.params || {},
-            body: this.ctx.request.body || {}
-          }
-        : contextResolve(this);
-      return args.solutions.map(([fetch, transform]) => {
-        return transform(fetch(context));
+      const context: IArgSolutionsContext = {
+        query: this.ctx.query || {},
+        params: this.ctx.params || {},
+        body: this.ctx.request.body || {}
+      };
+      return args.solutions.map(({ extract: fetch, transform, static: typeResolve }) => {
+        return !typeResolve ? transform(fetch(context)) : typeResolve(transform(fetch(context)), options);
       });
     }
   };
