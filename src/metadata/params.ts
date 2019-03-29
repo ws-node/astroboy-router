@@ -40,12 +40,13 @@ export interface IArgSolutionsContext {
  * @interface IArgsOptions
  * @template TRANS
  * @template RESULT
+ * @template SOPTIONS
  */
-export interface IArgsOptions<TRANS = any, RESULT = any> {
+export interface IArgsOptions<TRANS = any, RESULT = any, SOPTIONS = {}> {
   /** 自定义args转换，默认：`undefined` */
   transform: ArgsTransform<TRANS, RESULT>;
   /** 使用静态类型处理函数，默认：`undefined` */
-  useStatic: (data: any) => any;
+  useStatic: ArgsResolveStatic<RESULT, SOPTIONS>;
 }
 
 /**
