@@ -1,4 +1,4 @@
-import { IRouterDefine, IController, IRouter, IRoute, ArgTransform, ArgSolution, IArgsSolutionsContext, ARGS } from "../metadata";
+import { IRouterDefine, IController, IRouter, IRoute, ArgsDecision, ARGS, ArgsResolver } from "../metadata";
 import { defaultOnBuild } from "../entrance/build";
 import { defaultOnCreate } from "../entrance/create";
 import { RouterMap } from "../core";
@@ -125,31 +125,36 @@ export function readPipes(router: IRouter, route: IRoute) {
 }
 
 const defaultTransform = (d: any) => d;
-const useAll: ArgSolution = context => context;
-const useQuery: ArgSolution = ({ query }) => query;
-const useBody: ArgSolution = ({ body }) => body;
-const useParams: ArgSolution = ({ params }) => params;
+const useAll: ArgsDecision = context => context;
+const useQuery: ArgsDecision = ({ query }) => query;
+const useBody: ArgsDecision = ({ body }) => body;
+const useParams: ArgsDecision = ({ params }) => params;
 
-export function createArgsSolution(route: IRoute<any>): void {
+export function createArgSolution(route: IRoute<any>): void {
   const { maxIndex = -1, context = {}, solutions } = route.args;
   const len = maxIndex + 1;
   if (len === 0) return;
   for (let step = 0; step < len; step++) {
-    const { type, ctor: classType, resolver = defaultTransform, static: useStatic = false } = context[step];
     if (!context[step]) {
-      solutions.push([useAll, resolver]);
+      solutions.push([useAll, context[step].resolver || defaultTransform]);
       continue;
     }
+    const { type, ctor: classType, resolver = defaultTransform, static: useStatic = false, strict: useStrict = false } = context[step];
+    const transform = typeTransform({ resolver, useStatic, type: classType, useStrict });
     switch (type) {
       case ARGS.Query:
-        solutions.push([useQuery, typeTransform({ resolver, useStatic, type: classType, strictBool: false })]);
+        solutions.push([useQuery, transform]);
         break;
       case ARGS.Params:
-        solutions.push([useParams, typeTransform({ resolver, useStatic, type: classType, strictBool: false })]);
+        solutions.push([useParams, transform]);
         break;
-      // 默认按照 application/json 处理
+      case ARGS.BodyUrlEncoded:
+      case ARGS.BodyFormData:
+      case ARGS.BodyAppJson:
+        solutions.push([useBody, transform]);
+        break;
       default:
-        solutions.push([useBody, typeTransform({ resolver, useStatic, type: classType })]);
+        solutions.push([useAll, transform]);
         break;
     }
   }
@@ -158,20 +163,20 @@ export function createArgsSolution(route: IRoute<any>): void {
 
 interface ITypeTransformContext {
   type: any;
-  resolver: ArgTransform;
-  strictBool?: boolean;
+  resolver: ArgsResolver;
+  useStrict?: boolean;
   useStatic?: boolean;
 }
 
-function typeTransform(context: ITypeTransformContext): ArgTransform {
-  const { type, resolver, strictBool = true, useStatic = false } = context;
+function typeTransform(context: ITypeTransformContext): ArgsResolver {
+  const { type, resolver, useStrict = false, useStatic = false } = context;
   if (!useStatic) return resolver;
   switch (type) {
     case String:
     case Number:
       return d => type(resolver(d));
     case Boolean:
-      return strictBool ? d => resolver(d) === true : d => String(resolver(d)) === "true";
+      return useStrict ? d => resolver(d) === true : d => String(resolver(d)) === "true";
     // 暂时不支持其他复杂类型的类型转换处理
     // TODO 支持静态类型转换
     default:
