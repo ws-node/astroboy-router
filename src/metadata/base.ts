@@ -27,7 +27,7 @@ export interface IAstroboyBaseClass<T = any> {
 export interface IRoutePathConfig {
   path: string | undefined;
   urlTpl: string | undefined;
-  sections: { [key: string]: string };
+  sections: MapLike<string>;
 }
 
 export interface IRoutePipeDefine {

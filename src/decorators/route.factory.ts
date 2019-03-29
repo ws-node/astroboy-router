@@ -2,20 +2,29 @@ import { METHOD, IRouteFactory, IRouterDefine, IRoutePathConfig, IPipeProcess, P
 import { tryGetRouter, tryGetRoute } from "./utils";
 
 export interface CustomRouteOptions {
+  /** 路由方法，默认值：`'GET'` */
   method?: METHOD;
+  /** url模板，用来自定义生成的url，默认值：`[]` */
   tpls?: (string | { tpl: string; sections?: { [key: string]: string } })[];
+  /** 路由名字，默认值：`undefined` */
   name?: string;
+  /** 扩展结构，默认：`{}` */
   extensions?: any;
 }
 
-export interface CustomPipeOptions extends Partial<IPipeBaseCOnfig> {
+export interface CustomPipeOptions extends Partial<IPipeBaseConfig> {
+  /** 扩展结构，默认：`{}` */
   extensions?: any;
 }
 
-interface IPipeBaseCOnfig {
+interface IPipeBaseConfig {
+  /** 是否重载覆盖Router级别的pipe配置，默认：`false` */
   override: boolean;
+  /** 附加pipe的方式，默认：`'push'` */
   zIndex: "unshift" | "push";
+  /** 附加的pipes，默认：`[]` */
   rules: IPipeProcess[];
+  /** pipes的错误处理捕捉函数，默认：`undefined` */
   handler: PipeErrorHandler;
 }
 
@@ -23,7 +32,7 @@ interface RouteBaseConfig {
   name?: string;
   method?: METHOD;
   path?: IRoutePathConfig[];
-  pipeConfigs?: Partial<IPipeBaseCOnfig>;
+  pipeConfigs?: Partial<IPipeBaseConfig>;
   extensions?: MapLike<any>;
 }
 
@@ -72,14 +81,15 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
  * @exports
  */
 export function CustomRouteFactory(options: CustomRouteOptions): IRouteFactory {
-  const { method, name, tpls = [] } = options;
+  const { method, name, tpls = [], extensions = {} } = options;
   return function customRoute(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     RouteFactory({
       name,
       method,
       path: tpls.map(item =>
         typeof item === "string" ? { path: undefined, sections: {}, urlTpl: item } : { path: undefined, sections: item.sections || {}, urlTpl: item.tpl }
-      )
+      ),
+      extensions
     })(target, propertyKey, descriptor);
   };
 }
