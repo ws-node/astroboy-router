@@ -80,7 +80,7 @@ export function tryGetRoute(routes: any, key: string, subKey?: string) {
       extensions: {},
       pathConfig: [],
       pathOverride: false,
-      pathSection: undefined,
+      pathSection: [],
       args: {
         hasArgs: false,
         context: {},
