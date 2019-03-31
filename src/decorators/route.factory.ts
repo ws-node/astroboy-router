@@ -1,13 +1,31 @@
-import { METHOD, IRouteFactory, IRouterDefine, IRoutePathConfig, IPipeProcess, PipeErrorHandler, MapLike } from "../metadata";
+import {
+  METHOD,
+  IRouteFactory,
+  IRouterDefine,
+  IRoutePathConfig,
+  IPipeProcess,
+  PipeErrorHandler,
+  MapLike,
+  IRouteUrlTpl_DEPERACTED,
+  IRouteUrlPattern
+} from "../metadata";
 import { tryGetRouter, tryGetRoute } from "./utils";
+
+type UrlPatternV1 = string | IRouteUrlTpl_DEPERACTED;
+type UrlPatternv2 = string | IRouteUrlPattern;
+type UrlPattern = UrlPatternV1 | UrlPatternv2;
 
 export interface CustomRouteOptions {
   /** 路由方法，默认值：`'GET'` */
   method?: METHOD;
+  /** @deperacted [ replace with `patterns` ] url模板，用来自定义生成的url，默认值：`[]` */
+  tpls?: (string | IRouteUrlTpl_DEPERACTED)[];
   /** url模板，用来自定义生成的url，默认值：`[]` */
-  tpls?: (string | { tpl: string; sections?: { [key: string]: string } })[];
+  patterns?: (string | IRouteUrlPattern)[];
   /** 路由名字，默认值：`undefined` */
   name?: string;
+  /** 覆盖parent路由集的url生成模版，默认：`false` */
+  forceRouter?: boolean;
   /** 扩展结构，默认：`{}` */
   extensions?: any;
 }
@@ -33,6 +51,7 @@ interface RouteBaseConfig {
   method?: METHOD;
   path?: IRoutePathConfig[];
   pipeConfigs?: Partial<IPipeBaseConfig>;
+  pipeOverride?: boolean;
   extensions?: MapLike<any>;
 }
 
@@ -48,7 +67,7 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
   return function route(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     const { routes } = tryGetRouter(target);
     const route = tryGetRoute(routes, propertyKey);
-    const { method, path = [], name, pipeConfigs = {}, extensions = {} } = options;
+    const { method, path = [], name, pipeConfigs = {}, extensions = {}, pipeOverride } = options;
     const { handler, rules, zIndex = "push", override = undefined } = pipeConfigs;
     route.method = !!method ? [method] : route.method;
     route.name = name || route.name;
@@ -57,6 +76,9 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
       ...route.extensions,
       ...extensions
     };
+    if (pipeOverride !== undefined) {
+      route.pathOverride = pipeOverride;
+    }
     if (path.length > 0) {
       route.pathConfig.push(...path);
     }
@@ -81,15 +103,16 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
  * @exports
  */
 export function CustomRouteFactory(options: CustomRouteOptions): IRouteFactory {
-  const { method, name, tpls = [], extensions = {} } = options;
+  const { method, name, patterns = [], tpls = [], extensions = {}, forceRouter: force } = options;
+  // 兼容旧版tpls字段
+  const templates = (<UrlPattern[]>(patterns.length === 0 ? tpls : patterns)).map(decidePatternVersion);
   return function customRoute(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     RouteFactory({
       name,
       method,
-      path: tpls.map(item =>
-        typeof item === "string" ? { path: undefined, sections: {}, urlTpl: item } : { path: undefined, sections: item.sections || {}, urlTpl: item.tpl }
-      ),
-      extensions
+      path: templates.map(([pattern, sections]) => ({ pattern, sections })),
+      extensions,
+      pipeOverride: force
     })(target, propertyKey, descriptor);
   };
 }
@@ -108,4 +131,8 @@ export function CustomPipeFactory(options: CustomPipeOptions): IRouteFactory {
   return function customPipe(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     RouteFactory({ pipeConfigs: others, extensions })(target, propertyKey, descriptor);
   };
+}
+
+export function decidePatternVersion(each: UrlPattern): [string, MapLike<string>] {
+  return typeof each === "string" ? [each, {}] : [(<IRouteUrlPattern>each).pattern || (<IRouteUrlTpl_DEPERACTED>each).tpl, each.sections || {}];
 }

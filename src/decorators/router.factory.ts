@@ -1,5 +1,6 @@
 import { IRouterFactory, IRouterMetaConfig, IController, IPipeResolveContext } from "../metadata";
 import { tryGetRouter, readPath, readPipes, createArgSolution } from "./utils";
+import { decidePatternVersion } from "./route.factory";
 
 const noop = () => {};
 
@@ -28,6 +29,8 @@ export function RouterFactory(meta: string | IRouterMetaConfig) {
   let options: IRouterMetaConfig = <any>meta;
   if (typeof meta === "string") options = { group: meta };
   const { rules = [], handler = undefined } = options.pipes || {};
+  const { patterns: tpls = [], sections = {} } = options.pattern || {};
+  const patterns = tpls.map(decidePatternVersion).map(([pattern, sections]) => ({ pattern, sections }));
   return function router<T extends typeof IController>(target: T) {
     const router = tryGetRouter(target.prototype);
     router.group = options.group || router.group;
@@ -39,10 +42,14 @@ export function RouterFactory(meta: string | IRouterMetaConfig) {
       ...router.extensions,
       ...options.extensions
     };
+    router.pattern = {
+      patterns: [...router.pattern.patterns, ...patterns],
+      sections: { ...router.pattern.sections, ...sections }
+    };
     Object.keys(router.routes).forEach(key => {
       const route = router.routes[key];
       if (route.resolved) return;
-      readPath(router.group, route);
+      readPath(router, route);
       readPipes(router, route);
       createArgSolution(route);
       route.resolved = true;

@@ -35,7 +35,7 @@ export function defaultOnBuild(context: IRouteBuildContext, descriptor: IRouteDe
   const needOnEnter = (lifeCycle.onEnter || []).length > 0;
   const needOnQuit = (lifeCycle.onQuit || []).length > 0;
   const sourceRouteMethod: (...args: any[]) => Promise<any> = descriptor.value;
-  const hooks = createLifeHooks(lifeCycle);
+  const hooks = createLifeHooks(context);
   const helpers = createBuildHelper(context);
   descriptor.value = async function() {
     if (needOnPipe) await hooks.runOnPipes.call(this);
@@ -93,9 +93,10 @@ function defaultFetchArgs(delegator: any): IArgSolutionsContext {
  *
  * @author Big Mogician
  * @export
- * @param {Partial<IRouterLifeCycle>} lifeCycle
+ * @param {IRouteBuildContext} context
  */
-export function createLifeHooks(lifeCycle: Partial<IRouterLifeCycle>) {
+export function createLifeHooks(context: IRouteBuildContext<any>) {
+  const { lifeCycle } = context.router;
   return {
     /**
      * 执行OnPipes生命周期
@@ -106,7 +107,7 @@ export function createLifeHooks(lifeCycle: Partial<IRouterLifeCycle>) {
      */
     async runOnPipes(this: any) {
       for (const eachOnPipe of lifeCycle.onPipes || []) {
-        await eachOnPipe(this);
+        await eachOnPipe(context, this);
       }
     },
     /**
@@ -118,7 +119,7 @@ export function createLifeHooks(lifeCycle: Partial<IRouterLifeCycle>) {
      */
     async runOnEnters(this: any) {
       for (const eachOnEnter of lifeCycle.onEnter || []) {
-        await eachOnEnter(this);
+        await eachOnEnter(context, this);
       }
     },
     /**
@@ -130,7 +131,7 @@ export function createLifeHooks(lifeCycle: Partial<IRouterLifeCycle>) {
      */
     async runOnQuits(this: any) {
       for (const eachOnQuit of lifeCycle.onQuit || []) {
-        await eachOnQuit(this);
+        await eachOnQuit(context, this);
       }
     },
     /**

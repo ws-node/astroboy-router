@@ -1,4 +1,15 @@
-import { IRouterDefine, IController, IRouter, IRoute, ArgsExtraction, ARGS, ArgsResolveStatic, Constructor } from "../metadata";
+import {
+  IRouterDefine,
+  IController,
+  IRouter,
+  IRoute,
+  ArgsExtraction,
+  ARGS,
+  ArgsResolveStatic,
+  Constructor,
+  IRoutePathConfig,
+  IRouteUrlPattern
+} from "../metadata";
 import { defaultOnBuild } from "../entrance/build";
 import { defaultOnCreate } from "../entrance/create";
 import { RouterMap } from "../core";
@@ -23,6 +34,10 @@ export function tryGetRouter(target: IRouterDefine | IController, key?: string):
       group: "",
       dependency: new Map(),
       routes: {},
+      pattern: {
+        sections: {},
+        patterns: []
+      },
       extensions: {},
       onCreate: [defaultOnCreate],
       lifeCycle: {
@@ -64,6 +79,7 @@ export function tryGetRoute(routes: any, key: string, subKey?: string) {
       path: [],
       extensions: {},
       pathConfig: [],
+      pathOverride: false,
       args: {
         hasArgs: false,
         context: {},
@@ -80,13 +96,19 @@ export function tryGetRoute(routes: any, key: string, subKey?: string) {
   return route;
 }
 
-export function readPath(group: string, route: IRoute) {
-  const { pathConfig: configs = [] } = route;
-  route.path = configs.map(config => {
-    const { path, urlTpl: tpl, sections: data = {} } = config;
+export function readPath({ group, pattern }: IRouter<any>, route: IRoute) {
+  const { patterns = [], sections: routerSections = {} } = pattern;
+  const { pathConfig: configs = [], pathOverride: override = false } = route;
+  route.path = (<(IRoutePathConfig | IRouteUrlPattern)[]>(!override ? configs : patterns)).map(config => {
+    const { pattern: tpl, sections: data = {} } = config;
     const isPlainUrl = tpl === undefined;
-    if (isPlainUrl) return path || "";
-    const sections: { [prop: string]: any } = { path, group, ...data };
+    if (isPlainUrl) return (<IRoutePathConfig>config).path || "";
+    const sections: { [prop: string]: any } = {
+      ...routerSections,
+      path: (<IRoutePathConfig>config).path,
+      group,
+      ...data
+    };
     let urlToExport: string = tpl || "";
     Object.keys(sections).forEach(key => {
       const placeholder = "{{@" + key + "}}";
