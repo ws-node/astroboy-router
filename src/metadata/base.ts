@@ -75,6 +75,8 @@ export interface IRoute<P = void> {
   pathConfig: Array<IRoutePathConfig>;
   /** 当前路由url-pattern集合是否覆盖父路由集的规则，默认：`false` */
   pathOverride: boolean;
+  /** 当前路由path的占位符真实值，默认：`undefined` */
+  pathSection: string | undefined;
   /** 当前路由所有的pipe管道集合，默认：`{ extend: true, rules: [] }` */
   pipes: IPipeResolveContext<P> & { extend: boolean };
   /** 当前路由的所有args参数定义，默认：`{ hasArgs: false, context: {}, maxIndex: -1, aolutions: [] }` */

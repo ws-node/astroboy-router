@@ -18,6 +18,8 @@ type UrlPattern = UrlPatternV1 | UrlPatternv2;
 export interface CustomRouteOptions {
   /** 路由方法，默认值：`'GET'` */
   method?: METHOD;
+  /** 路由path部分的填充值，默认值：`undefined` */
+  path?: string;
   /** @deperacted [ replace with `patterns` ] url模板，用来自定义生成的url，默认值：`[]` */
   tpls?: (string | IRouteUrlTpl_DEPERACTED)[];
   /** url模板，用来自定义生成的url，默认值：`[]` */
@@ -49,6 +51,7 @@ interface IPipeBaseConfig {
 interface RouteBaseConfig {
   name?: string;
   method?: METHOD;
+  pathSection?: string;
   path?: IRoutePathConfig[];
   pipeConfigs?: Partial<IPipeBaseConfig>;
   pipeOverride?: boolean;
@@ -67,7 +70,7 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
   return function route(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     const { routes } = tryGetRouter(target);
     const route = tryGetRoute(routes, propertyKey);
-    const { method, path = [], name, pipeConfigs = {}, extensions = {}, pipeOverride } = options;
+    const { method, pathSection, path = [], name, pipeConfigs = {}, extensions = {}, pipeOverride } = options;
     const { handler, rules, zIndex = "push", override = undefined } = pipeConfigs;
     route.method = !!method ? [method] : route.method;
     route.name = name || route.name;
@@ -76,6 +79,9 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
       ...route.extensions,
       ...extensions
     };
+    if (pathSection !== undefined) {
+      route.pathSection = pathSection;
+    }
     if (pipeOverride !== undefined) {
       route.pathOverride = pipeOverride;
     }
@@ -103,13 +109,14 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
  * @exports
  */
 export function CustomRouteFactory(options: CustomRouteOptions): IRouteFactory {
-  const { method, name, patterns = [], tpls = [], extensions = {}, forceRouter: force } = options;
+  const { method, name, path, patterns = [], tpls = [], extensions = {}, forceRouter: force } = options;
   // 兼容旧版tpls字段
   const templates = (<UrlPattern[]>(patterns.length === 0 ? tpls : patterns)).map(decidePatternVersion);
   return function customRoute(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     RouteFactory({
       name,
       method,
+      pathSection: path,
       path: templates.map(([pattern, sections]) => ({ pattern, sections })),
       extensions,
       pipeOverride: force
