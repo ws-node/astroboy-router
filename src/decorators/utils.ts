@@ -1,4 +1,15 @@
-import { IRouterDefine, IController, IRouter, IRoute, ArgsDecision, ARGS, ArgsResolver } from "../metadata";
+import {
+  IRouterDefine,
+  IController,
+  IRouter,
+  IRoute,
+  ArgsExtraction,
+  ARGS,
+  ArgsResolveStatic,
+  Constructor,
+  IRoutePathConfig,
+  IRouteUrlPattern
+} from "../metadata";
 import { defaultOnBuild } from "../entrance/build";
 import { defaultOnCreate } from "../entrance/create";
 import { RouterMap } from "../core";
@@ -23,6 +34,10 @@ export function tryGetRouter(target: IRouterDefine | IController, key?: string):
       group: "",
       dependency: new Map(),
       routes: {},
+      pattern: {
+        sections: {},
+        patterns: []
+      },
       extensions: {},
       onCreate: [defaultOnCreate],
       lifeCycle: {
@@ -64,6 +79,7 @@ export function tryGetRoute(routes: any, key: string, subKey?: string) {
       path: [],
       extensions: {},
       pathConfig: [],
+      pathOverride: false,
       args: {
         hasArgs: false,
         context: {},
@@ -80,13 +96,20 @@ export function tryGetRoute(routes: any, key: string, subKey?: string) {
   return route;
 }
 
-export function readPath(group: string, route: IRoute) {
-  const { pathConfig: configs = [] } = route;
-  route.path = configs.map(config => {
-    const { path, urlTpl: tpl, sections: data = {} } = config;
+export function readPath({ group, pattern }: IRouter<any>, route: IRoute) {
+  const { patterns = [], sections: routerSections = {} } = pattern;
+  const { pathConfig: configs = [], pathOverride: override = false } = route;
+  const useRouterPatterns = !override && patterns.length > 0;
+  route.path = (<(IRoutePathConfig | IRouteUrlPattern)[]>(!useRouterPatterns ? configs : patterns)).map(config => {
+    const { pattern: tpl, sections: data = {} } = config;
     const isPlainUrl = tpl === undefined;
-    if (isPlainUrl) return path || "";
-    const sections: { [prop: string]: any } = { path, group, ...data };
+    if (isPlainUrl) return (<IRoutePathConfig>config).path || "";
+    const sections: { [prop: string]: any } = {
+      ...routerSections,
+      path: (<IRoutePathConfig>config).path,
+      group,
+      ...data
+    };
     let urlToExport: string = tpl || "";
     Object.keys(sections).forEach(key => {
       const placeholder = "{{@" + key + "}}";
@@ -125,10 +148,10 @@ export function readPipes(router: IRouter, route: IRoute) {
 }
 
 const defaultTransform = (d: any) => d;
-const useAll: ArgsDecision = context => context;
-const useQuery: ArgsDecision = ({ query }) => query;
-const useBody: ArgsDecision = ({ body }) => body;
-const useParams: ArgsDecision = ({ params }) => params;
+const useAll: ArgsExtraction = context => context;
+const useQuery: ArgsExtraction = ({ query }) => query;
+const useBody: ArgsExtraction = ({ body }) => body;
+const useParams: ArgsExtraction = ({ params }) => params;
 
 export function createArgSolution(route: IRoute<any>): void {
   const { maxIndex = -1, context = {}, solutions } = route.args;
@@ -136,25 +159,32 @@ export function createArgSolution(route: IRoute<any>): void {
   if (len === 0) return;
   for (let step = 0; step < len; step++) {
     if (!context[step]) {
-      solutions.push([useAll, context[step].resolver || defaultTransform]);
+      solutions.push({
+        extract: useAll,
+        transform: defaultTransform
+      });
       continue;
     }
-    const { type, ctor: classType, resolver = defaultTransform, static: useStatic = false, strict: useStrict = false } = context[step];
-    const transform = typeTransform({ resolver, useStatic, type: classType, useStrict });
+    const { type, ctor: classTypes = [], extract, transform = defaultTransform, static: useStatic, strict: useStrict = false } = context[step];
+    const staticX = typeTransform({ useStatic, type: classTypes, useStrict });
+    const solution = { static: staticX, transform, type: classTypes };
     switch (type) {
+      case ARGS.Custom:
+        solutions.push({ ...solution, extract: extract || useAll });
+        break;
       case ARGS.Query:
-        solutions.push([useQuery, transform]);
+        solutions.push({ ...solution, extract: useQuery });
         break;
       case ARGS.Params:
-        solutions.push([useParams, transform]);
+        solutions.push({ ...solution, extract: useParams });
         break;
       case ARGS.BodyUrlEncoded:
       case ARGS.BodyFormData:
       case ARGS.BodyAppJson:
-        solutions.push([useBody, transform]);
+        solutions.push({ ...solution, extract: useBody });
         break;
       default:
-        solutions.push([useAll, transform]);
+        solutions.push({ ...solution, extract: extract || useAll });
         break;
     }
   }
@@ -162,24 +192,24 @@ export function createArgSolution(route: IRoute<any>): void {
 }
 
 interface ITypeTransformContext {
-  type: any;
-  resolver: ArgsResolver;
+  type: Constructor<any>[];
   useStrict?: boolean;
-  useStatic?: boolean;
+  useStatic?: ArgsResolveStatic;
 }
 
-function typeTransform(context: ITypeTransformContext): ArgsResolver {
-  const { type, resolver, useStrict = false, useStatic = false } = context;
-  if (!useStatic) return resolver;
-  switch (type) {
+function typeTransform(context: ITypeTransformContext): ArgsResolveStatic | undefined {
+  const { type: types = [], useStrict = false, useStatic } = context;
+  if (!useStatic) return undefined;
+  if (types.length > 1) return useStatic;
+  switch (types[0]) {
     case String:
     case Number:
-      return d => type(resolver(d));
+      return (data, opts) => useStatic((<any>types[0])(data), opts);
     case Boolean:
-      return useStrict ? d => resolver(d) === true : d => String(resolver(d)) === "true";
-    // 暂时不支持其他复杂类型的类型转换处理
+      return useStrict ? (data, opts) => useStatic(data === true, opts) : (data, opts) => useStatic(String(data) === "true", opts);
+    // 暂时不支持其他复杂类型的类型转换处理，除非手动提供
     // TODO 支持静态类型转换
     default:
-      return resolver;
+      return useStatic;
   }
 }
