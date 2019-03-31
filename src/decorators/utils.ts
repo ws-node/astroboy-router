@@ -180,9 +180,9 @@ function typeTransform(context: ITypeTransformContext): ArgsResolveStatic | unde
   switch (type) {
     case String:
     case Number:
-      return d => useStatic(type(d));
+      return (data, opts) => useStatic(type(data), opts);
     case Boolean:
-      return useStrict ? d => useStatic(d === true) : d => useStatic(String(d) === "true");
+      return useStrict ? (data, opts) => useStatic(data === true, opts) : (data, opts) => useStatic(String(data) === "true", opts);
     // 暂时不支持其他复杂类型的类型转换处理，除非手动提供
     // TODO 支持静态类型转换
     default:
