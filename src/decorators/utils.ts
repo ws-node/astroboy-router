@@ -99,7 +99,8 @@ export function tryGetRoute(routes: any, key: string, subKey?: string) {
 export function readPath({ group, pattern }: IRouter<any>, route: IRoute) {
   const { patterns = [], sections: routerSections = {} } = pattern;
   const { pathConfig: configs = [], pathOverride: override = false } = route;
-  route.path = (<(IRoutePathConfig | IRouteUrlPattern)[]>(!override ? configs : patterns)).map(config => {
+  const useRouterPatterns = !override && patterns.length > 0;
+  route.path = (<(IRoutePathConfig | IRouteUrlPattern)[]>(!useRouterPatterns ? configs : patterns)).map(config => {
     const { pattern: tpl, sections: data = {} } = config;
     const isPlainUrl = tpl === undefined;
     if (isPlainUrl) return (<IRoutePathConfig>config).path || "";
