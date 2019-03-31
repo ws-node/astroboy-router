@@ -1,3 +1,5 @@
+import { MapLike } from "./base";
+
 export enum ARGS {
   All = "@all",
   Custom = "@custom",
@@ -27,9 +29,9 @@ export type ArgsResolveStatic<T = any, OPTIONS = {}> = (data: any, options?: { t
  * @interface IArgsSolutionsContext
  */
 export interface IArgSolutionsContext {
-  body: any;
-  params: any;
-  query: any;
+  body: MapLike<any>;
+  params: MapLike<any>;
+  query: MapLike<any>;
 }
 
 /**
@@ -101,7 +103,11 @@ export interface IRouteArgument {
   ctor?: any;
 }
 
-export interface IArgSolutionPack<SOURCE = any, TYPE = any, OPTIONS = any> {
+export interface IBaseStaticResolveOptions<T> extends Partial<IParseArgsOptions> {
+  type: T;
+}
+
+export interface IArgSolutionPack<SOURCE = any, TYPE = any, OPTIONS extends IBaseStaticResolveOptions<TYPE> = any> {
   extract: ArgsExtraction;
   transform: ArgsTransform<SOURCE, TYPE>;
   static?: ArgsResolveStatic<TYPE, OPTIONS>;
@@ -119,4 +125,9 @@ export interface IRouteArguContent {
   maxIndex: number;
   /** args解决方案，默认：`[]` */
   solutions: Array<IArgSolutionPack>;
+}
+
+export interface IParseArgsOptions {
+  fetchArgs(delegator: any): IArgSolutionsContext;
+  [prop: string]: any;
 }

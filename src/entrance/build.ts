@@ -1,4 +1,13 @@
-import { IRoute, IRouter, IRouteBuildContext, IPipeResolveContext, IRouterLifeCycle, IArgSolutionsContext, IRouteDescriptor } from "../metadata";
+import {
+  IRoute,
+  IRouter,
+  IRouteBuildContext,
+  IPipeResolveContext,
+  IRouterLifeCycle,
+  IArgSolutionsContext,
+  IRouteDescriptor,
+  IParseArgsOptions
+} from "../metadata";
 
 export function buildRouteMethod(prototype: any, methodName: string, router: IRouter, route: IRoute) {
   const { lifeCycle = {} } = router;
@@ -55,20 +64,25 @@ export function createBuildHelper({ route }: IRouteBuildContext<any>) {
      * 解析注入参数
      *
      * @author Big Mogician
-     * @param {any} this
-     * @param {any} [options={}]
+     * @param {any} this delegator
+     * @param {Partial<IParseArgsOptions>} [options={}]
      */
-    parseArgs(this: any, options: any = {}) {
+    parseArgs(this: any, options: Partial<IParseArgsOptions> = {}) {
+      const { fetchArgs = defaultFetchArgs } = options;
       if (!args.hasArgs) return [];
-      const context: IArgSolutionsContext = {
-        query: this.ctx.query || {},
-        params: this.ctx.params || {},
-        body: this.ctx.request.body || {}
-      };
+      const context = fetchArgs(this);
       return args.solutions.map(({ extract: fetch, transform, static: typeResolve, type }) => {
         return !typeResolve ? transform(fetch(context)) : typeResolve(transform(fetch(context)), { ...options, type });
       });
     }
+  };
+}
+
+function defaultFetchArgs(delegator: any): IArgSolutionsContext {
+  return {
+    query: delegator.ctx.query || {},
+    params: delegator.ctx.params || {},
+    body: delegator.ctx.request.body || {}
   };
 }
 
