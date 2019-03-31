@@ -101,13 +101,13 @@ export function readPath({ group, pattern }: IRouter<any>, route: IRoute) {
   const { patterns = [], sections: routerSections = {} } = pattern;
   const { pathConfig: configs = [], pathOverride: override = false, pathSection } = route;
   const useRouterPatterns = !override && patterns.length > 0;
-  route.path = (<(IRoutePathConfig | IRouteUrlPattern)[]>(!useRouterPatterns ? configs : patterns)).map(config => {
+  route.path = (<(IRoutePathConfig | IRouteUrlPattern)[]>(!useRouterPatterns ? configs : patterns)).map((config, index) => {
     const { pattern: tpl, sections: data = {} } = config;
     const isPlainUrl = tpl === undefined;
     if (isPlainUrl) return (<IRoutePathConfig>config).path || "";
     const sections: { [prop: string]: any } = {
       ...routerSections,
-      path: pathSection,
+      path: pathSection[index],
       group,
       ...data
     };
