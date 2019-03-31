@@ -1,4 +1,4 @@
-import { IRouterDefine, IController, IRouter, IRoute, ArgsExtraction, ARGS, ArgsResolveStatic } from "../metadata";
+import { IRouterDefine, IController, IRouter, IRoute, ArgsExtraction, ARGS, ArgsResolveStatic, Constructor } from "../metadata";
 import { defaultOnBuild } from "../entrance/build";
 import { defaultOnCreate } from "../entrance/create";
 import { RouterMap } from "../core";
@@ -142,9 +142,9 @@ export function createArgSolution(route: IRoute<any>): void {
       });
       continue;
     }
-    const { type, ctor: classType, extract, transform = defaultTransform, static: useStatic, strict: useStrict = false } = context[step];
-    const staticX = typeTransform({ useStatic, type: classType, useStrict });
-    const solution = { static: staticX, transform, type: classType };
+    const { type, ctor: classTypes = [], extract, transform = defaultTransform, static: useStatic, strict: useStrict = false } = context[step];
+    const staticX = typeTransform({ useStatic, type: classTypes, useStrict });
+    const solution = { static: staticX, transform, type: classTypes };
     switch (type) {
       case ARGS.Custom:
         solutions.push({ ...solution, extract: extract || useAll });
@@ -169,18 +169,19 @@ export function createArgSolution(route: IRoute<any>): void {
 }
 
 interface ITypeTransformContext {
-  type: any;
+  type: Constructor<any>[];
   useStrict?: boolean;
   useStatic?: ArgsResolveStatic;
 }
 
 function typeTransform(context: ITypeTransformContext): ArgsResolveStatic | undefined {
-  const { type, useStrict = false, useStatic } = context;
+  const { type: types = [], useStrict = false, useStatic } = context;
   if (!useStatic) return undefined;
-  switch (type) {
+  if (types.length > 1) return useStatic;
+  switch (types[0]) {
     case String:
     case Number:
-      return (data, opts) => useStatic(type(data), opts);
+      return (data, opts) => useStatic((<any>types[0])(data), opts);
     case Boolean:
       return useStrict ? (data, opts) => useStatic(data === true, opts) : (data, opts) => useStatic(String(data) === "true", opts);
     // 暂时不支持其他复杂类型的类型转换处理，除非手动提供

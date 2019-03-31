@@ -71,7 +71,7 @@ export function createBuildHelper({ route }: IRouteBuildContext<any>) {
       const { fetchArgs = defaultFetchArgs } = options;
       if (!args.hasArgs) return [];
       const context = fetchArgs(this);
-      return args.solutions.map(({ extract: fetch, transform, static: typeResolve, type }) => {
+      return args.solutions.map(({ extract: fetch, transform, static: typeResolve, type = [] }) => {
         return !typeResolve ? transform(fetch(context)) : typeResolve(transform(fetch(context)), { ...options, type });
       });
     }

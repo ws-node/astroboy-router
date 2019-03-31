@@ -46,11 +46,12 @@ export function FromBodyFactory(options: Partial<IBodyArgsOptions> = {}) {
 export function FromRequestFactory(): ArgsFactory;
 export function FromRequestFactory(options: Partial<IRequestArgsOptions>): ArgsFactory;
 export function FromRequestFactory(options: Partial<IRequestArgsOptions> = {}) {
-  const { transform, useStatic, useStrict = false, extract, type } = options;
+  const { transform, useStatic, useStrict = false, extract, type, useTypes = [] } = options;
   return function dynamic_args<T>(prototype: T, propertyKey: string, index: number) {
     const routes = tryGetRouter(prototype, "routes");
     const args = tryGetRoute(routes, propertyKey, "args");
     const types = Reflect.getMetadata("design:paramtypes", prototype, propertyKey) || [];
+    const reflectType = types[index];
     if (index > args.maxIndex) args.maxIndex = index;
     args.context[index] = {
       index,
@@ -59,7 +60,7 @@ export function FromRequestFactory(options: Partial<IRequestArgsOptions> = {}) {
       extract,
       static: useStatic,
       strict: !!useStrict,
-      ctor: typeFilter(types[index])
+      ctor: useTypes.length > 0 ? useTypes : [typeFilter(reflectType)]
     };
   };
 }

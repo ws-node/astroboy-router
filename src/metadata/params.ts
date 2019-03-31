@@ -1,4 +1,4 @@
-import { MapLike } from "./base";
+import { MapLike, Constructor } from "./base";
 
 export enum ARGS {
   All = "@all",
@@ -49,6 +49,8 @@ export interface IArgsOptions<TRANS = any, RESULT = any, SOPTIONS = {}> {
   transform: ArgsTransform<TRANS, RESULT>;
   /** 使用静态类型处理函数，默认：`undefined` */
   useStatic: ArgsResolveStatic<RESULT, SOPTIONS>;
+  /** 使用指定的类型覆盖类型声明 ， 默认：`undefined` */
+  useTypes: Array<Constructor<any>>;
 }
 
 /**
@@ -100,18 +102,18 @@ export interface IRouteArgument {
   /** args的严格模式，兼容url-encoded的类型模糊问题，默认：`false` */
   strict?: boolean;
   /** args的类型，默认：`undefined` */
-  ctor?: any;
+  ctor?: Array<Constructor<any>>;
 }
 
-export interface IBaseStaticResolveOptions<T> extends Partial<IParseArgsOptions> {
-  type: T;
+export interface IBaseStaticResolveOptions<T = any> extends Partial<IParseArgsOptions> {
+  type: T[];
 }
 
 export interface IArgSolutionPack<SOURCE = any, TYPE = any, OPTIONS extends IBaseStaticResolveOptions<TYPE> = any> {
   extract: ArgsExtraction;
   transform: ArgsTransform<SOURCE, TYPE>;
   static?: ArgsResolveStatic<TYPE, OPTIONS>;
-  type?: TYPE;
+  type?: TYPE[];
 }
 
 export interface IRouteArguContent {
