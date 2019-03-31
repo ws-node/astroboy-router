@@ -1,7 +1,7 @@
 import { IAstroboyBaseClass, IRouter, IRoute } from "./base";
 
-export interface IRouteLifeCycleMethod {
-  <T = any>(ctor: IAstroboyBaseClass<T>): void | Promise<void>;
+export interface IRouteLifeCycleMethod<T = IRouteBuildContext<void>> {
+  (context: T, instance: IAstroboyBaseClass<T>): void | Promise<void>;
 }
 
 export interface IRouterBuildContext<P = void> {

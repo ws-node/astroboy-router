@@ -1,4 +1,4 @@
-import { ArgsFactory, IArgsOptions, ARGS, InnerArgsOptions } from "../metadata";
+import { ArgsFactory, ARGS, IRequestArgsOptions, IBodyArgsOptions, IQueryArgsOptions, IParamsArgsOptions } from "../metadata";
 import { tryGetRoute, tryGetRouter } from "./utils";
 
 import "reflect-metadata";
@@ -11,9 +11,9 @@ import "reflect-metadata";
  * @returns {FromParamsFactory}
  */
 export function FromParamsFactory(): ArgsFactory;
-export function FromParamsFactory(options: Partial<IArgsOptions<{ params?: any }>>): ArgsFactory;
-export function FromParamsFactory(options: Partial<IArgsOptions<{ params?: any }>> = {}) {
-  return FromRequestFactory({ ...options, type: ARGS.Params });
+export function FromParamsFactory(options: Partial<IParamsArgsOptions>): ArgsFactory;
+export function FromParamsFactory(options: Partial<IParamsArgsOptions> = {}) {
+  return FromRequestFactory({ type: ARGS.Params, ...options });
 }
 
 /**
@@ -24,9 +24,9 @@ export function FromParamsFactory(options: Partial<IArgsOptions<{ params?: any }
  * @returns {FromQueryFactory}
  */
 export function FromQueryFactory(): ArgsFactory;
-export function FromQueryFactory(options: Partial<IArgsOptions<{ query?: any }>>): ArgsFactory;
-export function FromQueryFactory(options: Partial<IArgsOptions<{ query?: any }>> = {}) {
-  return FromRequestFactory({ ...options, type: ARGS.Query });
+export function FromQueryFactory(options: Partial<IQueryArgsOptions>): ArgsFactory;
+export function FromQueryFactory(options: Partial<IQueryArgsOptions> = {}) {
+  return FromRequestFactory({ type: ARGS.Query, ...options });
 }
 
 /**
@@ -38,27 +38,29 @@ export function FromQueryFactory(options: Partial<IArgsOptions<{ query?: any }>>
  * @returns {FromBodyFactory}
  */
 export function FromBodyFactory(): ArgsFactory;
-export function FromBodyFactory(options: Partial<IArgsOptions<{ body?: any }>>): ArgsFactory;
-export function FromBodyFactory(options: Partial<IArgsOptions<{ body?: any }>> = {}) {
-  return FromRequestFactory({ ...options, useStrict: true, type: ARGS.BodyAppJson });
+export function FromBodyFactory(options: Partial<IBodyArgsOptions>): ArgsFactory;
+export function FromBodyFactory(options: Partial<IBodyArgsOptions> = {}) {
+  return FromRequestFactory({ useStrict: true, type: ARGS.BodyAppJson, ...options });
 }
 
 export function FromRequestFactory(): ArgsFactory;
-export function FromRequestFactory(options: Partial<InnerArgsOptions>): ArgsFactory;
-export function FromRequestFactory(options: Partial<InnerArgsOptions> = {}) {
-  const { transform, useStatic = false, useStrict = false, type } = options;
+export function FromRequestFactory(options: Partial<IRequestArgsOptions>): ArgsFactory;
+export function FromRequestFactory(options: Partial<IRequestArgsOptions> = {}) {
+  const { transform, useStatic, useStrict = false, extract, type, useTypes = [] } = options;
   return function dynamic_args<T>(prototype: T, propertyKey: string, index: number) {
     const routes = tryGetRouter(prototype, "routes");
     const args = tryGetRoute(routes, propertyKey, "args");
     const types = Reflect.getMetadata("design:paramtypes", prototype, propertyKey) || [];
+    const reflectType = types[index];
     if (index > args.maxIndex) args.maxIndex = index;
     args.context[index] = {
       index,
-      type: type || ARGS.All,
-      resolver: transform,
-      static: !!useStatic,
+      type: type || ARGS.Custom,
+      transform,
+      extract,
+      static: useStatic,
       strict: !!useStrict,
-      ctor: typeFilter(types[index])
+      ctor: useTypes.length > 0 ? useTypes : [typeFilter(reflectType)]
     };
   };
 }

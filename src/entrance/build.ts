@@ -1,4 +1,13 @@
-import { IRoute, IRouter, IRouteBuildContext, IPipeResolveContext, IRouterLifeCycle, IArgsSolutionsContext, IRouteDescriptor } from "../metadata";
+import {
+  IRoute,
+  IRouter,
+  IRouteBuildContext,
+  IPipeResolveContext,
+  IRouterLifeCycle,
+  IArgSolutionsContext,
+  IRouteDescriptor,
+  IParseArgsOptions
+} from "../metadata";
 
 export function buildRouteMethod(prototype: any, methodName: string, router: IRouter, route: IRoute) {
   const { lifeCycle = {} } = router;
@@ -26,7 +35,7 @@ export function defaultOnBuild(context: IRouteBuildContext, descriptor: IRouteDe
   const needOnEnter = (lifeCycle.onEnter || []).length > 0;
   const needOnQuit = (lifeCycle.onQuit || []).length > 0;
   const sourceRouteMethod: (...args: any[]) => Promise<any> = descriptor.value;
-  const hooks = createLifeHooks(lifeCycle);
+  const hooks = createLifeHooks(context);
   const helpers = createBuildHelper(context);
   descriptor.value = async function() {
     if (needOnPipe) await hooks.runOnPipes.call(this);
@@ -55,22 +64,25 @@ export function createBuildHelper({ route }: IRouteBuildContext<any>) {
      * 解析注入参数
      *
      * @author Big Mogician
-     * @param {*} this
-     * @param {(caller: any) => IArgsSolutionsContext} [contextResolve]
+     * @param {any} this delegator
+     * @param {Partial<IParseArgsOptions>} [options={}]
      */
-    parseArgs(this: any, contextResolve?: (caller: any) => IArgsSolutionsContext) {
+    parseArgs(this: any, options: Partial<IParseArgsOptions> = {}) {
+      const { fetchArgs = defaultFetchArgs } = options;
       if (!args.hasArgs) return [];
-      const context: IArgsSolutionsContext = !contextResolve
-        ? {
-            query: this.ctx.query || {},
-            params: this.ctx.params || {},
-            body: this.ctx.request.body || {}
-          }
-        : contextResolve(this);
-      return args.solutions.map(([fetch, transform]) => {
-        return transform(fetch(context));
+      const context = fetchArgs(this);
+      return args.solutions.map(({ extract: fetch, transform, static: typeResolve, type = [] }) => {
+        return !typeResolve ? transform(fetch(context)) : typeResolve(transform(fetch(context)), { ...options, type });
       });
     }
+  };
+}
+
+function defaultFetchArgs(delegator: any): IArgSolutionsContext {
+  return {
+    query: delegator.ctx.query || {},
+    params: delegator.ctx.params || {},
+    body: delegator.ctx.request.body || {}
   };
 }
 
@@ -81,9 +93,10 @@ export function createBuildHelper({ route }: IRouteBuildContext<any>) {
  *
  * @author Big Mogician
  * @export
- * @param {Partial<IRouterLifeCycle>} lifeCycle
+ * @param {IRouteBuildContext} context
  */
-export function createLifeHooks(lifeCycle: Partial<IRouterLifeCycle>) {
+export function createLifeHooks(context: IRouteBuildContext<any>) {
+  const { lifeCycle } = context.router;
   return {
     /**
      * 执行OnPipes生命周期
@@ -94,7 +107,7 @@ export function createLifeHooks(lifeCycle: Partial<IRouterLifeCycle>) {
      */
     async runOnPipes(this: any) {
       for (const eachOnPipe of lifeCycle.onPipes || []) {
-        await eachOnPipe(this);
+        await eachOnPipe(context, this);
       }
     },
     /**
@@ -106,7 +119,7 @@ export function createLifeHooks(lifeCycle: Partial<IRouterLifeCycle>) {
      */
     async runOnEnters(this: any) {
       for (const eachOnEnter of lifeCycle.onEnter || []) {
-        await eachOnEnter(this);
+        await eachOnEnter(context, this);
       }
     },
     /**
@@ -118,7 +131,7 @@ export function createLifeHooks(lifeCycle: Partial<IRouterLifeCycle>) {
      */
     async runOnQuits(this: any) {
       for (const eachOnQuit of lifeCycle.onQuit || []) {
-        await eachOnQuit(this);
+        await eachOnQuit(context, this);
       }
     },
     /**
