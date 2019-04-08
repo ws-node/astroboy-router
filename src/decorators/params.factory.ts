@@ -11,8 +11,8 @@ import "reflect-metadata";
  * @returns {FromParamsFactory}
  */
 export function FromParamsFactory(): ArgsFactory;
-export function FromParamsFactory(options: Partial<IArgsOptions<{ params?: any }>>): ArgsFactory;
-export function FromParamsFactory(options: Partial<IArgsOptions<{ params?: any }>> = {}) {
+export function FromParamsFactory(options: Partial<IArgsOptions<any>>): ArgsFactory;
+export function FromParamsFactory(options: Partial<IArgsOptions<any>> = {}) {
   return FromRequestFactory({ ...options, type: ARGS.Params });
 }
 
@@ -24,8 +24,8 @@ export function FromParamsFactory(options: Partial<IArgsOptions<{ params?: any }
  * @returns {FromQueryFactory}
  */
 export function FromQueryFactory(): ArgsFactory;
-export function FromQueryFactory(options: Partial<IArgsOptions<{ query?: any }>>): ArgsFactory;
-export function FromQueryFactory(options: Partial<IArgsOptions<{ query?: any }>> = {}) {
+export function FromQueryFactory(options: Partial<IArgsOptions<any>>): ArgsFactory;
+export function FromQueryFactory(options: Partial<IArgsOptions<any>> = {}) {
   return FromRequestFactory({ ...options, type: ARGS.Query });
 }
 
@@ -38,8 +38,8 @@ export function FromQueryFactory(options: Partial<IArgsOptions<{ query?: any }>>
  * @returns {FromBodyFactory}
  */
 export function FromBodyFactory(): ArgsFactory;
-export function FromBodyFactory(options: Partial<IArgsOptions<{ body?: any }>>): ArgsFactory;
-export function FromBodyFactory(options: Partial<IArgsOptions<{ body?: any }>> = {}) {
+export function FromBodyFactory(options: Partial<IArgsOptions<any>>): ArgsFactory;
+export function FromBodyFactory(options: Partial<IArgsOptions<any>> = {}) {
   return FromRequestFactory({ ...options, useStrict: true, type: ARGS.BodyAppJson });
 }
 
