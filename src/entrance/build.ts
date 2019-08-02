@@ -1,13 +1,4 @@
-import {
-  IRoute,
-  IRouter,
-  IRouteBuildContext,
-  IPipeResolveContext,
-  IRouterLifeCycle,
-  IArgSolutionsContext,
-  IRouteDescriptor,
-  IParseArgsOptions
-} from "../metadata";
+import { IRoute, IRouter, IRouteBuildContext, IPipeResolveContext, IArgSolutionsContext, IRouteDescriptor, IParseArgsOptions } from "../metadata";
 
 export function buildRouteMethod(prototype: any, methodName: string, router: IRouter, route: IRoute) {
   const { lifeCycle = {} } = router;
