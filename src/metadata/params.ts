@@ -4,7 +4,7 @@ export enum ARGS {
   Query = "query",
   BodyAppJson = "body::application/json",
   BodyUrlEncoded = "body::application/x-www-form-urlencoded",
-  BodyFormData = "body::multipart/form-data"
+  BodyFormData = "body::multipart/form-data",
 }
 
 /** 处理解析 */
@@ -15,6 +15,7 @@ export type ArgsFactory<T = any> = (target: T, propertyKey: string, index: numbe
 export type ArgsDecision = (context: IArgsSolutionsContext) => any;
 
 export interface IArgsSolutionsContext {
+  context?: any;
   body?: any;
   params?: any;
   query?: any;
