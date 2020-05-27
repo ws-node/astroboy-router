@@ -1,7 +1,7 @@
 build:
 	yarn test
 	rm -rf dist
-	tsc
+	npx tsc
 	cp README.md dist/
 
 rc: build

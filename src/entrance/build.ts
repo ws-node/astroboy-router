@@ -28,7 +28,7 @@ export function defaultOnBuild(context: IRouteBuildContext, descriptor: IRouteDe
   const sourceRouteMethod: (...args: any[]) => Promise<any> = descriptor.value;
   const hooks = createLifeHooks(context);
   const helpers = createBuildHelper(context);
-  descriptor.value = async function() {
+  descriptor.value = async function () {
     if (needOnPipe) await hooks.runOnPipes.call(this);
     if (needPipe) await hooks.runPipes.call(this, pipes);
     if (needOnEnter) await hooks.runOnEnters.call(this);
@@ -65,15 +65,16 @@ export function createBuildHelper({ route }: IRouteBuildContext<any>) {
       return args.solutions.map(({ extract: fetch, transform, static: typeResolve, type = [] }) => {
         return !typeResolve ? transform(fetch(context)) : typeResolve(transform(fetch(context)), { ...options, type });
       });
-    }
+    },
   };
 }
 
 function defaultFetchArgs(delegator: any): IArgSolutionsContext {
   return {
+    context: delegator.ctx || {},
     query: delegator.ctx.query || {},
     params: delegator.ctx.params || {},
-    body: delegator.ctx.request.body || {}
+    body: delegator.ctx.request.body || {},
   };
 }
 
@@ -144,6 +145,6 @@ export function createLifeHooks(context: IRouteBuildContext<any>) {
         }
         pipes.handler(this, error);
       }
-    }
+    },
   };
 }

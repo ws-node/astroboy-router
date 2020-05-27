@@ -7,7 +7,7 @@ export enum ARGS {
   Query = "query",
   BodyAppJson = "body::application/json",
   BodyUrlEncoded = "body::application/x-www-form-urlencoded",
-  BodyFormData = "body::multipart/form-data"
+  BodyFormData = "body::multipart/form-data",
 }
 
 export type ArgsFactory<T = any> = (target: T, propertyKey: string, index: number) => void;
@@ -29,6 +29,7 @@ export type ArgsResolveStatic<T = any, OPTIONS = {}> = (data: any, options?: { t
  * @interface IArgsSolutionsContext
  */
 export interface IArgSolutionsContext {
+  context: MapLike<any>;
   body: MapLike<any>;
   params: MapLike<any>;
   query: MapLike<any>;
