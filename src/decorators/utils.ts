@@ -8,7 +8,7 @@ import {
   ArgsResolveStatic,
   Constructor,
   IRoutePathConfig,
-  IRouteUrlPattern
+  IRouteUrlPattern,
 } from "../metadata";
 import { defaultOnBuild } from "../entrance/build";
 import { defaultOnCreate } from "../entrance/create";
@@ -36,7 +36,7 @@ export function tryGetRouter(target: IRouterDefine | IController, key?: string):
       routes: {},
       pattern: {
         sections: {},
-        patterns: []
+        patterns: [],
       },
       extensions: {},
       onCreate: [defaultOnCreate],
@@ -44,11 +44,11 @@ export function tryGetRouter(target: IRouterDefine | IController, key?: string):
         onBuild: [defaultOnBuild],
         onEnter: [],
         onPipes: [],
-        onQuit: []
+        onQuit: [],
       },
       pipes: {
-        rules: []
-      }
+        rules: [],
+      },
     };
     RouterMap.set(target, router);
   }
@@ -85,12 +85,14 @@ export function tryGetRoute(routes: any, key: string, subKey?: string) {
         hasArgs: false,
         context: {},
         maxIndex: -1,
-        solutions: []
+        solutions: [],
       },
       pipes: {
         rules: [],
-        extend: true
-      }
+        extend: true,
+      },
+      routePreHandler: [],
+      routeSchema: {},
     };
   }
   if (!!subKey) return (<any>route)[subKey];
@@ -109,10 +111,10 @@ export function readPath({ group, pattern }: IRouter<any>, route: IRoute) {
       ...routerSections,
       path: pathSection[index],
       group,
-      ...data
+      ...data,
     };
     let urlToExport: string = tpl || "";
-    Object.keys(sections).forEach(key => {
+    Object.keys(sections).forEach((key) => {
       const placeholder = "{{@" + key + "}}";
       if (urlToExport.includes(placeholder)) {
         const realValue = sections[key];
@@ -144,12 +146,12 @@ export function readPipes(router: IRouter, route: IRoute) {
   route.pipes = {
     ...pipes,
     rules: pipes.extend ? [...parent.rules, ...pipes.rules] : pipes.rules,
-    handler: pipes.extend ? pipes.handler || parent.handler : pipes.handler
+    handler: pipes.extend ? pipes.handler || parent.handler : pipes.handler,
   };
 }
 
 const defaultTransform = (d: any) => d;
-const useAll: ArgsExtraction = context => context;
+const useAll: ArgsExtraction = (context) => context;
 const useQuery: ArgsExtraction = ({ query }) => query;
 const useBody: ArgsExtraction = ({ body }) => body;
 const useParams: ArgsExtraction = ({ params }) => params;
@@ -162,7 +164,7 @@ export function createArgSolution(route: IRoute<any>): void {
     if (!context[step]) {
       solutions.push({
         extract: useAll,
-        transform: defaultTransform
+        transform: defaultTransform,
       });
       continue;
     }

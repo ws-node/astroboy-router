@@ -1,6 +1,6 @@
 {
   "name": "astroboy-router",
-  "version": "2.2.3",
+  "version": "2.3.0-rc.1",
   "description": "A router plugin for astroboy.ts.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -40,8 +40,8 @@
     "@types/koa-router": "^7.0.31",
     "@types/node": "^10.3.2",
     "lodash": "^4.17.11",
-    "reflect-metadata": "0.1.12",
-    "tslib": "1.9.3"
+    "reflect-metadata": "^0.1.12",
+    "tslib": "^2.1.0"
   },
   "devDependencies": {
     "@bigmogician/publisher": "^1.0.9",
@@ -55,6 +55,6 @@
     "source-map-support": "^0.5.9",
     "ts-node": "7.0.0",
     "tslint": "^5.18.0",
-    "typescript": "^3.0.3"
+    "typescript": "^4.1.3"
   }
 }
