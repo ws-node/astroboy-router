@@ -1,4 +1,4 @@
-import { ArgsFactory, ARGS, IRequestArgsOptions, IBodyArgsOptions, IQueryArgsOptions, IParamsArgsOptions } from "../metadata";
+import { ArgsFactory, ARGS, IRequestArgsOptions, IArgsOptions } from "../metadata";
 import { tryGetRoute, tryGetRouter } from "./utils";
 
 import "reflect-metadata";
@@ -11,9 +11,9 @@ import "reflect-metadata";
  * @returns {FromParamsFactory}
  */
 export function FromParamsFactory(): ArgsFactory;
-export function FromParamsFactory(options: Partial<IParamsArgsOptions>): ArgsFactory;
-export function FromParamsFactory(options: Partial<IParamsArgsOptions> = {}) {
-  return FromRequestFactory({ type: ARGS.Params, ...options });
+export function FromParamsFactory(options: Partial<IArgsOptions<any>>): ArgsFactory;
+export function FromParamsFactory(options: Partial<IArgsOptions<any>> = {}) {
+  return FromRequestFactory({ ...options, type: ARGS.Params });
 }
 
 /**
@@ -24,9 +24,9 @@ export function FromParamsFactory(options: Partial<IParamsArgsOptions> = {}) {
  * @returns {FromQueryFactory}
  */
 export function FromQueryFactory(): ArgsFactory;
-export function FromQueryFactory(options: Partial<IQueryArgsOptions>): ArgsFactory;
-export function FromQueryFactory(options: Partial<IQueryArgsOptions> = {}) {
-  return FromRequestFactory({ type: ARGS.Query, ...options });
+export function FromQueryFactory(options: Partial<IArgsOptions<any>>): ArgsFactory;
+export function FromQueryFactory(options: Partial<IArgsOptions<any>> = {}) {
+  return FromRequestFactory({ ...options, type: ARGS.Query });
 }
 
 /**
@@ -38,9 +38,9 @@ export function FromQueryFactory(options: Partial<IQueryArgsOptions> = {}) {
  * @returns {FromBodyFactory}
  */
 export function FromBodyFactory(): ArgsFactory;
-export function FromBodyFactory(options: Partial<IBodyArgsOptions>): ArgsFactory;
-export function FromBodyFactory(options: Partial<IBodyArgsOptions> = {}) {
-  return FromRequestFactory({ useStrict: true, type: ARGS.BodyAppJson, ...options });
+export function FromBodyFactory(options: Partial<IArgsOptions<any>>): ArgsFactory;
+export function FromBodyFactory(options: Partial<IArgsOptions<any>> = {}) {
+  return FromRequestFactory({ ...options, useStrict: true, type: ARGS.BodyAppJson });
 }
 
 export function FromRequestFactory(): ArgsFactory;
@@ -60,7 +60,7 @@ export function FromRequestFactory(options: Partial<IRequestArgsOptions> = {}) {
       extract,
       static: useStatic,
       strict: !!useStrict,
-      ctor: useTypes.length > 0 ? useTypes : [typeFilter(reflectType)]
+      ctor: useTypes.length > 0 ? useTypes : [typeFilter(reflectType)],
     };
   };
 }
