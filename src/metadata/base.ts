@@ -54,6 +54,8 @@ export interface IRouterPatternConfig {
   sections: MapLike<any>;
 }
 
+export interface IRouteCheckSchema extends Record<string, any> {}
+
 /**
  * ## Astroboy-Router 路由定义
  *
@@ -83,6 +85,10 @@ export interface IRoute<P = void> {
   args: IRouteArguContent;
   /** 扩展字段集，用于第三方进行扩展内容补充，默认：`{}` */
   extensions: MapLike<any>;
+  /** 前置执行的路由，某个新版本加入的功能 */
+  routePreHandler: string[];
+  /** 支持使用schema对请求内容检查，某个新版本加入的功能 */
+  routeSchema: Partial<IRouteCheckSchema>;
 }
 
 /**

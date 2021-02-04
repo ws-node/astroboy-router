@@ -7,7 +7,8 @@ import {
   PipeErrorHandler,
   MapLike,
   IRouteUrlTpl_DEPERACTED,
-  IRouteUrlPattern
+  IRouteUrlPattern,
+  IRouteCheckSchema,
 } from "../metadata";
 import { tryGetRouter, tryGetRoute } from "./utils";
 
@@ -37,6 +38,18 @@ export interface CustomPipeOptions extends Partial<IPipeBaseConfig> {
   extensions?: any;
 }
 
+export interface CustomUtilOptions extends Partial<IRouteUtilConfig> {
+  /** 扩展结构，默认：`{}` */
+  extensions?: any;
+}
+
+interface IRouteUtilConfig {
+  /** 前置执行的路由，某个新版本加入的功能 */
+  preHandler: string[];
+  /** 支持使用schema对请求内容检查，某个新版本加入的功能 */
+  schema: Partial<IRouteCheckSchema>;
+}
+
 interface IPipeBaseConfig {
   /** 是否重载覆盖Router级别的pipe配置，默认：`false` */
   override: boolean;
@@ -56,6 +69,8 @@ interface RouteBaseConfig {
   pipeConfigs?: Partial<IPipeBaseConfig>;
   pipeOverride?: boolean;
   extensions?: MapLike<any>;
+  routePreHandler?: string[];
+  routeSchema?: Partial<IRouteCheckSchema>;
 }
 
 /**
@@ -70,16 +85,16 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
   return function route(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
     const { routes } = tryGetRouter(target);
     const route = tryGetRoute(routes, propertyKey);
-    const { method, pathSection = [], path = [], name, pipeConfigs = {}, extensions = {}, pipeOverride } = options;
+    const { method, pathSection = [], path = [], name, pipeConfigs = {}, extensions = {}, pipeOverride, routePreHandler, routeSchema } = options;
     const { handler, rules, zIndex = "push", override = undefined } = pipeConfigs;
     route.method = !!method ? [method] : route.method;
-    route.name = name || route.name;
+    route.name = name ?? route.name;
     route.pipes.handler = handler || route.pipes.handler;
     route.extensions = {
       ...route.extensions,
-      ...extensions
+      ...extensions,
     };
-    if (pipeOverride !== undefined) {
+    if (pipeOverride !== void 0) {
       route.pathOverride = pipeOverride;
     }
     if (pathSection.length > 0) {
@@ -95,6 +110,12 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
     } else {
       route.pipes.extend = false;
       route.pipes.rules = rules;
+    }
+    if (routePreHandler) {
+      route.routePreHandler = [...route.routePreHandler, ...routePreHandler];
+    }
+    if (routeSchema) {
+      route.routeSchema = { ...route.routeSchema, ...routeSchema };
     }
   };
 }
@@ -119,8 +140,24 @@ export function CustomRouteFactory(options: CustomRouteOptions): IRouteFactory {
       pathSection: path,
       path: templates.map(([pattern, sections]) => ({ pattern, sections })),
       extensions,
-      pipeOverride: force
+      pipeOverride: force,
     })(target, propertyKey, descriptor);
+  };
+}
+
+/**
+ * ## 自定义的额外功能
+ * @description
+ * @author Big Mogician
+ * @export
+ * @param {CustomUtilOptions} options
+ * @returns {IRouteFactory}
+ * @exports
+ */
+export function CustomUtilFactory(options: CustomUtilOptions): IRouteFactory {
+  const { extensions, preHandler, schema } = options;
+  return function customUtil(target: IRouterDefine, propertyKey: string, descriptor?: PropertyDescriptor) {
+    RouteFactory({ routePreHandler: preHandler, routeSchema: schema, extensions })(target, propertyKey, descriptor);
   };
 }
 

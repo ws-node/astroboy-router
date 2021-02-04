@@ -10,6 +10,12 @@ interface RouterOptions {
   debug?: boolean;
 }
 
+type RouteItem = (string | string[])[] | Record<string, any>;
+
+function getPath(root: string, paths: string[] | string) {
+  return Array.isArray(paths) ? paths.map((p) => `${root}/${p}`) : `${root}/${paths}`;
+}
+
 /**
  * ## 生成astroboy路由配置
  * @description
@@ -24,45 +30,54 @@ interface RouterOptions {
 export function createRouter(ctor: IControllerConstructor, name: string, root: string): (string | string[])[][];
 export function createRouter(options: RouterOptions): (string | string[])[][];
 export function createRouter(...args: any[]) {
-  let ctor!: IControllerConstructor;
-  let name!: string;
-  let root!: string;
-  let debug = false;
+  let routerCtor!: IControllerConstructor;
+  let routerName!: string;
+  let routerRoot!: string;
+  let useDebug = false;
   if (args.length === 1) {
-    [ctor, name, root] = [args[0].router, args[0].name, args[0].root];
-    if (args[0].debug !== undefined) debug = !!args[0].debug;
+    [routerCtor, routerName, routerRoot] = [args[0].router, args[0].name, args[0].root];
+    if (args[0].debug !== undefined) useDebug = !!args[0].debug;
   } else {
-    [ctor, name, root] = args;
+    [routerCtor, routerName, routerRoot] = args;
   }
-  const prototype = <any>ctor.prototype;
-  const router = <IRouter>ctor.prototype["@router"];
+  const prototype = <any>routerCtor.prototype;
+  const router = <IRouter>routerCtor.prototype["@router"];
   // 未经装饰，不符合Router的要求，终止应用程序
-  if (!router) throw new Error(`Create router failed : invalid router controller [${ctor && (<any>ctor).name}]`);
+  if (!router) throw new Error(`Create router failed : invalid router controller [${routerCtor && (<any>routerCtor).name}]`);
   buildRouterInstance(prototype, router);
-  const result: (string | string[])[][] = [];
+  const result: RouteItem[] = [];
   for (const methodName in router.routes) {
     const route = router.routes[methodName];
-    const allRouteMethods: (string | string[])[][] = [];
-    route.method.forEach(method => {
-      const routeArr: (string | string[])[] = [];
-      if (!!route.name) routeArr.push(route.name);
-      routeArr.push(method);
-      if (route.path instanceof Array) {
-        routeArr.push(route.path.map(path => `${root}/${path}`));
+    const allRouteMethods: RouteItem[] = [];
+    route.method.forEach((method) => {
+      if (Object.keys(route.routeSchema).length === 0) {
+        // 不存在schema，使用旧逻辑
+        const routeArr: (string | string[])[] = [];
+        if (!!route.name) routeArr.push(route.name);
+        routeArr.push(method);
+        routeArr.push(getPath(routerRoot, route.path));
+        routeArr.push(routerName);
+        routeArr.push(methodName);
+        buildRouteMethod(prototype, methodName, router, route);
+        allRouteMethods.push(routeArr);
       } else {
-        routeArr.push(`${root}/${route.path}`);
+        // 新版本的写法
+        allRouteMethods.push({
+          name: route.name,
+          method,
+          path: getPath(routerRoot, route.path),
+          schema: route.routeSchema,
+          preHandler: route.routePreHandler,
+          handler: `${routerName}:${methodName}`,
+        });
       }
-      routeArr.push(name);
-      routeArr.push(methodName);
-      buildRouteMethod(prototype, methodName, router, route);
-      allRouteMethods.push(routeArr);
     });
     result.push(...allRouteMethods);
   }
-  Object.keys(router.routes).forEach(async methodName => {});
-  if (debug) {
+  // Object.keys(router.routes).forEach(async (methodName) => {});
+  if (useDebug) {
     // tslint:disable-next-line:no-console
-    console.log(`======${name}======`);
+    console.log(`======${routerName}======`);
     // tslint:disable-next-line:no-console
     console.log(result);
   }
