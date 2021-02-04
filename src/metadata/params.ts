@@ -75,15 +75,15 @@ export interface IAllArgsOptions extends IArgsOptions<IArgSolutionsContext, any>
   type: ARGS.All;
 }
 
-export interface IQueryArgsOptions extends IArgsOptions<{ query: any }, any> {
+export interface IQueryArgsOptions extends IArgsOptions<any, any> {
   type: ARGS.Query;
 }
 
-export interface IParamsArgsOptions extends IArgsOptions<{ params: any }, any> {
+export interface IParamsArgsOptions extends IArgsOptions<any, any> {
   type: ARGS.Params;
 }
 
-export interface IBodyArgsOptions extends IArgsOptions<{ body: any }, any> {
+export interface IBodyArgsOptions extends IArgsOptions<any, any> {
   type: ARGS.BodyAppJson | ARGS.BodyFormData | ARGS.BodyUrlEncoded;
 }
 
