@@ -15,7 +15,7 @@
     "@types/koa-router": "^7.0.31",
     "@types/node": "^10.9.4",
     "astroboy": ">=0.0.30",
-    "lodash": "^4.17.19"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "astroboy.ts": "1.1.3-rc.55",
