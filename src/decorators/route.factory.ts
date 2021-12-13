@@ -103,19 +103,20 @@ function RouteFactory(options: RouteBaseConfig): IRouteFactory {
     if (path.length > 0) {
       route.pathConfig.push(...path);
     }
-    if (!rules) return;
-    if (!override) {
-      route.pipes.extend = true;
-      route.pipes.rules[zIndex](...rules);
-    } else {
-      route.pipes.extend = false;
-      route.pipes.rules = rules;
-    }
     if (routePreHandler) {
       route.routePreHandler = [...route.routePreHandler, ...routePreHandler];
     }
     if (routeSchema) {
       route.routeSchema = { ...route.routeSchema, ...routeSchema };
+    }
+    if(!!rules) {
+      if (!override) {
+        route.pipes.extend = true;
+        route.pipes.rules[zIndex](...rules);
+      } else {
+        route.pipes.extend = false;
+        route.pipes.rules = rules;
+      }
     }
   };
 }

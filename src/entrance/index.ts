@@ -62,6 +62,7 @@ export function createRouter(...args: any[]) {
         allRouteMethods.push(routeArr);
       } else {
         // 新版本的写法
+        buildRouteMethod(prototype, methodName, router, route);
         allRouteMethods.push({
           name: route.name,
           method,
